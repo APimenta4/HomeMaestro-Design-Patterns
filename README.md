@@ -13,3 +13,7 @@ To install this project, follow these steps:
    ```
    [insert installation command, e.g., npm install or pip install -r requirements.txt]
    ```
+
+## How to Contribute
+
+On how to contribute to the project, see to our [How to Contribute](CONTRIBUTING.md).
