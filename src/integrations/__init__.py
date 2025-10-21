@@ -1,0 +1,6 @@
+from integrations.integration import Integration
+from integrations.discord_integration import DiscordIntegration
+from integrations.slack_integration import SlackIntegration
+from integrations.telegram_integration import TelegramIntegration
+from integrations.webhook_integration import WebhookIntegration
+from integrations.whatsapp_integration import WhatsAppIntegration
