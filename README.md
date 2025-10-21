@@ -3,6 +3,9 @@
 ## Overview
 This project implements a software system to monitor, control, and manage home automation devices and activities. It operates in contexts with multiple devices, including sensors, actuators and hubs.
 
+## Diagrams
+[Domain Model (draw.io)](https://app.diagrams.net/#G1Dm2RSYODV8ipJ_am0yr1ROCWjzooqt7y)
+
 ## Installation
 To install this project, follow these steps:
 1. Clone the repository:
