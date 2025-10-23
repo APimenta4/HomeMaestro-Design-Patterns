@@ -1,8 +1,8 @@
 ## How to Contribute
 
-1. **Create a Branch**: Before making any changes, create a new branch for your feature or bug fix:
+1. **Pull latest commits**: Before making any changes, make sure to pull the latest commits from GitHub:
    ```
-   git checkout -b your-feature-branch
+   git pull
    ```
 
 4. **Make Your Changes**: Implement your changes in the codebase. Make sure to write clear and concise commit messages.
@@ -17,9 +17,7 @@
    git commit -m "Description of your changes"
    ```
 
-7. **Push to Your Branch**: Push your changes to your branch:
+7. **Push your changes**: Push your changes to the main branch:
    ```
-   git push origin your-feature-branch
+   git push
    ```
-
-8. **Create a Pull Request**: Go to the original repository and click on the "Pull Requests" tab. Click on "New Pull Request" and select your branch to create a pull request.
