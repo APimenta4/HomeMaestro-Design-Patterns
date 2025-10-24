@@ -8,6 +8,7 @@ from integrations import TelegramIntegration, WhatsAppIntegration
 from rules import AutomationRule
 from triggers import TimeTrigger
 from triggers.conditions import LightsCondition
+from api import app
 
 if __name__ == "__main__":
 
@@ -34,3 +35,6 @@ if __name__ == "__main__":
         automation_rules={automation_rule1},
         integrations={integration1, integration2},
     )
+
+    # Start the API
+    app.run(debug=True)
