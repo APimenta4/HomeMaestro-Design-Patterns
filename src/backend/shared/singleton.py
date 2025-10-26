@@ -1,3 +1,4 @@
+# DESIGN PATTERN: Singleton
 class Singleton(type):
     _instances = {}
 

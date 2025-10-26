@@ -8,10 +8,14 @@ from integrations import Integration
 class HomeMaestro(metaclass=Singleton):
     def __init__(
         self,
-        devices: set[Device],
-        automation_rules: set[AutomationRule],
-        integrations: set[Integration],
+        integrations: set[Integration] | None = None,
     ):
-        self.notification_service = NotificationService(integrations)
-        self.devices = devices
-        self.automation_rules = automation_rules
+        self.notification_service = NotificationService(integrations or set())
+        self.devices: set[Device] = set()
+        self.automation_rules: set[AutomationRule] = set()
+
+    def add_device(self, device: Device):
+        self.devices.add(device)
+
+    def add_automation_rule(self, rule: AutomationRule):
+        self.automation_rules.add(rule)
