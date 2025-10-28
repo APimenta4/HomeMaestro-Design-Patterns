@@ -1,11 +1,253 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello World</title>
-  </head>
-  <body>
-    <h1>Hello, World!</h1>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeMaestro - Add Device</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #87CEFA 0%, #E0F4FF 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: #2C3E50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+            h1 a {
+                color: #2C3E50;
+                text-decoration: none;
+                transition: opacity 0.3s;
+            }
+
+                h1 a:hover {
+                    opacity: 0.7;
+                }
+
+        h2 {
+            color: #34495E;
+            font-size: 1.3em;
+            font-weight: 400;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 35px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #2C3E50;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        input[type="text"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #E8E8E8;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+            input[type="text"]:focus,
+            select:focus {
+                outline: none;
+                border-color: #87CEFA;
+            }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: #87CEFA;
+            color: white;
+        }
+
+            .btn-primary:hover {
+                background: #6DB3E8;
+                transform: translateY(-2px);
+            }
+
+        .btn-secondary {
+            background: #ECF0F1;
+            color: #7F8C8D;
+        }
+
+            .btn-secondary:hover {
+                background: #D5DBDB;
+            }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .success {
+            background: #D5F4E6;
+            color: #27AE60;
+        }
+
+        .error {
+            background: #FADBD8;
+            color: #E74C3C;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .container {
+                padding: 25px 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><a href="index.html">HomeMaestro</a></h1>
+        <h2>Add New Device</h2>
+    </div>
+
+    <div class="container">
+        <div id="message" style="display: none;"></div>
+
+        <form id="deviceForm">
+            <div class="form-group">
+                <label for="deviceName">Device Name</label>
+                <input type="text" id="deviceName" name="name" required placeholder="Enter device name">
+            </div>
+
+            <div class="form-group">
+                <label for="deviceType">Device Type</label>
+                <select id="deviceType" name="type" required>
+                    <option value="">Select a type</option>
+                    <option value="Light">Light</option>
+                    <option value="Sensor">Sensor</option>
+                    <option value="Camera">Camera</option>
+                    <option value="Thermostat">Thermostat</option>
+                    <option value="Lock">Lock</option>
+                    <option value="Switch">Switch</option>
+                    <option value="ZigbeeHub">Zigbee Hub</option>
+                    <option value="ZWaveHub">Z-Wave Hub</option>
+                    <option value="Device">Other Device</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="deviceStatus">Status</label>
+                <select id="deviceStatus" name="status" required>
+                    <option value="online">Online</option>
+                    <option value="offline">Offline</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button type="button" class="btn-secondary" onclick="window.location.href='devices.html'">Cancel</button>
+                <button type="submit" class="btn-primary">Add Device</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5000/devices/';
+
+        function showMessage(text, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.className = `message ${type}`;
+            messageDiv.style.display = 'block';
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        document.getElementById('deviceForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = {
+                name: document.getElementById('deviceName').value,
+                type: document.getElementById('deviceType').value,
+                status: document.getElementById('deviceStatus').value
+            };
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                showMessage('Device added successfully!', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'devices.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error adding device:', error);
+                showMessage(`Failed to add device: ${error.message}`, 'error');
+            }
+        });
+    </script>
+</body>
 </html>

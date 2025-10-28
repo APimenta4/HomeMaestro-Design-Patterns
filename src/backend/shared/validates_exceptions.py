@@ -1,9 +1,9 @@
 from flask import Response
-
+import functools  # ← necessário
 
 # DESIGN PATTERN: Decorator
 def validates_exceptions(api_method):
-
+    @functools.wraps(api_method)  # ← preserva o __name__ e a docstring
     def wrapper(*args, **kwargs):
         try:
             return api_method(*args, **kwargs)

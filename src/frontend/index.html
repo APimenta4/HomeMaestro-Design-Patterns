@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: rgb(58, 232, 110);
+            background: linear-gradient(135deg, #87CEFA 0%, #E0F4FF 100%);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -23,10 +23,13 @@
         }
 
         h1 {
-            color: white;
-            font-size: 3em;
+            color: #2C3E50;
+            font-size: 3.5em;
             margin-bottom: 60px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-weight: 700;
+            letter-spacing: -1px;
+            text-align: center;
         }
 
         .button-container {
@@ -44,30 +47,43 @@
             padding: 25px 40px;
             font-size: 1.3em;
             font-weight: 600;
-            color: #333;
+            color: #2C3E50;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
             text-decoration: none;
             text-align: center;
+            display: block;
         }
 
-        .menu-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
+            .menu-button:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+            }
 
-        .menu-button:active {
-            transform: translateY(-1px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            .menu-button:active {
+                transform: translateY(-1px);
+            }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5em;
+                margin-bottom: 40px;
+            }
+
+            .menu-button {
+                font-size: 1.1em;
+                padding: 20px 30px;
+            }
         }
     </style>
 </head>
 <body>
     <h1>HomeMaestro</h1>
-    
+
     <div class="button-container">
         <a href="devices.html" class="menu-button">Connected Devices</a>
+        <a href="automations.html" class="menu-button">Automations</a>
         <a href="add-device.html" class="menu-button">Add Device</a>
         <a href="add-automation.html" class="menu-button">Add Automation</a>
     </div>

@@ -1,1 +1,2 @@
-from api.devices_api.devices_api import devices_api
+from .devices_api import devices_api, init_home_maestro
+
