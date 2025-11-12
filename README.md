@@ -37,9 +37,10 @@ To install this project, follow these steps:
    ```
    git clone https://github.com/FEUP-MESW-ADS-2025/HomeMaestro-2T6
    ```
-3. In case you don't have it yet, install `Flask` via pip:
+3. In case you don't have it yet, install `flask` and `flask-cors` via pip:
    ```
    pip install Flask
+   pip install flask-cors
    ```
    The previous command installs Flask in your current python environment. If you aren't using any virtual environment, it will be installed on the global python version of your system.
 4. Running the backend:
