@@ -1,1 +1,1 @@
-from messages.message import Message, MessageType
+from .message import Message, MessageType

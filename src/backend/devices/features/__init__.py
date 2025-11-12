@@ -1,2 +1,2 @@
-from devices.features.feature import Feature
-from devices.features.lamp_feature import LampFeature
+from .feature import Feature
+from .lamp_feature import LampFeature

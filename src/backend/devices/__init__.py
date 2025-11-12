@@ -1,1 +1,1 @@
-from devices.device import Device, DeviceStatus
+from .device import Device, DeviceStatus

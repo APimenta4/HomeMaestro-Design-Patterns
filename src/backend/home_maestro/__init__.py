@@ -1,1 +1,1 @@
-from home_maestro.home_maestro import HomeMaestro
+from .home_maestro import HomeMaestro
