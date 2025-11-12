@@ -1,1 +1,1 @@
-from .automation_rule import AutomationRule
+from .rule import Rule

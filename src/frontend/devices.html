@@ -341,7 +341,7 @@
                             <div class="device-type">${device.type}</div>
                             <div class="device-status ${statusClass}">
                                 <span class="status-indicator"></span>
-                                ${device.status || 'Unknown'}
+                                ${(device.status || 'Unknown').toUpperCase()}
                             </div>
                         `;
                     deviceList.appendChild(listItem);

@@ -1,15 +1,21 @@
+import functools
+import logging
+
 from flask import Response
-import functools  # ← necessário
+
+logger = logging.getLogger(__name__)
+
 
 # DESIGN PATTERN: Decorator
-def validates_exceptions(api_method):
-    @functools.wraps(api_method)  # ← preserva o __name__ e a docstring
+def validates_exceptions(method):
+    @functools.wraps(method)
     def wrapper(*args, **kwargs):
         try:
-            return api_method(*args, **kwargs)
+            return method(*args, **kwargs)
         except Exception as e:
+            logger.error("An error occurred: %s", e, exc_info=True)
             return Response(
-                response=f"An error occurred while performing the operation: {str(e)}",
+                response="An error occurred while performing the operation.",
                 status=500,
             )
 
