@@ -36,15 +36,15 @@ The motivations behind the choice were the need to have a simplified interface f
 
 **Pros**
 
-- 🟢 Target class can only be instantiated once, ensuring all parts of the program share a common instance.
+- 🟢 Target classes can only be instantiated once, ensuring all parts of the program share the singleton instance (HomeMaestro and NotificationService).
 
-- 🟢 Simplified access to the class instance, by acting like a global variable.
+- 🟢 Simplified access to the class instance, by acting like a global variable (accessible anywhere through `home_maestro = HomeMaestro()`, for example).
 
 - 🟢 Singleton pattern is commonly used and well-known, allowing a faster implementation and transition from other programming languages while also lowering the project learning curve, as opposed to more complex practices like dependency injection and state management.
 
 **Cons**
 
-- 🔴 Using the Singleton pattern usually implies you are violating the Single Responsibility Principle, as a single class is responsible for both providing global access to an instance and ensuring that only this one instance exists.
+- 🔴 Using the Singleton pattern would usually imply we are violating the Single Responsibility Principle, as a single class is responsible for both providing global access to an instance and ensuring that only this one instance exists.
 
   🟡 **Note:** By using a Python Metaclass to implement the Singleton pattern, we can overcome this issue by splitting the responsabilities. For example, HomeMaestro is completely unaware that it is a Singleton and behaves exactly like a regular class would do, providing access to itself, while the Singleton Metaclass is responsible for ensuring that only one instance of HomeMaestro exists.
 
@@ -110,15 +110,17 @@ def get_devices() -> Response:
 
 The motivation behind this choice was the need to extend the behavior of certain methods (e.g., API endpoint handlers) in a reusable, clean and stackable way.
 
+The `validates_exceptions` decorator, in particular, allows us to handle any unexpected errors that may arise during the execution of the endpoint methods, ensuring that the API responds with an appropriate response while logging information for debugging purposes.
+
 ### Consequences
 
 **Pros**
 
-- 🟢 Using a method decorator allows extending function behavior without explicitly modifying the original function code.
+- 🟢 Using the method decorator allows us to extend methods behavior without explicitly modifying the original function code, reducing code duplication.
 
 - 🟢 It is possible to stack multiple decorators to combine behaviors, including framework-specific ones (like Flask, in our case).
 
-- 🟢 Enables quickly adding the decorator to new methods as needed.
+- 🟢 Enables quickly adding the decorator to new methods as needed (in our case, new endpoints).
 
 - 🟢 Conforms to the Open/Closed and Single Responsibility principles, promoting cleaner code.
 
@@ -126,4 +128,10 @@ The motivation behind this choice was the need to extend the behavior of certain
 
 **Cons**
 
-- 🔴 Although stacking decorators is possible, they still need to be called in the correct order to function as intended.
+- 🔴 Although stacking decorators is possible, they still need to be called in the correct order to function as intended. In our case, we always need to run the decorators before defining the API route with Flask. Example:
+
+```python
+@devices_api.route("/", methods=["POST"])
+@validates_exceptions
+def add_device() -> Response:
+```
