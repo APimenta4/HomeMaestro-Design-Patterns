@@ -135,3 +135,52 @@ The `validates_exceptions` decorator, in particular, allows us to handle any une
 @validates_exceptions
 def add_device() -> Response:
 ```
+
+## 🏭 Simple Factory
+
+Simple Factory method is used to simplify the creation of objects that can be of multiple concrete classes.
+
+This allows us to centralize object creation logic in a single location, making the creation of those concrete objects easier. This code is located on the Factory classes, and simply requires the usage of a "type" argument to determine which concrete class to instantiate.
+
+Although we still need to make chain of "ifs" (or in our case, switch-case statements) to determine which concrete class to instantiate, this logic is now encapsulated within the Factory class, meaning that it won't be scattered all over the code.
+
+Some examples of this pattern can be found in the following Factory classes:
+
+**Source code:**
+
+\- [Hub Factory](src/backend/devices/hubs/hub_factory.py)
+
+\- [Action Factory](src/backend/devices/actions/action_factory.py)
+
+\- [Feature Factory](src/backend/devices/features/feature_factory.py)
+
+\- [Condition Factory](src/backend/devices/conditions/condition_factory.py)
+
+\- [Trigger Factory](src/backend/devices/triggers/trigger_factory.py)
+
+\- [Command Factory](src/backend/devices/commands/command_factory.py)
+
+## Template Method
+
+We make use of the Template Method design pattern to structure well-defined steps of certain interactions with our API.
+
+While creating entities, we always follow a consistent series of steps that are common to all POST endpoints. These steps include verifying the payload, preparing the data, creating the entity, and finally returning the response.
+
+Most of the code for these steps is the same, and for that reason we encapsulated this common logic in abstract base classes, which define the overall structure of the process while allowing subclasses to implement specific details.
+
+Afterwards, we can simply call the general method that calls these steps in order in each API endpoint.
+
+This behavior can be seen in the following classes:
+
+**Source code:**
+\- [AutomationCreationAlgorithm](src/backend/api/endpoint_templates/automation_creation_algorithm.py)
+
+\- [DeviceCreationAlgorithm](src/backend/api/endpoint_templates/device_creation_algorithm.py)
+
+\- [EntityCreationAlgorithm](src/backend/api/endpoint_templates/entity_creation_algorithm.py)
+
+Is it called in:
+
+\- [Automations API](src/backend/api/automations_api/automations_api.py)
+
+\- [Devices API](src/backend/api/devices_api/devices_api.py)
