@@ -1,16 +1,16 @@
 import logging
 
-from actions import ExternalAction
-from actions.commands import LightsCommand
 from api import app
+from automations import Automation
+from automations.actions import ExternalAction
+from automations.actions.commands import LightsCommand
+from automations.triggers import TimeTrigger
+from automations.triggers.conditions import LightsCondition
 from devices import Device, DeviceStatus
 from devices.features import LampFeature
 from devices.hubs import ZigbeeHub, ZWaveHub
 from home_maestro import HomeMaestro
 from integrations import TelegramIntegration, WhatsAppIntegration
-from rules import Rule
-from triggers import TimeTrigger
-from triggers.conditions import LightsCondition
 
 logging.basicConfig(level=logging.INFO)
 
@@ -39,12 +39,17 @@ if __name__ == "__main__":
     integration1 = WhatsAppIntegration()
     integration2 = TelegramIntegration()
 
-    # Sample automation rules
+    # Sample automations
     condition1 = LightsCondition()
     command1 = LightsCommand()
     trigger1 = TimeTrigger({condition1})
     action1 = ExternalAction({command1})
-    rule1 = Rule(trigger=trigger1, action=action1)
+    automation1 = Automation(
+        name="my beautiful automation",
+        trigger=trigger1,
+        action=action1,
+        description="just testing",
+    )
 
     home_maestro = HomeMaestro(integrations={integration1, integration2})
 
@@ -57,7 +62,7 @@ if __name__ == "__main__":
     home_maestro.add_device(device5)
 
     # Adicionar automações
-    home_maestro.add_rule(rule1)
+    home_maestro.add_automation(automation1)
 
     # Start the API
     app.run(debug=True)

@@ -18,4 +18,5 @@ class Identifiable(ABC):
         return {
             "id": self.id,
             "name": self.name,
+            "type": self.__class__.__name__,
         }

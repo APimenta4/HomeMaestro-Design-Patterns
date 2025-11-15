@@ -1,321 +1,772 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HomeMaestro - Add Automation</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #87CEFA 0%, #E0F4FF 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
-        }
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #87cefa 0%, #e0f4ff 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
 
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
 
+      h1 {
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      h1 a {
+        color: #2c3e50;
+        text-decoration: none;
+        transition: opacity 0.3s;
+      }
+
+      h1 a:hover {
+        opacity: 0.7;
+      }
+
+      h2 {
+        color: #34495e;
+        font-size: 1.3em;
+        font-weight: 400;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        padding: 35px;
+        box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+        margin-top: 15px;
+      }
+
+      label {
+        display: block;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 8px;
+        font-size: 0.95em;
+      }
+
+      input[type="text"],
+      input[type="time"],
+      select,
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e8e8e8;
+        border-radius: 8px;
+        font-size: 1em;
+        font-family: inherit;
+        transition: border-color 0.3s;
+      }
+
+      textarea {
+        min-height: 80px;
+        resize: vertical;
+      }
+
+      input[type="text"]:focus,
+      input[type="time"]:focus,
+      select:focus,
+      textarea:focus {
+        outline: none;
+        border-color: #87cefa;
+      }
+
+      .button-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 25px;
+      }
+
+      button {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.05em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: inherit;
+      }
+
+      .btn-primary {
+        background: #87cefa;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: #6db3e8;
+        transform: translateY(-2px);
+      }
+
+      .btn-secondary {
+        background: #ecf0f1;
+        color: #7f8c8d;
+      }
+
+      .btn-secondary:hover {
+        background: #d5dbdb;
+      }
+
+      .message {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-weight: 500;
+        font-size: 0.95em;
+      }
+
+      .success {
+        background: #d5f4e6;
+        color: #27ae60;
+      }
+
+      .error {
+        background: #fadbd8;
+        color: #e74c3c;
+      }
+
+      .info-text {
+        font-size: 0.85em;
+        color: #7f8c8d;
+        margin-top: 5px;
+      }
+
+      .section-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin: 25px 0 0 0;
+        border-left: 4px solid #87cefa;
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      }
+
+      .section-header:hover {
+        background: #e9ecef;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+      }
+
+      .section-header h3 {
+        color: #2c3e50;
+        font-size: 1.1em;
+        margin: 0;
+        display: flex;
+        align-items: center;
+      }
+
+      .section-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+      }
+
+      .section-toggle::before {
+        content: "▼";
+        font-size: 0.9em;
+        color: #87cefa;
+        transition: transform 0.3s ease;
+        display: block;
+      }
+
+      .section-toggle.collapsed::before {
+        transform: rotate(-90deg);
+      }
+
+      .section-header:hover .section-toggle {
+        background: #87cefa;
+        box-shadow: 0 3px 8px rgba(135, 206, 250, 0.3);
+      }
+
+      .section-header:hover .section-toggle::before {
+        color: white;
+      }
+
+      .section-content {
+        max-height: 1000px;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+        opacity: 1;
+      }
+
+      .section-content.collapsed {
+        max-height: 0;
+        opacity: 0;
+      }
+
+      .dynamic-list {
+        margin-top: 10px;
+      }
+
+      .dynamic-item {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 10px;
+        align-items: center;
+      }
+
+      .dynamic-item select {
+        flex: 1;
+      }
+
+      .btn-remove {
+        background: #e74c3c;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: background 0.3s;
+      }
+
+      .btn-remove:hover {
+        background: #c0392b;
+      }
+
+      .btn-add {
+        background: #87cefa;
+        color: white;
+        padding: 10px 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 0.9em;
+        margin-top: 10px;
+        transition: background 0.3s;
+      }
+
+      .btn-add:hover {
+        background: #6db3e8;
+      }
+
+      .section-description {
+        color: #7f8c8d;
+        font-size: 0.9em;
+        margin-top: 8px;
+        line-height: 1.5;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        border-left: 3px solid #87cefa;
+        margin-bottom: 15px;
+      }
+
+      .section-header.has-error {
+        border-left-color: #e74c3c;
+        background: #fadbd8;
+      }
+
+      .section-header.has-error h3 {
+        color: #e74c3c;
+      }
+
+      .section-header.has-error .section-toggle {
+        background: #fadbd8;
+        border: 2px solid #e74c3c;
+      }
+
+      .section-header.has-error .section-toggle::before {
+        color: #e74c3c;
+      }
+
+      .section-header.has-error:hover .section-toggle {
+        background: #e74c3c;
+      }
+
+      .section-header.has-error:hover .section-toggle::before {
+        color: white;
+      }
+
+      .error-badge {
+        background: #e74c3c;
+        color: white;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.85em;
+        margin-left: 10px;
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+
+      .field-error {
+        color: #e74c3c;
+        font-size: 0.85em;
+        margin-top: 5px;
+        display: none;
+      }
+
+      .field-error.show {
+        display: block;
+      }
+
+      input.error,
+      select.error {
+        border-color: #e74c3c;
+      }
+
+      @media (max-width: 768px) {
         h1 {
-            color: #2C3E50;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        h1 a {
-            color: #2C3E50;
-            text-decoration: none;
-            transition: opacity 0.3s;
-        }
-
-        h1 a:hover {
-            opacity: 0.7;
-        }
-
-        h2 {
-            color: #34495E;
-            font-size: 1.3em;
-            font-weight: 400;
+          font-size: 2em;
         }
 
         .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            padding: 35px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            font-weight: 600;
-            color: #2C3E50;
-            margin-bottom: 8px;
-            font-size: 0.95em;
-        }
-
-        input[type="text"],
-        input[type="time"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #E8E8E8;
-            border-radius: 8px;
-            font-size: 1em;
-            font-family: inherit;
-            transition: border-color 0.3s;
-        }
-
-        textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-
-        input[type="text"]:focus,
-        input[type="time"]:focus,
-        select:focus,
-        textarea:focus {
-            outline: none;
-            border-color: #87CEFA;
+          padding: 25px 20px;
         }
 
         .button-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
+          flex-direction: column;
         }
-
-        button {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.05em;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-        }
-
-        .btn-primary {
-            background: #87CEFA;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #6DB3E8;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: #ECF0F1;
-            color: #7F8C8D;
-        }
-
-        .btn-secondary:hover {
-            background: #D5DBDB;
-        }
-
-        .message {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            text-align: center;
-            font-weight: 500;
-            font-size: 0.95em;
-        }
-
-        .success {
-            background: #D5F4E6;
-            color: #27AE60;
-        }
-
-        .error {
-            background: #FADBD8;
-            color: #E74C3C;
-        }
-
-        .info-text {
-            font-size: 0.85em;
-            color: #7F8C8D;
-            margin-top: 5px;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
-            }
-
-            .container {
-                padding: 25px 20px;
-            }
-
-            .button-group {
-                flex-direction: column;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="header">
-        <h1><a href="index.html">HomeMaestro</a></h1>
-        <h2>Add New Automation</h2>
+      <h1><a href="index.html">HomeMaestro</a></h1>
+      <h2>Add New Automation</h2>
     </div>
-    
+
     <div class="container">
-        <div id="message" style="display: none;"></div>
+      <div id="message" style="display: none"></div>
 
-        <form id="automationForm">
-            <div class="form-group">
-                <label for="automationName">Automation Name</label>
-                <input type="text" id="automationName" name="name" required placeholder="e.g., Turn on lights at sunset">
-            </div>
+      <form id="automationForm" novalidate>
+        <div class="form-group">
+          <label for="automationName">Automation Name</label>
+          <input
+            type="text"
+            id="automationName"
+            name="name"
+            required
+            placeholder="e.g., Turn on lights at sunset"
+          />
+        </div>
 
-            <div class="form-group">
-                <label for="triggerType">Trigger Type</label>
-                <select id="triggerType" name="trigger" required>
-                    <option value="">Select trigger</option>
-                    <option value="time">Time-based</option>
-                    <option value="state">Device State</option>
-                    <option value="threshold">Sensor Threshold</option>
-                </select>
-            </div>
+        <div class="form-group">
+          <label style="display: flex; align-items: center; cursor: pointer">
+            <input
+              type="checkbox"
+              id="enabled"
+              name="enabled"
+              checked
+              style="width: auto; margin-right: 8px"
+            />
+            <span>Enable this automation</span>
+          </label>
+          <p class="info-text">
+            Disabled automations won't trigger automatically
+          </p>
+        </div>
 
-            <div class="form-group" id="timeGroup" style="display: none;">
-                <label for="triggerTime">Trigger Time</label>
-                <input type="time" id="triggerTime" name="time">
-                <p class="info-text">Set the time when this automation should run</p>
-            </div>
+        <div class="form-group">
+          <label for="description">Description (Optional)</label>
+          <textarea
+            id="description"
+            name="description"
+            placeholder="Add notes about this automation..."
+          ></textarea>
+        </div>
 
-            <div class="form-group">
-                <label for="actionType">Action Type</label>
-                <select id="actionType" name="action" required>
-                    <option value="">Select action</option>
-                    <option value="turn_on">Turn On</option>
-                    <option value="turn_off">Turn Off</option>
-                    <option value="toggle">Toggle</option>
-                    <option value="notify">Send Notification</option>
-                </select>
-            </div>
+        <div
+          class="section-header"
+          onclick="toggleSection('triggerSection')"
+          id="triggerHeader"
+        >
+          <h3>
+            🎯 Trigger Configuration
+            <span class="error-badge" id="triggerError" style="display: none"
+              >!</span
+            >
+          </h3>
+          <div class="section-toggle collapsed" id="triggerToggle"></div>
+        </div>
+        <div class="section-content collapsed" id="triggerSection">
+          <p class="section-description">
+            <strong>How triggers work:</strong> Define when this automation
+            should activate. You can add multiple conditions, and
+            <strong>ALL conditions must be true</strong>
+            for the trigger to fire. For example, if you add "Temperature" and
+            "Lights" conditions, both must be satisfied simultaneously.
+          </p>
 
-            <div class="form-group">
-                <label for="targetDevice">Target Device</label>
-                <select id="targetDevice" name="device" required>
-                    <option value="">Loading devices...</option>
-                </select>
+          <div class="form-group">
+            <label for="triggerType">Trigger Type</label>
+            <select id="triggerType" name="trigger" required>
+              <option value="">Select trigger type</option>
+              <option value="time">Time-based</option>
+              <option value="state">Device State</option>
+              <option value="threshold">Sensor Threshold</option>
+            </select>
+            <div class="field-error" id="triggerTypeError">
+              Please select a trigger type
             </div>
+          </div>
 
-            <div class="form-group">
-                <label for="description">Description (Optional)</label>
-                <textarea id="description" name="description" placeholder="Add notes about this automation..."></textarea>
+          <div class="form-group">
+            <label>Conditions (All must be true)</label>
+            <div id="conditionsList" class="dynamic-list"></div>
+            <button type="button" class="btn-add" onclick="addCondition()">
+              + Add Condition
+            </button>
+            <div class="field-error" id="conditionsError">
+              Please add at least one condition
             </div>
+          </div>
+        </div>
 
-            <div class="button-group">
-                <button type="button" class="btn-secondary" onclick="window.location.href='automations.html'">Cancel</button>
-                <button type="submit" class="btn-primary">Create Automation</button>
+        <div
+          class="section-header"
+          onclick="toggleSection('actionSection')"
+          id="actionHeader"
+        >
+          <h3>
+            ⚡ Action Configuration
+            <span class="error-badge" id="actionError" style="display: none"
+              >!</span
+            >
+          </h3>
+          <div class="section-toggle collapsed" id="actionToggle"></div>
+        </div>
+        <div class="section-content collapsed" id="actionSection">
+          <p class="section-description">
+            <strong>How actions work:</strong> Define what happens when the
+            trigger activates. You can add multiple commands, and
+            <strong>ALL commands will be executed</strong>
+            at once. For example, you can turn on lights, unlock a door, and
+            adjust temperature all at once.
+          </p>
+
+          <div class="form-group">
+            <label for="actionType">Action Type</label>
+            <select id="actionType" name="action" required>
+              <option value="">Select action type</option>
+              <option value="command">Command</option>
+              <option value="external">External</option>
+              <option value="notification">Notification</option>
+            </select>
+            <div class="field-error" id="actionTypeError">
+              Please select an action type
             </div>
-        </form>
+          </div>
+
+          <div class="form-group">
+            <label>Commands (All will be executed)</label>
+            <div id="commandsList" class="dynamic-list"></div>
+            <button type="button" class="btn-add" onclick="addCommand()">
+              + Add Command
+            </button>
+            <div class="field-error" id="commandsError">
+              Please add at least one command
+            </div>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button
+            type="button"
+            class="btn-secondary"
+            onclick="window.location.href='automations.html'"
+          >
+            Cancel
+          </button>
+          <button type="submit" class="btn-primary">Create Automation</button>
+        </div>
+      </form>
     </div>
 
     <script>
-        const DEVICES_API = 'http://127.0.0.1:5000/devices/';
-        const AUTOMATIONS_API = 'http://127.0.0.1:5000/automations/';
+      const AUTOMATIONS_API = "http://127.0.0.1:5000/automations/";
 
-        function showMessage(text, type) {
-            const messageDiv = document.getElementById('message');
-            messageDiv.textContent = text;
-            messageDiv.className = `message ${type}`;
-            messageDiv.style.display = 'block';
+      let conditionCounter = 0;
+      let commandCounter = 0;
+
+      function showMessage(text, type) {
+        const messageDiv = document.getElementById("message");
+        messageDiv.textContent = text;
+        messageDiv.className = `message ${type}`;
+        messageDiv.style.display = "block";
+
+        setTimeout(() => {
+          messageDiv.style.display = "none";
+        }, 5000);
+      }
+
+      function toggleSection(sectionId) {
+        const section = document.getElementById(sectionId);
+        const toggleIcon = document.getElementById(
+          sectionId === "triggerSection" ? "triggerToggle" : "actionToggle"
+        );
+
+        section.classList.toggle("collapsed");
+        toggleIcon.classList.toggle("collapsed");
+      }
+
+      function clearSectionErrors(sectionId) {
+        const header = document.getElementById(
+          sectionId === "triggerSection" ? "triggerHeader" : "actionHeader"
+        );
+        const badge = document.getElementById(
+          sectionId === "triggerSection" ? "triggerError" : "actionError"
+        );
+
+        header.classList.remove("has-error");
+        badge.style.display = "none";
+
+        const section = document.getElementById(sectionId);
+        const fieldErrors = section.querySelectorAll(".field-error");
+        fieldErrors.forEach((error) => error.classList.remove("show"));
+
+        const errorFields = section.querySelectorAll(".error");
+        errorFields.forEach((field) => field.classList.remove("error"));
+      }
+
+      function showSectionError(sectionId, fieldId, errorMessage) {
+        const header = document.getElementById(
+          sectionId === "triggerSection" ? "triggerHeader" : "actionHeader"
+        );
+        const badge = document.getElementById(
+          sectionId === "triggerSection" ? "triggerError" : "actionError"
+        );
+        const section = document.getElementById(sectionId);
+
+        header.classList.add("has-error");
+        badge.style.display = "inline-block";
+
+        if (section.classList.contains("collapsed")) {
+          toggleSection(sectionId);
+        }
+
+        if (fieldId) {
+          const errorDiv = document.getElementById(fieldId);
+          if (errorDiv) {
+            errorDiv.classList.add("show");
+            if (errorMessage) {
+              errorDiv.textContent = errorMessage;
+            }
+          }
+
+          const fieldElement = document.getElementById(
+            fieldId.replace("Error", "")
+          );
+          if (fieldElement) {
+            fieldElement.classList.add("error");
+          }
+        }
+      }
+
+      function addCondition() {
+        const conditionsList = document.getElementById("conditionsList");
+        const conditionId = `condition-${conditionCounter++}`;
+
+        const conditionItem = document.createElement("div");
+        conditionItem.className = "dynamic-item";
+        conditionItem.id = conditionId;
+
+        conditionItem.innerHTML = `
+          <select class="condition-type" required>
+            <option value="">Select condition type</option>
+            <option value="blinds">Blinds</option>
+            <option value="lock">Lock</option>
+            <option value="temperature">Temperature</option>
+            <option value="lights">Lights</option>
+          </select>
+          <button type="button" class="btn-remove" onclick="removeCondition('${conditionId}')">Remove</button>
+        `;
+
+        conditionsList.appendChild(conditionItem);
+
+        clearSectionErrors("triggerSection");
+      }
+
+      function removeCondition(conditionId) {
+        const element = document.getElementById(conditionId);
+        if (element) {
+          element.remove();
+        }
+      }
+
+      function addCommand() {
+        const commandsList = document.getElementById("commandsList");
+        const commandId = `command-${commandCounter++}`;
+
+        const commandItem = document.createElement("div");
+        commandItem.className = "dynamic-item";
+        commandItem.id = commandId;
+
+        commandItem.innerHTML = `
+          <select class="command-type" required>
+            <option value="">Select command type</option>
+            <option value="lights">Lights</option>
+            <option value="lock">Lock</option>
+            <option value="temperature">Temperature</option>
+            <option value="blinds">Blinds</option>
+          </select>
+          <button type="button" class="btn-remove" onclick="removeCommand('${commandId}')">Remove</button>
+        `;
+
+        commandsList.appendChild(commandItem);
+
+        clearSectionErrors("actionSection");
+      }
+
+      function removeCommand(commandId) {
+        const element = document.getElementById(commandId);
+        if (element) {
+          element.remove();
+        }
+      }
+
+      document
+        .getElementById("automationForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          clearSectionErrors("triggerSection");
+          clearSectionErrors("actionSection");
+
+          let hasErrors = false;
+
+          const triggerType = document.getElementById("triggerType").value;
+          if (!triggerType) {
+            showSectionError("triggerSection", "triggerTypeError");
+            hasErrors = true;
+          }
+
+          const conditionElements =
+            document.querySelectorAll(".condition-type");
+          const conditions = Array.from(conditionElements)
+            .map((el) => el.value)
+            .filter((val) => val)
+            .map((type) => ({ type }));
+
+          if (conditions.length === 0) {
+            showSectionError("triggerSection", "conditionsError");
+            hasErrors = true;
+          }
+
+          const actionType = document.getElementById("actionType").value;
+          if (!actionType) {
+            showSectionError("actionSection", "actionTypeError");
+            hasErrors = true;
+          }
+
+          const commandElements = document.querySelectorAll(".command-type");
+          const commands = Array.from(commandElements)
+            .map((el) => el.value)
+            .filter((val) => val)
+            .map((type) => ({ type }));
+
+          if (commands.length === 0) {
+            showSectionError("actionSection", "commandsError");
+            hasErrors = true;
+          }
+
+          if (hasErrors) {
+            showMessage("Please fix the errors in the form", "error");
+            return;
+          }
+
+          const formData = {
+            name: document.getElementById("automationName").value,
+            enabled: document.getElementById("enabled").checked,
+            trigger: {
+              type: triggerType,
+              conditions: conditions,
+            },
+            action: {
+              type: actionType,
+              commands: commands,
+            },
+            description:
+              document.getElementById("description").value || undefined,
+          };
+
+          try {
+            const response = await fetch(AUTOMATIONS_API, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(formData),
+            });
+
+            if (!response.ok) {
+              const errorData = await response.json();
+              throw new Error(
+                errorData.error || `HTTP error! status: ${response.status}`
+              );
+            }
+
+            showMessage("Automation created successfully!", "success");
 
             setTimeout(() => {
-                messageDiv.style.display = 'none';
-            }, 5000);
-        }
-
-        async function loadDevices() {
-            try {
-                const response = await fetch(DEVICES_API);
-                const devices = await response.json();
-                
-                const select = document.getElementById('targetDevice');
-                select.innerHTML = '<option value="">Select a device</option>';
-                
-                devices.forEach(device => {
-                    const option = document.createElement('option');
-                    option.value = device.id;
-                    option.textContent = `${device.name} (${device.type})`;
-                    select.appendChild(option);
-                });
-            } catch (error) {
-                console.error('Error loading devices:', error);
-                showMessage('Failed to load devices', 'error');
-            }
-        }
-
-        document.getElementById('triggerType').addEventListener('change', (e) => {
-            const timeGroup = document.getElementById('timeGroup');
-            if (e.target.value === 'time') {
-                timeGroup.style.display = 'block';
-            } else {
-                timeGroup.style.display = 'none';
-            }
+              window.location.href = "automations.html";
+            }, 1500);
+          } catch (error) {
+            console.error("Error creating automation:", error);
+            showMessage(
+              `Failed to create automation: ${error.message}`,
+              "error"
+            );
+          }
         });
 
-        document.getElementById('automationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
+      document.getElementById("triggerType").addEventListener("change", () => {
+        clearSectionErrors("triggerSection");
+      });
 
-            const formData = {
-                name: document.getElementById('automationName').value,
-                trigger_type: document.getElementById('triggerType').value,
-                action_type: document.getElementById('actionType').value,
-                target_device_id: document.getElementById('targetDevice').value,
-                description: document.getElementById('description').value
-            };
+      document.getElementById("actionType").addEventListener("change", () => {
+        clearSectionErrors("actionSection");
+      });
 
-            if (formData.trigger_type === 'time') {
-                formData.trigger_time = document.getElementById('triggerTime').value;
-            }
-
-            try {
-                const response = await fetch(AUTOMATIONS_API, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-
-                showMessage('Automation created successfully!', 'success');
-                
-                setTimeout(() => {
-                    window.location.href = 'automations.html';
-                }, 1500);
-
-            } catch (error) {
-                console.error('Error creating automation:', error);
-                showMessage(`Failed to create automation: ${error.message}`, 'error');
-            }
-        });
-
-        window.addEventListener('DOMContentLoaded', loadDevices);
+      window.addEventListener("DOMContentLoaded", () => {
+        addCondition();
+        addCommand();
+      });
     </script>
-</body>
+  </body>
 </html>

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from triggers.conditions import Condition
+from .conditions import Condition
 
 
 class Trigger(ABC):

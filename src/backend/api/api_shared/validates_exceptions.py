@@ -15,7 +15,7 @@ def validates_exceptions(method):
         except Exception as e:
             logger.error("An error occurred: %s", e, exc_info=True)
             return Response(
-                response="An error occurred while performing the operation.",
+                response=f"An error occurred while performing the operation: {str(e)}",
                 status=500,
             )
 

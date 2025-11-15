@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from actions.commands import Command
+from .commands import Command
 
 
 class Action(ABC):
