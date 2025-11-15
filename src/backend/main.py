@@ -7,7 +7,7 @@ from automations.actions.commands import LightsCommand
 from automations.triggers import TimeTrigger
 from automations.triggers.conditions import LightsCondition
 from devices import Device, DeviceStatus
-from devices.features import LampFeature
+from devices.features import LampFeature, Feature
 from devices.hubs import ZigbeeHub, ZWaveHub
 from home_maestro import HomeMaestro
 from integrations import TelegramIntegration, WhatsAppIntegration
@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.INFO)
 if __name__ == "__main__":
 
     # Sample devices
-    features = set()
+    features: set[Feature] = set()
     features.add(LampFeature("My Dream Feature", {"max_brightness": 100}))
     features.add(
         LampFeature("Second Feature", {"second feature": "amazing capabilities"})
@@ -50,6 +50,11 @@ if __name__ == "__main__":
         action=action1,
         description="just testing",
     )
+    automation2 = Automation(
+        name="another automation",
+        trigger=trigger1,
+        action=action1,
+    )
 
     home_maestro = HomeMaestro(integrations={integration1, integration2})
 
@@ -63,6 +68,7 @@ if __name__ == "__main__":
 
     # Adicionar automações
     home_maestro.add_automation(automation1)
+    home_maestro.add_automation(automation2)
 
     # Start the API
     app.run(debug=True)

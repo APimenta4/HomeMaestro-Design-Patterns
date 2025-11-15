@@ -3,6 +3,7 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from flask import Request, Response, make_response
+
 from shared import Identifiable
 
 logger = logging.getLogger(__name__)
@@ -21,7 +22,7 @@ class EntityCreationAlgorithm(ABC):
         entity = self.instantiate_and_persist_entity(prepared_data)  # Hooked method
         return self.success_response(entity)
 
-    def parse_payload(self, payload: Request) -> dict[str, Any]:
+    def parse_payload(self, payload: Request) -> dict[str, object]:
         try:
             request = payload.get_json()
         except Exception as e:
@@ -82,12 +83,12 @@ class EntityCreationAlgorithm(ABC):
         pass
 
     @abstractmethod
-    def prepare_input_data(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def prepare_input_data(self, payload: dict[str, object]) -> dict[str, object]:
         pass
 
     @abstractmethod
     def instantiate_and_persist_entity(
-        self, prepared_data: dict[str, Any]
+        self, prepared_data: dict[str, object]
     ) -> Identifiable:
         pass
 

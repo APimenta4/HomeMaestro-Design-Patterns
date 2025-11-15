@@ -1,8 +1,8 @@
 from automations import Automation
-from shared import Singleton
 from devices import Device
-from notifications import NotificationService
 from integrations import Integration
+from notifications import NotificationService
+from shared import Singleton
 
 
 class HomeMaestro(metaclass=Singleton):
@@ -16,3 +16,9 @@ class HomeMaestro(metaclass=Singleton):
 
     def add_automation(self, automation: Automation):
         self.automations.add(automation)
+
+    def get_automation_by_id(self, automation_id: int) -> Automation | None:
+        for automation in self.automations:
+            if automation.id == automation_id:
+                return automation
+        return None

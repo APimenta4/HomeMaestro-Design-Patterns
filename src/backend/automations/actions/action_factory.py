@@ -1,4 +1,4 @@
-from . import CommandAction, ExternalAction, NotificationAction, Action
+from . import Action, CommandAction, ExternalAction, NotificationAction
 from .commands import CommandFactory
 
 

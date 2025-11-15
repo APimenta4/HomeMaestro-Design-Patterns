@@ -18,7 +18,7 @@ class AutomationCreationAlgorithm(EntityCreationAlgorithm):
     def optional_fields(self) -> dict[str, type]:
         return {"description": str, "enabled": bool}
 
-    def prepare_input_data(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def prepare_input_data(self, payload: dict[str, Any]) -> dict[str, object]:
         payload["trigger"] = TriggerFactory.create_trigger(**payload["trigger"])
         payload["action"] = ActionFactory.create_action(**payload["action"])
         return payload

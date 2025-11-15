@@ -249,10 +249,10 @@
                             </div>
                             <div class="automation-info">
                                 <span>Trigger: ${
-                                  automation.trigger_type || "N/A"
+                                  automation.trigger || "N/A"
                                 }</span>
                                 <span>Action: ${
-                                  automation.action_type || "N/A"
+                                  automation.action || "N/A"
                                 }</span>
                             </div>
                             ${
@@ -319,7 +319,7 @@
       async function toggleAutomation(id, enabled, toggleElement) {
         try {
           const response = await fetch(`${API_URL}${id}`, {
-            method: "PUT",
+            method: "PATCH",
             headers: {
               "Content-Type": "application/json",
             },
@@ -339,5 +339,5 @@
 
       window.addEventListener("DOMContentLoaded", loadAutomations);
     </script>
-  </body>   
+  </body>
 </html>

@@ -1,4 +1,4 @@
-from . import LampFeature, Feature
+from . import Feature, LampFeature
 
 
 # DESIGN PATTERN: Simple Factory

@@ -1,4 +1,4 @@
-from . import TimeTrigger, ThresholdTrigger, StateTrigger, Trigger
+from . import StateTrigger, ThresholdTrigger, TimeTrigger, Trigger
 from .conditions import ConditionFactory
 
 

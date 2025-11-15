@@ -23,5 +23,11 @@ class Device(Identifiable):
     def to_dict(self) -> dict[str, object]:
         dict = super().to_dict()
         dict["status"] = self.status.value
+        dict["features"] = [feature.__class__.__name__ for feature in self.features]
+        return dict
+
+    def to_dict_deep(self) -> dict[str, object]:
+        dict = super().to_dict()
+        dict["status"] = self.status.value
         dict["features"] = [feature.to_dict() for feature in self.features]
         return dict

@@ -1,6 +1,6 @@
 # DESIGN PATTERN: Singleton
 class Singleton(type):
-    _instances = {}
+    _instances: dict[type, "Singleton"] = {}
 
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:

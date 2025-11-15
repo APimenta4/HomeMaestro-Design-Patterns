@@ -1,8 +1,9 @@
 # devices_api.py
 # -*- coding: utf-8 -*-
-from api.endpoint_templates import DeviceCreationAlgorithm
-from api.api_shared import validates_exceptions
 from flask import Blueprint, Response, make_response, request
+
+from api.api_shared import validates_exceptions
+from api.endpoint_templates import DeviceCreationAlgorithm
 from home_maestro import HomeMaestro
 
 devices_api = Blueprint("devices", __name__)

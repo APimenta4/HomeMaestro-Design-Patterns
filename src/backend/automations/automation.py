@@ -19,12 +19,10 @@ class Automation(Identifiable):
         self.enabled = enabled
         self.description = description
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "enabled": self.enabled,
-            "description": self.description,
-            "trigger": self.trigger.__class__.__name__,
-            "action": self.action.__class__.__name__,
-        }
+    def to_dict(self) -> dict[str, object]:
+        dict = super().to_dict()
+        dict["enabled"] = self.enabled
+        dict["trigger"] = self.trigger.__class__.__name__
+        dict["action"] = self.action.__class__.__name__
+        dict["description"] = self.description
+        return dict

@@ -2,9 +2,10 @@ import logging
 from typing import Any
 
 from devices import Device, DeviceStatus
-from devices.hubs import HubFactory
 from devices.features import FeatureFactory
+from devices.hubs import HubFactory
 from home_maestro import HomeMaestro
+
 from . import EntityCreationAlgorithm
 
 home_maestro = HomeMaestro()
@@ -20,7 +21,7 @@ class DeviceCreationAlgorithm(EntityCreationAlgorithm):
     def optional_fields(self) -> dict[str, type]:
         return {"type": str, "features": list}
 
-    def prepare_input_data(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def prepare_input_data(self, payload: dict[str, Any]) -> dict[str, object]:
         if payload.get("type"):
             # Right now, hubs don't hold features, only other devices. This could be changed in the future.
             if payload.get("features"):

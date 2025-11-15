@@ -1,7 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
-from .devices_api import devices_api
+
 from .automations_api import automations_api
+from .devices_api import devices_api
 
 app = Flask(__name__)
 CORS(app)  # Permite requisições de qualquer origem (para testes)

@@ -1,5 +1,6 @@
 from devices import Device, DeviceStatus
-from . import ZigbeeHub, ZWaveHub, TradfriHub, HueHub
+
+from . import HueHub, TradfriHub, ZigbeeHub, ZWaveHub
 
 
 # DESIGN PATTERN: Simple Factory

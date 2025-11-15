@@ -1,4 +1,5 @@
-from . import LightsCommand, LockCommand, TemperatureCommand, BlindsCommand, Command
+from . import (BlindsCommand, Command, LightsCommand, LockCommand,
+               TemperatureCommand)
 
 
 # DESIGN PATTERN: Simple Factory
