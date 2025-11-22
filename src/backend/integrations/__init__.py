@@ -1,5 +1,5 @@
-from .discord_integration import DiscordIntegration
 from .integration import Integration
+from .discord_integration import DiscordIntegration
 from .slack_integration import SlackIntegration
 from .telegram_integration import TelegramIntegration
 from .webhook_integration import WebhookIntegration

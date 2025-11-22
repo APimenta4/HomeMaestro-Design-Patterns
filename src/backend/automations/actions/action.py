@@ -1,6 +1,8 @@
+from .commands import Command
+
 from abc import ABC, abstractmethod
 
-from .commands import Command
+
 
 
 class Action(ABC):
