@@ -331,19 +331,22 @@
 
                     const listItem = document.createElement('li');
                     listItem.className = 'device-card';
+                    listItem.onclick = () => {
+                        window.location.href = `device-details.html?id=${device.id}`;
+                    };
                     listItem.innerHTML = `
-                            <div class="device-header">
-                                <div class="device-icon">
-                                    <i class="fas ${icon}"></i>
-                                </div>
-                                <div class="device-name">${device.name}</div>
+                        <div class="device-header">
+                            <div class="device-icon">
+                                <i class="fas ${icon}"></i>
                             </div>
-                            <div class="device-type">${device.type}</div>
-                            <div class="device-status ${statusClass}">
-                                <span class="status-indicator"></span>
-                                ${(device.status || 'Unknown').toUpperCase()}
-                            </div>
-                        `;
+                            <div class="device-name">${device.name}</div>
+                        </div>
+                        <div class="device-type">${device.type}</div>
+                        <div class="device-status ${statusClass}">
+                            <span class="status-indicator"></span>
+                            ${(device.status || 'Unknown').toUpperCase()}
+                        </div>
+`;
                     deviceList.appendChild(listItem);
                 });
 
