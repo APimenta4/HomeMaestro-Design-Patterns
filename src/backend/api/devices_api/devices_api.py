@@ -28,32 +28,27 @@ def add_device() -> Response:
 @devices_api.route("/<device_id>", methods=["GET"])
 @validates_exceptions
 def get_device_details(device_id: str) -> Response:
-    print(f"Looking for device with ID: {device_id} (type: {type(device_id)})")
-    print(f"Available devices: {[(d.id, d.name, type(d.id)) for d in home_maestro.devices]}")
-    
     device = None
     for d in home_maestro.devices:
-        print(f"Comparing {d.id} == {device_id}: {d.id == device_id}")
-        if str(d.id) == str(device_id):  # Explicit string comparison
+        if str(d.id) == str(device_id):
             device = d
             break
     
     if device is None:
-        print(f"Device not found!")
         return make_response(
             {"error": f"Device with id '{device_id}' not found"},
             404
         )
     
-    print(f"Found device: {device.name}")
     return make_response(device.to_dict_deep(), 200)
+
 
 @devices_api.route("/<device_id>", methods=["PUT"])
 @validates_exceptions
 def update_device(device_id: str) -> Response:
     device = None
     for d in home_maestro.devices:
-        if d.id == device_id:
+        if str(d.id) == str(device_id):
             device = d
             break
     
@@ -99,7 +94,7 @@ def update_device(device_id: str) -> Response:
 def delete_device(device_id: str) -> Response:
     device = None
     for d in home_maestro.devices:
-        if d.id == device_id:
+        if str(d.id) == str(device_id):
             device = d
             break
     
