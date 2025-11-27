@@ -1,5 +1,10 @@
-from . import (BlindsCondition, Condition, LightsCondition, LockCondition,
-               TemperatureCondition)
+from . import (
+    BlindsCondition,
+    Condition,
+    LampCondition,
+    LockCondition,
+    TemperatureCondition,
+)
 
 
 # DESIGN PATTERN: Simple Factory
@@ -13,8 +18,8 @@ class ConditionFactory:
                 return LockCondition()
             case "temperature":
                 return TemperatureCondition()
-            case "lights":
-                return LightsCondition()
+            case "lamp":
+                return LampCondition()
             case _:
                 raise ValueError(
                     f"The provided condition type is not supported: {type}"

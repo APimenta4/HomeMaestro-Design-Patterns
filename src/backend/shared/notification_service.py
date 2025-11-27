@@ -1,5 +1,5 @@
 from integrations import Integration
-from messages import Message
+from integrations.messages import Message
 from shared import Singleton
 
 

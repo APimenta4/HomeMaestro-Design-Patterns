@@ -1,7 +1,7 @@
 from . import Condition
 
 
-class LightsCondition(Condition):
+class LampCondition(Condition):
     def __init__(self):
         # condition related attributes
         pass

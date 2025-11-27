@@ -1,4 +1,4 @@
-from messages import Message
+from .messages import Message
 
 from . import Integration
 

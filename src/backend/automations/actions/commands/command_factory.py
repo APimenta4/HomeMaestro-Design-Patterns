@@ -1,4 +1,4 @@
-from . import (BlindsCommand, Command, LightsCommand, LockCommand,
+from . import (Command, BlindsCommand, LampCommand, LockCommand,
                TemperatureCommand)
 
 
@@ -7,8 +7,8 @@ class CommandFactory:
     @staticmethod
     def create_command(type: str) -> Command:
         match type.lower():
-            case "lights":
-                return LightsCommand()
+            case "lamp":
+                return LampCommand()
             case "lock":
                 return LockCommand()
             case "temperature":

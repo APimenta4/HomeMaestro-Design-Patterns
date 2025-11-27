@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from devices import Device, DeviceStatus
 
 
-# TODO: smart hub subclass that can change protocol with strategy pattern
 class Hub(Device, ABC):
     def __init__(
         self, name: str, status: DeviceStatus, devices: set[Device] | None = None

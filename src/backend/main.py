@@ -3,16 +3,16 @@ import logging
 from api import app
 from automations import Automation
 from automations.actions import ExternalAction
-from automations.actions.commands import LightsCommand
+from automations.actions.commands import LampCommand
 from automations.triggers import TimeTrigger
-from automations.triggers.conditions import LightsCondition
+from automations.triggers.conditions import LampCondition
 from devices import Device, DeviceStatus
-from devices.features import LampFeature, Feature
+from devices.features import Feature, LampFeature
 from devices.hubs import ZigbeeHub, ZWaveHub
-from home_maestro import HomeMaestro
 from integrations import TelegramIntegration, WhatsAppIntegration
+from shared import HomeMaestro, MQTTClient
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == "__main__":
 
@@ -40,8 +40,8 @@ if __name__ == "__main__":
     integration2 = TelegramIntegration()
 
     # Sample automations
-    condition1 = LightsCondition()
-    command1 = LightsCommand()
+    condition1 = LampCondition()
+    command1 = LampCommand()
     trigger1 = TimeTrigger({condition1})
     action1 = ExternalAction({command1})
     automation1 = Automation(
@@ -49,18 +49,22 @@ if __name__ == "__main__":
         trigger=trigger1,
         action=action1,
         description="just testing",
+        device_id=1,
     )
     automation2 = Automation(
         name="another automation",
         trigger=trigger1,
         action=action1,
+        device_id=2,
     )
 
     home_maestro = HomeMaestro(integrations={integration1, integration2})
+    MQTTClient()
 
     # Adicionar devices
     home_maestro.add_device(hub)
     home_maestro.add_device(hub2)
+    home_maestro.add_device(device1)
     home_maestro.add_device(device2)
     home_maestro.add_device(device3)
     home_maestro.add_device(device4)
@@ -71,4 +75,4 @@ if __name__ == "__main__":
     home_maestro.add_automation(automation2)
 
     # Start the API
-    app.run(debug=True)
+    app.run(debug=True, use_reloader=False)

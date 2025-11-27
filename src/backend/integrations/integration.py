@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from messages import Message
+from .messages import Message
 
 
 class Integration(ABC):

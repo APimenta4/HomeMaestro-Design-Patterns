@@ -2,5 +2,5 @@ from . import Trigger
 
 
 class StateTrigger(Trigger):
-    def check_conditions(self) -> bool:
+    def check_conditions(self, *args, **kwargs) -> bool:
         return True
