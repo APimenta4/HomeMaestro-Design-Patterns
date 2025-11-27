@@ -8,5 +8,5 @@ class Trigger(ABC):
         self.conditions = conditions
 
     @abstractmethod
-    def check_conditions(self) -> bool:
+    def check_conditions(self, payload: str) -> bool:
         pass

@@ -1,8 +1,11 @@
 from enum import Enum
+from logging import getLogger
 
-from shared import Identifiable
+from shared import Identifiable, MQTTClient
 
 from .features import Feature
+
+logger = getLogger(__name__)
 
 
 class DeviceStatus(Enum):
@@ -18,7 +21,32 @@ class Device(Identifiable):
         super().__init__(name)
         self.status = status
         self.features = features or set()
-        # self.state = ...     TODO: State Design Pattern
+
+    def get_feature_by_id(self, feature_id: int) -> Feature | None:
+        for feature in self.features:
+            if feature.id == feature_id:
+                return feature
+        return None
+
+    def execute_feature(
+        self,
+        feature_id: int,
+    ):
+        feature = self.get_feature_by_id(feature_id)
+        if feature is None:
+            raise ValueError(f"Feature with id '{feature_id}' does not exist on device")
+
+        payload = feature.execute()
+        # Overwrite payload while feature is not implemented yet
+        # TODO: Remove following line
+        payload = "that was a success!"
+        MQTTClient().publish(f"{self.id}", payload)
+
+    def get_feature_status(self, feature_id: int):
+        feature = self.get_feature_by_id(feature_id)
+        if feature is None:
+            raise ValueError(f"Feature with id '{feature_id}' does not exist on device")
+        return feature.get_status()
 
     def to_dict(self) -> dict[str, object]:
         dict = super().to_dict()

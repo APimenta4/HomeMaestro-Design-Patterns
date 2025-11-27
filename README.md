@@ -19,11 +19,9 @@ The team is composed by:
 
 This project's management is centralized on the [Home Maestro Trello Board](https://trello.com/b/SKnU0Hi3/home-maestro).
 
-## Diagrams
-
-[Domain Model (draw.io)](https://app.diagrams.net/#G1Dm2RSYODV8ipJ_am0yr1ROCWjzooqt7y)
-
 ## Installation
+
+# TODO: add mosquitto and python mosquitto package
 
 To install this project, follow these steps:
 

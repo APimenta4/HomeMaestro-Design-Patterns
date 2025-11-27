@@ -5,8 +5,9 @@ from . import HueHub, TradfriHub, ZigbeeHub, ZWaveHub
 
 # DESIGN PATTERN: Simple Factory
 class HubFactory:
-    @staticmethod
+    @classmethod
     def create_hub(
+        cls,
         name: str,
         status: DeviceStatus,
         type: str,

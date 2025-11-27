@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from flask import Blueprint, Response, jsonify, make_response, request
-
 from api.api_shared import validates_exceptions
 from api.endpoint_templates import AutomationCreationAlgorithm
-from home_maestro import HomeMaestro
+from flask import Blueprint, Response, jsonify, make_response, request
+from shared import HomeMaestro
 
 automations_api = Blueprint("automations", __name__)
 

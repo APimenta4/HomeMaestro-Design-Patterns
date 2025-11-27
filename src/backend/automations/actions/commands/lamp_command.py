@@ -1,7 +1,7 @@
 from . import Command
 
 
-class LightsCommand(Command):
+class LampCommand(Command):
     def __init__(self):
         # command related attributes
         pass

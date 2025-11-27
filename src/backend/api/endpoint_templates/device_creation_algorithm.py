@@ -4,7 +4,7 @@ from typing import Any
 from devices import Device, DeviceStatus
 from devices.features import FeatureFactory
 from devices.hubs import HubFactory
-from home_maestro import HomeMaestro
+from shared import HomeMaestro
 
 from . import EntityCreationAlgorithm
 
@@ -23,7 +23,7 @@ class DeviceCreationAlgorithm(EntityCreationAlgorithm):
 
     def prepare_input_data(self, payload: dict[str, Any]) -> dict[str, object]:
         if payload.get("type"):
-            # Right now, hubs don't hold features, only other devices. This could be changed in the future.
+            # TODO: Right now, hubs don't hold features, only other devices. This could be changed in the future.
             if payload.get("features"):
                 logger.warning(
                     "Features were provided for new device of type Hub. These features will be ignored."

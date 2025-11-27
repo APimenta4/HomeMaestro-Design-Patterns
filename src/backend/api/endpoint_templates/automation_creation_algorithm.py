@@ -3,7 +3,7 @@ from typing import Any
 from automations import Automation
 from automations.actions import ActionFactory
 from automations.triggers import TriggerFactory
-from home_maestro import HomeMaestro
+from shared import HomeMaestro
 
 from . import EntityCreationAlgorithm
 

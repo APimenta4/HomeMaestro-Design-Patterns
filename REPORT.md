@@ -2,9 +2,15 @@
 
 [Updated Domain Model (draw.io)](https://app.diagrams.net/#G1Dm2RSYODV8ipJ_am0yr1ROCWjzooqt7y)
 
+# TODO: update diagram with new classes
+
 ![12-11 Architecture Model](assets/architecture-12-11.png)
 
+# TODO: "For the final version of the report, it would be good to also include a component diagram in your description of the high-level architecture of the system."
+
 # Design Pattern Documentation
+
+# TODO: update patterns, see professor's feedback
 
 ## 1️⃣ Singleton
 
@@ -13,6 +19,8 @@
 Accessing a single instance of a class in multiple places, across a complex project structure such as the present one, can be messy and challenging. Typical programatic solutions include passing the instance of the desired class as a parameter to functions or classes that depend on it, or pointing to highly controlled global variables.
 
 ### Pattern
+
+# TODO: add MQTTClient class
 
 The Singleton pattern was applied to our commonly shared classes, namely `HomeMaestro` and `NotificationService` (as of right now).
 
@@ -184,3 +192,5 @@ Is it called in:
 \- [Automations API](src/backend/api/automations_api/automations_api.py)
 
 \- [Devices API](src/backend/api/devices_api/devices_api.py)
+
+# TODO: add publisher subscriber
