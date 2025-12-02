@@ -6,7 +6,7 @@ from automations.actions import ExternalAction
 from automations.actions.commands import LampCommand
 from automations.triggers import TimeTrigger
 from automations.triggers.conditions import LampCondition
-from devices import Device, DeviceStatus
+from devices import Device, DeviceState, ErrorState, OfflineState, OnlineState
 from devices.features import Feature, LampFeature
 from devices.hubs import ZigbeeHub, ZWaveHub
 from integrations import TelegramIntegration, WhatsAppIntegration
@@ -22,18 +22,16 @@ if __name__ == "__main__":
     features.add(
         LampFeature("Second Feature", {"second feature": "amazing capabilities"})
     )
-    device1 = Device("Smartwatch", DeviceStatus.ONLINE, features)
-    device2 = Device("Digital Clock 2018", DeviceStatus.OFFLINE, features)
+    device1 = Device("Smartwatch", OnlineState, features)
+    device2 = Device("Digital Clock 2018", OfflineState, features)
     feature1 = LampFeature("Feature 1", {"something": "my test value"})
     feature2 = LampFeature("Feature 2", {"something else": "20"})
     feature3 = LampFeature("Feature 3", {"ADS feature": "10"})
-    device3 = Device(
-        "Test Device", DeviceStatus.OFFLINE, {feature1, feature2, feature3}
-    )
-    device4 = Device("Another Device", DeviceStatus.ERROR)
-    device5 = Device("Simple Device", DeviceStatus.ONLINE, {feature2})
-    hub = ZWaveHub("My first hub", DeviceStatus.ONLINE, {device1})
-    hub2 = ZigbeeHub("ZigBee Hub", DeviceStatus.ONLINE, {device1})
+    device3 = Device("Test Device", OfflineState, {feature1, feature2, feature3})
+    device4 = Device("Another Device", ErrorState)
+    device5 = Device("Simple Device", OnlineState, {feature2})
+    hub = ZWaveHub("My first hub", OnlineState, {device1})
+    hub2 = ZigbeeHub("ZigBee Hub", OnlineState, {device1})
 
     # Sample integrations
     integration1 = WhatsAppIntegration()
