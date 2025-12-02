@@ -1,7 +1,7 @@
 from logging import getLogger
 
 from automations import Automation
-from devices import Device
+from devices import Device, Protocol
 from integrations import Integration
 
 from . import MQTTClient, NotificationService, Singleton
@@ -12,12 +12,27 @@ logger = getLogger(__name__)
 class HomeMaestro(metaclass=Singleton):
     def __init__(self, integrations: set[Integration] | None = None):
         self.notification_service = NotificationService(integrations or set())
-        self.devices: set[Device] = set()
+        # hubless devices and hubs
+        self.connected_devices: set[Device] = set()
+        # other devices that require connection to a hub
+        self.unconnected_devices: set[Device] = set()
         self.automations: set[Automation] = set()
         MQTTClient().set_event_handler(self._handle_mqtt_event)
 
+    @property
+    def all_devices(self) -> set[Device]:
+        return self.connected_devices | self.unconnected_devices
+
     def add_device(self, device: Device):
-        self.devices.add(device)
+        if device in self.connected_devices | self.unconnected_devices:
+            raise ValueError(
+                f"Device with id '{device.id}' already exists in HomeMaestro"
+            )
+        if device.protocol == Protocol.HUBLESS:
+            self.connected_devices.add(device)
+        else:
+            self.unconnected_devices.add(device)
+
         MQTTClient().subscribe(f"{device.id}")
 
     def add_automation(self, automation: Automation):
@@ -30,7 +45,7 @@ class HomeMaestro(metaclass=Singleton):
         return None
 
     def get_device_by_id(self, device_id: int) -> Device | None:
-        for device in self.devices:
+        for device in self.all_devices:
             if device.id == device_id:
                 return device
         return None

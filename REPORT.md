@@ -168,6 +168,8 @@ Some examples of this pattern can be found in the following Factory classes:
 
 \- [Command Factory](src/backend/devices/commands/command_factory.py)
 
+TODO: add states factory
+
 ## Template Method
 
 We make use of the Template Method design pattern to structure well-defined steps of certain interactions with our API.
@@ -194,3 +196,5 @@ Is it called in:
 \- [Devices API](src/backend/api/devices_api/devices_api.py)
 
 # TODO: add publisher subscriber
+
+# TODO: add state

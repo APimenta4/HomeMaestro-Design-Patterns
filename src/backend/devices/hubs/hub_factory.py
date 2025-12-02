@@ -1,6 +1,5 @@
 from devices import Device, DeviceStatus
-
-from . import HueHub, TradfriHub, ZigbeeHub, ZWaveHub
+from devices.hubs import HueHub, TradfriHub, ZigbeeHub, ZWaveHub
 
 
 # DESIGN PATTERN: Simple Factory
@@ -9,7 +8,7 @@ class HubFactory:
     def create_hub(
         cls,
         name: str,
-        status: DeviceStatus,
+        status: type[DeviceStatus],
         type: str,
     ) -> Device:
         match type.lower():

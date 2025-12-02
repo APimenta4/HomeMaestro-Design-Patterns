@@ -3,7 +3,6 @@ from abc import ABC, abstractmethod
 from typing import Any
 
 from flask import Request, Response, make_response
-
 from shared import Identifiable
 
 logger = logging.getLogger(__name__)
@@ -13,11 +12,12 @@ logger = logging.getLogger(__name__)
 # reduces boilerplate steps
 # enforce strict algorithm
 # in the future, we can add steps like persist in database
+# cons: tightly coupled to this structure, less flexible
 class EntityCreationAlgorithm(ABC):
 
     def create_entity(self, request: Request) -> Response:
         payload = self.parse_payload(request)
-        self.validate_fields(payload)  # Partially hooked method
+        self.validate_and_clean_payload(payload)  # Partially hooked method
         prepared_data = self.prepare_input_data(payload)  # Hooked method
         entity = self.instantiate_and_persist_entity(prepared_data)  # Hooked method
         return self.success_response(entity)
@@ -31,7 +31,7 @@ class EntityCreationAlgorithm(ABC):
             raise ValueError("Payload is empty")
         return request
 
-    def validate_fields(self, payload: dict[str, Any]) -> bool:
+    def validate_and_clean_payload(self, payload: dict[str, Any]) -> bool:
         required_fields = self.required_fields()
         optional_fields = self.optional_fields()
 
@@ -71,6 +71,11 @@ class EntityCreationAlgorithm(ABC):
                 logger.warning(
                     "Optional field '%s' is empty or whitespace. Ignoring field.", field
                 )
+
+        # Clean all other fields from payload
+        for field in list(payload.keys()):
+            if field not in required_fields | optional_fields:
+                payload.pop(field)
 
         return True
 

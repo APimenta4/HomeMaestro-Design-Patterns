@@ -1,3 +1,4 @@
 from .entity_creation_algorithm import EntityCreationAlgorithm
 from .automation_creation_algorithm import AutomationCreationAlgorithm
 from .device_creation_algorithm import DeviceCreationAlgorithm
+from .hub_creation_algorithm import HubCreationAlgorithm

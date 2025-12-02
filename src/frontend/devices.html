@@ -1,368 +1,493 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HomeMaestro - Devices</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #87cefa 0%, #e0f4ff 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      h1 a {
+        color: #2c3e50;
+        text-decoration: none;
+        transition: opacity 0.3s;
+      }
+
+      h1 a:hover {
+        opacity: 0.7;
+      }
+
+      h2 {
+        color: #34495e;
+        font-size: 1.3em;
+        font-weight: 400;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+      }
+
+      .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        text-align: center;
+      }
+
+      .stat-card i {
+        font-size: 1.8em;
+        color: #3498db;
+        margin-bottom: 8px;
+      }
+
+      .stat-card h3 {
+        font-size: 2em;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 5px;
+      }
+
+      .stat-card p {
+        color: #7f8c8d;
+        font-size: 0.95em;
+      }
+
+      .device-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        list-style: none;
+      }
+
+      .device-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .device-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+      }
+
+      .device-card.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+        background: #f0f0f0;
+      }
+
+      .device-card.disabled::after {
+        content: "Unconnected";
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #e74c3c;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75em;
+      }
+
+      .device-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .device-icon {
+        width: 45px;
+        height: 45px;
+        background: #87cefa;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 3px 8px rgba(135, 206, 250, 0.4);
+      }
+
+      .device-icon i {
+        color: white;
+        font-size: 1.4em;
+      }
+
+      .device-name {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: #2c3e50;
+      }
+
+      .device-type {
+        color: #7f8c8d;
+        font-size: 0.9em;
+        margin-bottom: 10px;
+      }
+
+      .device-protocol {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: #ebf5fb;
+        color: #2980b9;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85em;
+        font-weight: 600;
+        margin-bottom: 10px;
+        margin-right: 8px;
+      }
+
+      .device-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 0.85em;
+        font-weight: 600;
+      }
+
+      .status-online {
+        background: #d5f4e6;
+        color: #27ae60;
+      }
+
+      .status-offline {
+        background: #fadbd8;
+        color: #e74c3c;
+      }
+
+      .status-error {
+        background: #fcf3cf;
+        color: #f39c12;
+      }
+
+      .status-indicator {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: currentColor;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 60px 20px;
+        color: #2c3e50;
+        grid-column: 1/-1;
+      }
+
+      .spinner {
+        border: 3px solid rgba(44, 62, 80, 0.1);
+        border-top: 3px solid #2c3e50;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #87CEFA 0%, #E0F4FF 100%);
-            min-height: 100vh;
-            padding: 40px 20px;
+        100% {
+          transform: rotate(360deg);
         }
+      }
 
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
+      .error,
+      .empty-state {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        text-align: center;
+        grid-column: 1/-1;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      }
 
+      .error {
+        color: #e74c3c;
+      }
+
+      .empty-state {
+        color: #7f8c8d;
+      }
+
+      .section-title {
+        color: #2c3e50;
+        font-size: 1.4em;
+        font-weight: 600;
+        margin: 30px 0 15px 0;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #87cefa;
+      }
+
+      .section-title:first-of-type {
+        margin-top: 0;
+      }
+
+      .section-title.unconnected {
+        color: #6b6d6d;
+      }
+
+      @media (max-width: 768px) {
         h1 {
-            color: #2C3E50;
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            font-weight: 700;
+          font-size: 2em;
         }
-
-            h1 a {
-                color: #2C3E50;
-                text-decoration: none;
-                transition: opacity 0.3s;
-            }
-
-                h1 a:hover {
-                    opacity: 0.7;
-                }
-
-        h2 {
-            color: #34495E;
-            font-size: 1.3em;
-            font-weight: 400;
-        }
-
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            text-align: center;
-        }
-
-            .stat-card i {
-                font-size: 1.8em;
-                color: #3498DB;
-                margin-bottom: 8px;
-            }
-
-            .stat-card h3 {
-                font-size: 2em;
-                font-weight: 700;
-                color: #2C3E50;
-                margin-bottom: 5px;
-            }
-
-            .stat-card p {
-                color: #7F8C8D;
-                font-size: 0.95em;
-            }
 
         .device-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            list-style: none;
+          grid-template-columns: 1fr;
         }
-
-        .device-card {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-            .device-card:hover {
-                transform: translateY(-3px);
-                box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-            }
-
-        .device-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .device-icon {
-            width: 45px;
-            height: 45px;
-            background: #87CEFA;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            box-shadow: 0 3px 8px rgba(135, 206, 250, 0.4);
-        }
-
-            .device-icon i {
-                color: white;
-                font-size: 1.4em;
-            }
-
-        .device-name {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: #2C3E50;
-        }
-
-        .device-type {
-            color: #7F8C8D;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-        }
-
-        .device-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 12px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            font-weight: 600;
-        }
-
-        .status-online {
-            background: #D5F4E6;
-            color: #27AE60;
-        }
-
-        .status-offline {
-            background: #FADBD8;
-            color: #E74C3C;
-        }
-
-        .status-error {
-            background: #FCF3CF;
-            color: #F39C12;
-        }
-
-        .status-indicator {
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: currentColor;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: #2C3E50;
-            grid-column: 1/-1;
-        }
-
-        .spinner {
-            border: 3px solid rgba(44, 62, 80, 0.1);
-            border-top: 3px solid #2C3E50;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .error, .empty-state {
-            background: white;
-            padding: 40px;
-            border-radius: 12px;
-            text-align: center;
-            grid-column: 1/-1;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-
-        .error {
-            color: #E74C3C;
-        }
-
-        .empty-state {
-            color: #7F8C8D;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2em;
-            }
-
-            .device-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="header">
-        <h1><a href="index.html"></i> HomeMaestro</a></h1>
-        <h2>Connected Devices</h2>
+      <h1><a href="index.html">HomeMaestro</a></h1>
+      <h2>Devices</h2>
     </div>
 
     <div class="container">
-        <div class="stats" id="stats" style="display: none;">
-            <div class="stat-card">
-                <i class="fas fa-plug"></i>
-                <h3 id="totalDevices">0</h3>
-                <p>Total Devices</p>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-circle-check"></i>
-                <h3 id="onlineDevices">0</h3>
-                <p>Online</p>
-            </div>
-            <div class="stat-card">
-                <i class="fas fa-circle-xmark"></i>
-                <h3 id="offlineDevices">0</h3>
-                <p>Offline</p>
-            </div>
+      <div class="stats" id="stats" style="display: none">
+        <div class="stat-card">
+          <i class="fas fa-plug"></i>
+          <h3 id="totalDevices">0</h3>
+          <p>Total Devices</p>
         </div>
+        <div class="stat-card">
+          <i class="fas fa-circle-check"></i>
+          <h3 id="onlineDevices">0</h3>
+          <p>Online</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-circle-xmark"></i>
+          <h3 id="offlineDevices">0</h3>
+          <p>Offline</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-link-slash"></i>
+          <h3 id="unconnectedDevices">0</h3>
+          <p>Unconnected</p>
+        </div>
+      </div>
 
-        <ul id="deviceList" class="device-grid">
-            <li class="loading">
-                <div class="spinner"></div>
-                <div>Loading devices...</div>
-            </li>
-        </ul>
+      <div id="devicesContainer">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div>Loading devices...</div>
+        </div>
+      </div>
     </div>
 
     <script>
-        const API_URL = 'http://127.0.0.1:5000/devices/';
+      const API_URL = "http://127.0.0.1:5000/devices/";
 
-        const deviceIcons = {
-            'Device': 'fa-microchip',
-            'ZigbeeHub': 'fa-network-wired',
-            'ZWaveHub': 'fa-tower-broadcast',
-            'Light': 'fa-lightbulb',
-            'Sensor': 'fa-sensor',
-            'Camera': 'fa-video',
-            'Thermostat': 'fa-temperature-half',
-            'Lock': 'fa-lock',
-            'Switch': 'fa-toggle-on',
-            'default': 'fa-plug'
-        };
+      const deviceIcons = {
+        // Device types
+        Device: "fa-microchip",
+        Light: "fa-lightbulb",
+        Sensor: "fa-sensor",
+        Camera: "fa-video",
+        Thermostat: "fa-temperature-half",
+        Lock: "fa-lock",
+        Switch: "fa-toggle-on",
+        // Hubs
+        ZigbeeHub: "fa-wifi",
+        ZWaveHub: "fa-tower-broadcast",
+        HueHub: "fa-lightbulb",
+        TradfriHub: "fa-bolt",
+        // Protocols
+        HubLess: "fa-house-signal",
+        Hue: "fa-lightbulb",
+        ZWave: "fa-tower-broadcast",
+        Tradfri: "fa-bolt",
+        Zigbee: "fa-wifi",
+        default: "fa-plug",
+      };
 
-        function getDeviceIcon(type) {
-            return deviceIcons[type] || deviceIcons.default;
+      function getDeviceIcon(type) {
+        return deviceIcons[type] || deviceIcons.default;
+      }
+
+      function getProtocolIcon(protocol) {
+        return deviceIcons[protocol] || deviceIcons.default;
+      }
+
+      function getStatusClass(status) {
+        if (!status) return "status-error";
+        const statusLower = status.toLowerCase();
+        if (statusLower === "online") return "status-online";
+        if (statusLower === "offline") return "status-offline";
+        return "status-error";
+      }
+
+      function updateStats(connectedDevices, unconnectedDevices) {
+        const stats = document.getElementById("stats");
+        const allDevices = [...connectedDevices, ...unconnectedDevices];
+        const total = allDevices.length;
+        const online = connectedDevices.filter(
+          (d) => d.status && d.status.toLowerCase() === "online"
+        ).length;
+        const offline = connectedDevices.filter(
+          (d) => d.status && d.status.toLowerCase() === "offline"
+        ).length;
+        const unconnected = unconnectedDevices.length;
+
+        document.getElementById("totalDevices").textContent = total;
+        document.getElementById("onlineDevices").textContent = online;
+        document.getElementById("offlineDevices").textContent = offline;
+        document.getElementById("unconnectedDevices").textContent = unconnected;
+
+        stats.style.display = "grid";
+      }
+
+      function createDeviceCard(device, isDisabled) {
+        const statusClass = getStatusClass(device.status);
+        const icon = getDeviceIcon(device.type);
+        const disabledClass = isDisabled ? "disabled" : "";
+        const protocolIcon = getProtocolIcon(device.protocol);
+        const protocolDisplay = device.protocol
+          ? `<span class="device-protocol"><i class="fas ${protocolIcon}"></i> ${device.protocol}</span>`
+          : "";
+
+        const listItem = document.createElement("li");
+        listItem.className = `device-card ${disabledClass}`;
+        if (!isDisabled) {
+          listItem.onclick = () => {
+            window.location.href = `device-details.html?id=${device.id}`;
+          };
         }
+        listItem.innerHTML = `
+                <div class="device-header">
+                    <div class="device-icon">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <div class="device-name">${device.name}</div>
+                </div>
+                <div class="device-type">${device.type || "Device"}</div>
+                ${protocolDisplay}
+                <div class="device-status ${statusClass}">
+                    <span class="status-indicator"></span>
+                    ${(device.status || "Unknown").toUpperCase()}
+                </div>
+            `;
+        return listItem;
+      }
 
-        function getStatusClass(status) {
-            if (!status) return 'status-error';
-            const statusLower = status.toLowerCase();
-            if (statusLower === 'online') return 'status-online';
-            if (statusLower === 'offline') return 'status-offline';
-            return 'status-error';
-        }
+      async function loadDevices() {
+        const container = document.getElementById("devicesContainer");
 
-        function updateStats(devices) {
-            const stats = document.getElementById('stats');
-            const total = devices.length;
-            const online = devices.filter(d => d.status && d.status.toLowerCase() === 'online').length;
-            const offline = total - online;
+        try {
+          const response = await fetch(API_URL);
+          if (!response.ok)
+            throw new Error(`HTTP error! status: ${response.status}`);
+          const data = await response.json();
 
-            document.getElementById('totalDevices').textContent = total;
-            document.getElementById('onlineDevices').textContent = online;
-            document.getElementById('offlineDevices').textContent = offline;
+          const connectedDevices = data.connected_devices || [];
+          const unconnectedDevices = data.unconnected_devices || [];
 
-            stats.style.display = 'grid';
-        }
+          container.innerHTML = "";
 
-        async function loadDevices() {
-            const deviceList = document.getElementById('deviceList');
-
-            try {
-                const response = await fetch(API_URL);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json();
-                deviceList.innerHTML = '';
-
-                if (!data || data.length === 0) {
-                    deviceList.innerHTML = `
-                            <li class="empty-state">
-                                <i class="fas fa-inbox fa-3x"></i>
-                                <h3>No devices found</h3>
-                                <p>Start by adding your first device</p>
-                            </li>
-                        `;
-                    return;
-                }
-
-                updateStats(data);
-
-                data.forEach(device => {
-                    const statusClass = getStatusClass(device.status);
-                    const icon = getDeviceIcon(device.type);
-
-                    const listItem = document.createElement('li');
-                    listItem.className = 'device-card';
-                    listItem.onclick = () => {
-                        window.location.href = `device-details.html?id=${device.id}`;
-                    };
-                    listItem.innerHTML = `
-                        <div class="device-header">
-                            <div class="device-icon">
-                                <i class="fas ${icon}"></i>
-                            </div>
-                            <div class="device-name">${device.name}</div>
+          if (
+            connectedDevices.length === 0 &&
+            unconnectedDevices.length === 0
+          ) {
+            container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox fa-3x"></i>
+                            <h3>No devices found</h3>
+                            <p>Start by adding your first device</p>
                         </div>
-                        <div class="device-type">${device.type}</div>
-                        <div class="device-status ${statusClass}">
-                            <span class="status-indicator"></span>
-                            ${(device.status || 'Unknown').toUpperCase()}
-                        </div>
-`;
-                    deviceList.appendChild(listItem);
-                });
-
-            } catch (error) {
-                console.error('Error loading devices:', error);
-                deviceList.innerHTML = `
-                        <li class="error">
-                            <i class="fas fa-triangle-exclamation fa-3x"></i>
-                            <h3>Failed to load devices</h3>
-                            <p>${error.message}</p>
-                        </li>
                     `;
-            }
-        }
+            return;
+          }
 
-        window.addEventListener('DOMContentLoaded', loadDevices);
+          updateStats(connectedDevices, unconnectedDevices);
+
+          if (connectedDevices.length > 0) {
+            const connectedTitle = document.createElement("h3");
+            connectedTitle.className = "section-title";
+            connectedTitle.innerHTML =
+              '<i class="fas fa-link"></i> Connected Devices';
+            container.appendChild(connectedTitle);
+
+            const connectedList = document.createElement("ul");
+            connectedList.className = "device-grid";
+            connectedDevices.forEach((device) => {
+              connectedList.appendChild(createDeviceCard(device, false));
+            });
+            container.appendChild(connectedList);
+          }
+
+          if (unconnectedDevices.length > 0) {
+            const unconnectedTitle = document.createElement("h3");
+            unconnectedTitle.className = "section-title unconnected";
+            unconnectedTitle.innerHTML =
+              '<i class="fas fa-link-slash"></i> Unconnected Devices (Requires Hub)';
+            container.appendChild(unconnectedTitle);
+
+            const unconnectedList = document.createElement("ul");
+            unconnectedList.className = "device-grid";
+            unconnectedDevices.forEach((device) => {
+              unconnectedList.appendChild(createDeviceCard(device, true));
+            });
+            container.appendChild(unconnectedList);
+          }
+        } catch (error) {
+          console.error("Error loading devices:", error);
+          container.innerHTML = `
+                    <div class="error">
+                        <i class="fas fa-triangle-exclamation fa-3x"></i>
+                        <h3>Failed to load devices</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", loadDevices);
     </script>
-</body>
+  </body>
 </html>
