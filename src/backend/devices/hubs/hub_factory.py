@@ -1,4 +1,4 @@
-from devices import Device, DeviceState
+from devices import Device, DeviceStatus
 from devices.hubs import HueHub, TradfriHub, ZigbeeHub, ZWaveHub
 
 
@@ -8,17 +8,17 @@ class HubFactory:
     def create_hub(
         cls,
         name: str,
-        state: type[DeviceState],
+        status: type[DeviceStatus],
         type: str,
     ) -> Device:
         match type.lower():
             case "zigbee" | "zigbeehub":
-                return ZigbeeHub(name=name, state=state)
+                return ZigbeeHub(name=name, status=status)
             case "zwave" | "zwavehub":
-                return ZWaveHub(name=name, state=state)
+                return ZWaveHub(name=name, status=status)
             case "tradfri" | "tradfrihub":
-                return TradfriHub(name=name, state=state)
+                return TradfriHub(name=name, status=status)
             case "hue" | "huehub":
-                return HueHub(name=name, state=state)
+                return HueHub(name=name, status=status)
             case _:
                 raise ValueError(f"The provided hub type is not supported: {type}")

@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
 
-from devices import Device, DeviceState
+from devices import Device, DeviceStatus
 
 
 class Hub(Device, ABC):
     def __init__(
-        self, name: str, state: type[DeviceState], devices: set[Device] | None = None
+        self, name: str, status: type[DeviceStatus], devices: set[Device] | None = None
     ):
-        super().__init__(name=name, state=state)
+        super().__init__(name=name, status=status)
         # TODO: remove once implemented. Hubs shouldnt initialize with devices. They should discover them.
         self.devices = devices or set()
 

@@ -1,6 +1,6 @@
 from api.api_shared import validates_exceptions
 from api.endpoint_templates import DeviceCreationAlgorithm
-from devices import DeviceStateFactory
+from devices import DeviceStatusFactory
 from flask import Blueprint, Response, make_response, request
 from shared import HomeMaestro
 
@@ -55,7 +55,7 @@ def update_device(device_id: int) -> Response:
 
     if "status" in data:
         try:
-            device.state = DeviceStateFactory.create_state(data["status"])
+            device.status = DeviceStatusFactory.create_status(data["status"])
         except ValueError:
             return make_response(
                 {"error": "Invalid status. Must be one of: online, offline, error"},

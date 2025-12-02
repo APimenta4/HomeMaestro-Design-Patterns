@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from multiprocessing import Value
 
 # DESIGN PATTERN: State
 # makes code cleaner
@@ -8,7 +7,7 @@ from multiprocessing import Value
 # approach using static methods enables an easy further refactoring if needed
 
 
-class DeviceState(ABC):
+class DeviceStatus(ABC):
     @staticmethod
     @abstractmethod
     def value() -> str:
@@ -25,7 +24,7 @@ class DeviceState(ABC):
         pass
 
 
-class OnlineState(DeviceState):
+class OnlineStatus(DeviceStatus):
     @staticmethod
     def value() -> str:
         return "online"
@@ -39,7 +38,7 @@ class OnlineState(DeviceState):
         return True
 
 
-class OfflineState(DeviceState):
+class OfflineStatus(DeviceStatus):
     @staticmethod
     def value() -> str:
         return "offline"
@@ -53,7 +52,7 @@ class OfflineState(DeviceState):
         raise ValueError("Cannot obtain status: Device is offline.")
 
 
-class ErrorState(DeviceState):
+class ErrorStatus(DeviceStatus):
     @staticmethod
     def value() -> str:
         return "error"

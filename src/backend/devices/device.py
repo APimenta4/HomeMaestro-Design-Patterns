@@ -2,7 +2,7 @@ from logging import getLogger
 
 from shared import Identifiable, MQTTClient
 
-from . import DeviceState
+from . import DeviceStatus
 from .features import Feature
 
 logger = getLogger(__name__)
@@ -10,10 +10,13 @@ logger = getLogger(__name__)
 
 class Device(Identifiable):
     def __init__(
-        self, name: str, state: type[DeviceState], features: set[Feature] | None = None
+        self,
+        name: str,
+        status: type[DeviceStatus],
+        features: set[Feature] | None = None,
     ):
         super().__init__(name)
-        self.state = state
+        self.status = status
         self.features = features or set()
 
     def get_feature_by_id(self, feature_id: int) -> Feature | None:
@@ -26,7 +29,7 @@ class Device(Identifiable):
         self,
         feature_id: int,
     ):
-        self.state.verify_can_execute()
+        self.status.verify_can_execute()
 
         feature = self.get_feature_by_id(feature_id)
         if feature is None:
@@ -39,7 +42,7 @@ class Device(Identifiable):
         MQTTClient().publish(f"{self.id}", payload)
 
     def get_feature_status(self, feature_id: int):
-        self.state.verify_can_obtain_status()
+        self.status.verify_can_obtain_status()
 
         feature = self.get_feature_by_id(feature_id)
         if feature is None:
@@ -48,7 +51,7 @@ class Device(Identifiable):
 
     def to_dict(self) -> dict[str, object]:
         dict = super().to_dict()
-        dict["status"] = self.state.value()
+        dict["status"] = self.status.value()
         dict["features"] = [feature.__class__.__name__ for feature in self.features]
         return dict
 

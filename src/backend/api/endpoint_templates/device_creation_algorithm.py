@@ -1,7 +1,7 @@
 import logging
 from typing import Any
 
-from devices import Device, DeviceStateFactory
+from devices import Device, DeviceStatusFactory
 from devices.features import FeatureFactory
 from devices.hubs import HubFactory
 from shared import HomeMaestro
@@ -30,7 +30,7 @@ class DeviceCreationAlgorithm(EntityCreationAlgorithm):
                 )
                 payload.pop("features")
 
-        payload["status"] = DeviceStateFactory.create_state(payload["status"])
+        payload["status"] = DeviceStatusFactory.create_status(payload["status"])
 
         if payload.get("features"):
             payload["features"] = {
