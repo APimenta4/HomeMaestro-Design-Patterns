@@ -180,12 +180,14 @@
           <label for="deviceType">Device Type</label>
           <select id="deviceType" name="type" required>
             <option value="">Select a type</option>
-            <option value="Regular Device">Regular Device</option>
-            <option value="HueHub">Hue Hub</option>
-            <option value="TradfriHub">Tradfri Hub</option>
-            <option value="ZigbeeHub">Zigbee Hub</option>
-            <option value="ZWaveHub">Z-Wave Hub</option>
+            <option value="Device">Device</option>
+            <option value="Hub">Hub</option>
           </select>
+        </div>
+
+        <div class="form-group" id="subTypeGroup" style="display: none">
+          <label for="subType" id="subTypeLabel">Protocol</label>
+          <select id="subType" name="subType" required></select>
         </div>
 
         <div class="form-group">
@@ -212,6 +214,55 @@
     <script>
       const API_URL = "http://127.0.0.1:5000/devices/";
 
+      const protocolOptions = [
+        { value: "HubLess", label: "HubLess" },
+        { value: "Hue", label: "Hue" },
+        { value: "ZWave", label: "Z-Wave" },
+        { value: "Tradfri", label: "Tradfri" },
+        { value: "Zigbee", label: "Zigbee" },
+      ];
+
+      const hubTypeOptions = [
+        { value: "HueHub", label: "Hue Hub" },
+        { value: "TradfriHub", label: "Tradfri Hub" },
+        { value: "ZigbeeHub", label: "Zigbee Hub" },
+        { value: "ZWaveHub", label: "Z-Wave Hub" },
+      ];
+
+      document
+        .getElementById("deviceType")
+        .addEventListener("change", function () {
+          const subTypeGroup = document.getElementById("subTypeGroup");
+          const subTypeLabel = document.getElementById("subTypeLabel");
+          const subTypeSelect = document.getElementById("subType");
+          const selectedType = this.value;
+
+          subTypeSelect.innerHTML = "";
+
+          if (selectedType === "Device") {
+            subTypeLabel.textContent = "Protocol";
+            subTypeSelect.innerHTML =
+              '<option value="">Select a protocol</option>';
+            protocolOptions.forEach((opt) => {
+              subTypeSelect.innerHTML += `<option value="${opt.value}">${opt.label}</option>`;
+            });
+            subTypeGroup.style.display = "block";
+            subTypeSelect.required = true;
+          } else if (selectedType === "Hub") {
+            subTypeLabel.textContent = "Hub Type";
+            subTypeSelect.innerHTML =
+              '<option value="">Select a hub type</option>';
+            hubTypeOptions.forEach((opt) => {
+              subTypeSelect.innerHTML += `<option value="${opt.value}">${opt.label}</option>`;
+            });
+            subTypeGroup.style.display = "block";
+            subTypeSelect.required = true;
+          } else {
+            subTypeGroup.style.display = "none";
+            subTypeSelect.required = false;
+          }
+        });
+
       function showMessage(text, type) {
         const messageDiv = document.getElementById("message");
         messageDiv.textContent = text;
@@ -228,14 +279,19 @@
         .addEventListener("submit", async (e) => {
           e.preventDefault();
 
+          const deviceType = document.getElementById("deviceType").value;
+          const subType = document.getElementById("subType").value;
+
           const formData = {
             name: document.getElementById("deviceName").value,
             status: document.getElementById("deviceStatus").value,
-            type:
-              document.getElementById("deviceType").value === "Regular Device"
-                ? undefined
-                : document.getElementById("deviceType").value,
           };
+
+          if (deviceType === "Device") {
+            formData.protocol = subType;
+          } else if (deviceType === "Hub") {
+            formData.type = subType;
+          }
 
           try {
             const response = await fetch(API_URL, {

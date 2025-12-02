@@ -1,9 +1,8 @@
 import logging
 from typing import Any
 
-from devices import Device, DeviceStatusFactory
+from devices import Device, DeviceStatusFactory, Protocol
 from devices.features import FeatureFactory
-from devices.hubs import HubFactory
 from shared import HomeMaestro
 
 from . import EntityCreationAlgorithm
@@ -16,19 +15,18 @@ logger = logging.getLogger(__name__)
 class DeviceCreationAlgorithm(EntityCreationAlgorithm):
 
     def required_fields(self) -> dict[str, type]:
-        return {"name": str, "status": str}
+        return {"name": str, "status": str, "protocol": str}
 
     def optional_fields(self) -> dict[str, type]:
-        return {"type": str, "features": list}
+        return {"features": list}
 
     def prepare_input_data(self, payload: dict[str, Any]) -> dict[str, object]:
-        if payload.get("type"):
-            # TODO: Right now, hubs don't hold features, only other devices. This could be changed in the future.
-            if payload.get("features"):
-                logger.warning(
-                    "Features were provided for new device of type Hub. These features will be ignored."
-                )
-                payload.pop("features")
+        try:
+            payload["protocol"] = Protocol(payload["protocol"])
+        except ValueError as exc:
+            raise ValueError(
+                f"The provided protocol type is not supported: {payload['protocol']}"
+            ) from exc
 
         payload["status"] = DeviceStatusFactory.create_status(payload["status"])
 
@@ -41,9 +39,6 @@ class DeviceCreationAlgorithm(EntityCreationAlgorithm):
         return payload
 
     def instantiate_and_persist_entity(self, prepared_data: dict[str, Any]) -> Device:
-        if prepared_data.get("type"):
-            device = HubFactory.create_hub(**prepared_data)
-        else:
-            device = Device(**prepared_data)
+        device = Device(**prepared_data)
         home_maestro.add_device(device)
         return device

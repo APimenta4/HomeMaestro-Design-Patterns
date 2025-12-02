@@ -1,3 +1,4 @@
+from enum import Enum
 from logging import getLogger
 
 from shared import Identifiable, MQTTClient
@@ -8,15 +9,25 @@ from .features import Feature
 logger = getLogger(__name__)
 
 
+class Protocol(Enum):
+    HUBLESS = "HubLess"
+    HUE = "Hue"
+    ZWAVE = "ZWave"
+    TRADFRI = "Tradfri"
+    ZIGBEE = "Zigbee"
+
+
 class Device(Identifiable):
     def __init__(
         self,
         name: str,
         status: type[DeviceStatus],
+        protocol: Protocol,
         features: set[Feature] | None = None,
     ):
         super().__init__(name)
         self.status = status
+        self.protocol = protocol
         self.features = features or set()
 
     def get_feature_by_id(self, feature_id: int) -> Feature | None:
@@ -52,6 +63,7 @@ class Device(Identifiable):
     def to_dict(self) -> dict[str, object]:
         dict = super().to_dict()
         dict["status"] = self.status.value()
+        dict["protocol"] = self.protocol.value
         dict["features"] = [feature.__class__.__name__ for feature in self.features]
         return dict
 
