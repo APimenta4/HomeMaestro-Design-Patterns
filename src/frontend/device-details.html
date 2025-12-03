@@ -210,10 +210,28 @@
         align-items: center;
         gap: 10px;
         border-left: 3px solid #3498db;
+        justify-content: space-between;
       }
 
       .feature-item i {
         color: #3498db;
+      }
+
+      .feature-item.clickable {
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+      }
+
+      .feature-item.clickable:hover {
+        background-color: #eaf2f8;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+      }
+
+      .device-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-left: auto;
       }
 
       .actions {
@@ -257,6 +275,38 @@
         background: #c0392b;
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+      }
+
+      .btn-discover {
+        background: #9b59b6;
+        color: white;
+      }
+
+      .btn-discover:hover {
+        background: #8e44ad;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(155, 89, 182, 0.3);
+      }
+
+      .btn-unpair {
+        padding: 6px 12px;
+        background: #de984e;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.85em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .btn-unpair:hover {
+        background: #c0392b;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(231, 76, 60, 0.3);
       }
 
       .btn:disabled {
@@ -518,12 +568,17 @@
         return "status-error";
       }
 
+      function isHub(device) {
+        return device.type && device.type.endsWith("Hub");
+      }
+
       function renderDeviceDetails(device) {
         currentDevice = device;
         const content = document.getElementById("content");
         const icon = getDeviceIcon(device.type);
         const statusClass = getStatusClass(device.status);
         const protocolIcon = getProtocolIcon(device.protocol);
+        const deviceIsHub = isHub(device);
 
         content.innerHTML = `
                 <div class="detail-card">
@@ -611,7 +666,61 @@
                         : ""
                     }
 
+                    ${
+                      deviceIsHub && device.devices && device.devices.length > 0
+                        ? `
+                        <div class="info-section">
+                            <h3><i class="fas fa-link"></i> Connected Devices (${
+                              device.devices.length
+                            })</h3>
+                            <ul class="features-list">
+                                ${device.devices
+                                  .map(
+                                    (d) => `
+                                    <li class="feature-item clickable" onclick="redirectToDevice(${
+                                      d.id
+                                    })">
+                                        <i class="fas ${getDeviceIcon(
+                                          d.type
+                                        )}"></i>
+                                        <span>${d.name}</span>
+                                        <div class="device-actions">
+                                            <span class="device-status ${getStatusClass(
+                                              d.status
+                                            )}" style="font-size: 0.8em;">
+                                                <span class="status-indicator"></span>
+                                                ${(
+                                                  d.status || "Unknown"
+                                                ).toUpperCase()}
+                                            </span>
+                                            <button class="btn-unpair" onclick="event.stopPropagation(); unpairDevice(${
+                                              device.id
+                                            }, ${d.id}, '${d.name}')">
+                                                <i class="fas fa-unlink"></i>
+                                                Unpair
+                                            </button>
+                                        </div>
+                                    </li>
+                                `
+                                  )
+                                  .join("")}
+                            </ul>
+                        </div>
+                    `
+                        : ""
+                    }
+
                     <div class="actions">
+                        ${
+                          deviceIsHub
+                            ? `
+                        <button class="btn btn-discover" onclick="discoverDevices()">
+                            <i class="fas fa-search"></i>
+                            Discover Devices
+                        </button>
+                        `
+                            : ""
+                        }
                         <button class="btn btn-edit" onclick="openEditModal()">
                             <i class="fas fa-edit"></i>
                             Edit Device
@@ -699,6 +808,87 @@
         }
       }
 
+      async function discoverDevices() {
+        if (!currentDevice) return;
+
+        const discoverBtn = document.querySelector(".btn-discover");
+        const originalContent = discoverBtn.innerHTML;
+        discoverBtn.disabled = true;
+        discoverBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> Discovering...';
+
+        try {
+          const response = await fetch(`${API_URL}${deviceId}/discover`, {
+            method: "POST",
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Failed to discover devices");
+          }
+
+          const result = await response.json();
+          alert(result.message || "Discovery completed!");
+
+          await loadDeviceDetails();
+        } catch (error) {
+          console.error("Error discovering devices:", error);
+          alert(`Error: ${error.message}`);
+          discoverBtn.disabled = false;
+          discoverBtn.innerHTML = originalContent;
+        }
+      }
+
+      async function unpairDevice(hubId, deviceId, deviceName) {
+        if (
+          !confirm(
+            `Are you sure you want to unpair "${deviceName}" from this hub?`
+          )
+        ) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `${API_URL}${hubId}/unpair/${deviceId}`,
+            {
+              method: "POST",
+            }
+          );
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Failed to unpair device");
+          }
+
+          const result = await response.json();
+          alert(result.message || "Device unpaired successfully!");
+
+          await loadDeviceDetails();
+        } catch (error) {
+          console.error("Error unpairing device:", error);
+          alert(`Error: ${error.message}`);
+        }
+      }
+
+      function updateDeviceList(devices) {
+        const deviceListContainer = document.getElementById("deviceList");
+        deviceListContainer.innerHTML = "";
+
+        devices.forEach((device) => {
+          const deviceItem = document.createElement("div");
+          deviceItem.className = "device-item";
+          deviceItem.innerHTML = `
+                <div class="device-info">
+                    <h4>${device.name}</h4>
+                    <p>${device.type} - ${device.status}</p>
+                </div>
+            `;
+
+          deviceListContainer.appendChild(deviceItem);
+        });
+      }
+
       async function loadDeviceDetails() {
         if (!deviceId) {
           document.getElementById("content").innerHTML = `
@@ -733,6 +923,10 @@
                     </div>
                 `;
         }
+      }
+
+      function redirectToDevice(deviceId) {
+        window.location.href = `device-details.html?id=${deviceId}`;
       }
 
       document

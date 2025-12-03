@@ -10,8 +10,8 @@ class Identifiable(ABC):
 
     @classmethod
     def _assign_id(cls) -> int:
-        cls._id_counter += 1
-        return cls._id_counter
+        Identifiable._id_counter += 1
+        return Identifiable._id_counter
 
     @abstractmethod
     def to_dict(self) -> dict[str, object]:

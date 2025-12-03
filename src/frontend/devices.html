@@ -103,6 +103,7 @@
         transition: all 0.3s ease;
         cursor: pointer;
         position: relative;
+        list-style: none;
       }
 
       .device-card:hover {
@@ -272,6 +273,108 @@
         color: #6b6d6d;
       }
 
+      .hub-group {
+        background: #f8fbff;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border: 2px solid #87cefa;
+      }
+
+      .hub-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #d4e9f7;
+        cursor: pointer;
+        transition: opacity 0.3s;
+      }
+
+      .hub-header:hover {
+        opacity: 0.8;
+      }
+
+      .hub-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+      }
+
+      .hub-icon i {
+        color: white;
+        font-size: 1.5em;
+      }
+
+      .hub-info {
+        flex: 1;
+      }
+
+      .hub-name {
+        font-size: 1.4em;
+        font-weight: 700;
+        color: #2c3e50;
+      }
+
+      .hub-meta {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 5px;
+      }
+
+      .hub-type {
+        color: #7f8c8d;
+        font-size: 0.9em;
+      }
+
+      .hub-device-count {
+        background: #ebf5fb;
+        color: #2980b9;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 0.8em;
+        font-weight: 600;
+      }
+
+      .hub-devices {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        list-style: none;
+      }
+
+      .hub-devices .device-card {
+        background: white;
+        border: 1px solid #e8f4fc;
+      }
+
+      .connected-grid {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .standalone-card-wrapper {
+        display: inline-block;
+      }
+
+      .standalone-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+      }
+
+      .standalone-row .device-card {
+        margin: 0;
+      }
+
       @media (max-width: 768px) {
         h1 {
           font-size: 2em;
@@ -363,21 +466,62 @@
         return "status-error";
       }
 
+      function parseConnectedDevices(connectedDevices) {
+        const hubs = [];
+        const standaloneDevices = [];
+        const hubChildIds = new Set();
+
+        connectedDevices.forEach((item) => {
+          if (item.devices && Array.isArray(item.devices)) {
+            hubs.push(item);
+            item.devices.forEach((d) => hubChildIds.add(d.id));
+          }
+        });
+
+        connectedDevices.forEach((item) => {
+          if (!item.devices && !hubChildIds.has(item.id)) {
+            standaloneDevices.push(item);
+          }
+        });
+
+        return { hubs, standaloneDevices };
+      }
+
       function updateStats(connectedDevices, unconnectedDevices) {
         const stats = document.getElementById("stats");
-        const allDevices = [...connectedDevices, ...unconnectedDevices];
-        const total = allDevices.length;
-        const online = connectedDevices.filter(
+        const { hubs, standaloneDevices } =
+          parseConnectedDevices(connectedDevices);
+
+        let totalConnected = standaloneDevices.length;
+        let onlineCount = standaloneDevices.filter(
           (d) => d.status && d.status.toLowerCase() === "online"
         ).length;
-        const offline = connectedDevices.filter(
+        let offlineCount = standaloneDevices.filter(
           (d) => d.status && d.status.toLowerCase() === "offline"
         ).length;
+
+        hubs.forEach((hub) => {
+          totalConnected += 1;
+          if (hub.status && hub.status.toLowerCase() === "online")
+            onlineCount++;
+          else if (hub.status && hub.status.toLowerCase() === "offline")
+            offlineCount++;
+
+          hub.devices.forEach((device) => {
+            totalConnected++;
+            if (device.status && device.status.toLowerCase() === "online")
+              onlineCount++;
+            else if (device.status && device.status.toLowerCase() === "offline")
+              offlineCount++;
+          });
+        });
+
+        const total = totalConnected + unconnectedDevices.length;
         const unconnected = unconnectedDevices.length;
 
         document.getElementById("totalDevices").textContent = total;
-        document.getElementById("onlineDevices").textContent = online;
-        document.getElementById("offlineDevices").textContent = offline;
+        document.getElementById("onlineDevices").textContent = onlineCount;
+        document.getElementById("offlineDevices").textContent = offlineCount;
         document.getElementById("unconnectedDevices").textContent = unconnected;
 
         stats.style.display = "grid";
@@ -416,6 +560,48 @@
         return listItem;
       }
 
+      function createHubGroup(hub) {
+        const hubIcon = getDeviceIcon(hub.type);
+        const statusClass = getStatusClass(hub.status);
+        const deviceCount = hub.devices ? hub.devices.length : 0;
+
+        const hubGroup = document.createElement("div");
+        hubGroup.className = "hub-group";
+        hubGroup.innerHTML = `
+          <div class="hub-header" onclick="window.location.href='device-details.html?id=${
+            hub.id
+          }'">
+            <div class="hub-icon">
+              <i class="fas ${hubIcon}"></i>
+            </div>
+            <div class="hub-info">
+              <div class="hub-name">${hub.name}</div>
+              <div class="hub-meta">
+                <span class="hub-type">${hub.type}</span>
+                <span class="hub-device-count">${deviceCount} device${
+          deviceCount !== 1 ? "s" : ""
+        }</span>
+                <span class="device-status ${statusClass}">
+                  <span class="status-indicator"></span>
+                  ${(hub.status || "Unknown").toUpperCase()}
+                </span>
+              </div>
+            </div>
+          </div>
+        `;
+
+        if (hub.devices && hub.devices.length > 0) {
+          const deviceList = document.createElement("ul");
+          deviceList.className = "hub-devices";
+          hub.devices.forEach((device) => {
+            deviceList.appendChild(createDeviceCard(device, false));
+          });
+          hubGroup.appendChild(deviceList);
+        }
+
+        return hubGroup;
+      }
+
       async function loadDevices() {
         const container = document.getElementById("devicesContainer");
 
@@ -435,30 +621,44 @@
             unconnectedDevices.length === 0
           ) {
             container.innerHTML = `
-                        <div class="empty-state">
-                            <i class="fas fa-inbox fa-3x"></i>
-                            <h3>No devices found</h3>
-                            <p>Start by adding your first device</p>
-                        </div>
-                    `;
+              <div class="empty-state">
+                <i class="fas fa-inbox fa-3x"></i>
+                <h3>No devices found</h3>
+                <p>Start by adding your first device</p>
+              </div>
+            `;
             return;
           }
 
           updateStats(connectedDevices, unconnectedDevices);
 
-          if (connectedDevices.length > 0) {
+          const { hubs, standaloneDevices } =
+            parseConnectedDevices(connectedDevices);
+
+          if (hubs.length > 0 || standaloneDevices.length > 0) {
             const connectedTitle = document.createElement("h3");
             connectedTitle.className = "section-title";
             connectedTitle.innerHTML =
               '<i class="fas fa-link"></i> Connected Devices';
             container.appendChild(connectedTitle);
 
-            const connectedList = document.createElement("ul");
-            connectedList.className = "device-grid";
-            connectedDevices.forEach((device) => {
-              connectedList.appendChild(createDeviceCard(device, false));
+            const connectedGrid = document.createElement("div");
+            connectedGrid.className = "connected-grid";
+
+            hubs.forEach((hub) => {
+              connectedGrid.appendChild(createHubGroup(hub));
             });
-            container.appendChild(connectedList);
+
+            if (standaloneDevices.length > 0) {
+              const standaloneRow = document.createElement("ul");
+              standaloneRow.className = "standalone-row";
+              standaloneDevices.forEach((device) => {
+                standaloneRow.appendChild(createDeviceCard(device, false));
+              });
+              connectedGrid.appendChild(standaloneRow);
+            }
+
+            container.appendChild(connectedGrid);
           }
 
           if (unconnectedDevices.length > 0) {
@@ -478,12 +678,12 @@
         } catch (error) {
           console.error("Error loading devices:", error);
           container.innerHTML = `
-                    <div class="error">
-                        <i class="fas fa-triangle-exclamation fa-3x"></i>
-                        <h3>Failed to load devices</h3>
-                        <p>${error.message}</p>
-                    </div>
-                `;
+            <div class="error">
+              <i class="fas fa-triangle-exclamation fa-3x"></i>
+              <h3>Failed to load devices</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
         }
       }
 
