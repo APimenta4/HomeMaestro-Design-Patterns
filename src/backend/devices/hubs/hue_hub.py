@@ -1,10 +1,19 @@
 from logging import getLogger
 
+from devices import Protocol
+from shared import HomeMaestro
+
 from . import Hub
 
 logger = getLogger(__name__)
 
+home_maestro = HomeMaestro()
+
 
 class HueHub(Hub):
     def discover_devices(self):
-        logger.info("Discovering devices through Hue protocol")
+        logger.info("Discovering devices through Hue protocol for hub '%s'", self.name)
+        for device in home_maestro.unconnected_devices.copy():
+            if device.protocol == Protocol.HUE:
+                self.link_device(device)
+                logger.info("Linked device '%s' to hub '%s'", device.name, self.name)

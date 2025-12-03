@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 
 from devices import Device, DeviceStatus, Protocol
+from shared import HomeMaestro
+
+home_maestro = HomeMaestro()
 
 
 # We chose inheritance for Hubs as it will be easier to implement protocol-specific implementations
@@ -20,6 +23,16 @@ class Hub(Device, ABC):
         dict.pop("protocol", None)
         dict["devices"] = [device.to_dict() for device in self.devices]
         return dict
+
+    def link_device(self, device: Device):
+        self.devices.add(device)
+        home_maestro.unconnected_devices.discard(device)
+        home_maestro.connected_devices.add(device)
+
+    def unpair_device(self, device: Device):
+        home_maestro.connected_devices.discard(device)
+        home_maestro.unconnected_devices.add(device)
+        self.devices.discard(device)
 
     @abstractmethod
     def discover_devices(self):

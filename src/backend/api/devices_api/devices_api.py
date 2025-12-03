@@ -1,6 +1,7 @@
 from api.api_shared import validates_exceptions
 from api.endpoint_templates import DeviceCreationAlgorithm, HubCreationAlgorithm
 from devices import DeviceStatusFactory
+from devices.hubs import Hub
 from flask import Blueprint, Response, make_response, request
 from shared import HomeMaestro
 
@@ -101,3 +102,44 @@ def execute_device_feature(device_id: int) -> Response:
 
     # TODO: Implement
     pass
+
+
+@devices_api.route("/<int:hub_id>/discover", methods=["POST"])
+@validates_exceptions
+def discover_devices(hub_id: int) -> Response:
+    hub = home_maestro.get_device_by_id(hub_id)
+
+    if hub is None or not isinstance(hub, Hub):
+        return make_response({"error": f"Hub with id '{hub_id}' not found"}, 404)
+
+    hub.discover_devices()
+
+    return make_response(
+        {"message": f"Discovery process started for hub '{hub.name}'"}, 200
+    )
+
+
+# unpair device from hub
+@devices_api.route("/<int:hub_id>/unpair/<int:device_id>", methods=["POST"])
+@validates_exceptions
+def unpair_device(hub_id: int, device_id: int) -> Response:
+    hub = home_maestro.get_device_by_id(hub_id)
+
+    if hub is None or not isinstance(hub, Hub):
+        return make_response({"error": f"Hub with id '{hub_id}' not found"}, 404)
+
+    device = home_maestro.get_device_by_id(device_id)
+
+    if device is None:
+        return make_response({"error": f"Device with id '{device_id}' not found"}, 404)
+
+    hub.unpair_device(device)
+
+    return make_response(
+        {
+            "message": f"Successfully unpaired device '{device.name}' from hub '{hub.name}'",
+            "hub_id": hub_id,
+            "device_id": device_id,
+        },
+        200,
+    )
