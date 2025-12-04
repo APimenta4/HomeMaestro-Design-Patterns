@@ -1,12 +1,15 @@
 import random
 
 from . import Feature
+from typing import TypedDict
 
+class BlindsParameters(TypedDict):
+    position: float
 
 class BlindsFeature(Feature):
-    def __init__(self, name: str, options: dict[str, object] | None = None):
+    def __init__(self, name: str, options: BlindsParameters | None = None):
         super().__init__(name, options)
-        self.position: float = 0.0  # fully open
+        self.position = options.get("position", 0.0)  # fully open
 
     def execute(self):
         # Virtual device, therefore we simulate how much the blinds will be opened
@@ -17,4 +20,5 @@ class BlindsFeature(Feature):
 
     def to_dict(self):
         dict = super().to_dict()
+        dict["position"] = self.position
         return dict

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -521,6 +521,30 @@
       </div>
     </div>
 
+    <!-- Modal de Detalhes da Feature -->
+    <div id="featureModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="featureModalTitle"><i class="fas fa-star"></i> Feature Details</h3>
+          <button class="close-modal" onclick="closeFeatureModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="featureModalBody">
+          <!-- O conteúdo será preenchido via JS -->
+        </div>
+        <div class="modal-actions">
+          <button
+            type="button"
+            class="btn btn-cancel"
+            onclick="closeFeatureModal()"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
       const API_URL = "http://127.0.0.1:5000/devices/";
 
@@ -572,6 +596,31 @@
         return device.type && device.type.endsWith("Hub");
       }
 
+      function getFeatureDisplayProperties(feature) {
+        const properties = [];
+        switch (feature.type) {
+          case "LampFeature":
+            if (feature.state !== undefined) {
+              properties.push(`state: ${feature.state ? "ON" : "OFF"}`);
+            }
+            if (feature.brightness !== undefined) {
+              properties.push(`brightness: ${feature.brightness}`);
+            }
+            break;
+          case "BlindsFeature":
+            if (feature.position !== undefined) {
+              properties.push(`position: ${feature.position}`);
+            }
+            break;
+          case "TemperatureFeature":
+            if (feature.temperature !== undefined) {
+              properties.push(`temperature: ${feature.temperature}`);
+            }
+            break;
+        }
+        return properties.join(", ");
+      }
+
       function renderDeviceDetails(device) {
         currentDevice = device;
         const content = document.getElementById("content");
@@ -582,6 +631,7 @@
 
         content.innerHTML = `
                 <div class="detail-card">
+                    <input type="hidden" id="currentDevice" value='${JSON.stringify(device).replace(/'/g, '&#39;')}'>
                     <div class="device-header">
                         <div class="device-icon-large">
                             <i class="fas ${icon}"></i>
@@ -634,30 +684,29 @@
                         <div class="info-section">
                             <h3><i class="fas fa-star"></i> Features</h3>
                             <ul class="features-list">
-                                ${device.features
+                                ${device.features.sort((a, b) =>
+                                  a.name.localeCompare(b.name)
+                                )
                                   .map(
-                                    (feature) => `
-                                    <li class="feature-item">
+                                    (feature) => {
+                                      const featureString = JSON.stringify(feature).replace(/"/g, '&quot;');
+                                      return `
+                                    <li class="feature-item clickable" onclick='openFeatureModal(${featureString})'>
                                         <i class="fas fa-check-circle"></i>
-                                        <span>${feature.type || feature}</span>
-                                        ${
-                                          feature.properties
+                                        <span>${feature.name} <span style="color: #7f8c8d; font-size: 0.9em;">(${
+                                          feature.type
+                                        })</span></span>
+                                        ${(() => {
+                                          const props = getFeatureDisplayProperties(feature);
+                                          return props
                                             ? `
                                             <div style="margin-left: auto; color: #7F8C8D; font-size: 0.9em;">
-                                                ${Object.entries(
-                                                  feature.properties
-                                                )
-                                                  .map(
-                                                    ([key, value]) =>
-                                                      `${key}: ${value}`
-                                                  )
-                                                  .join(", ")}
+                                                ${props}
                                             </div>
-                                        `
-                                            : ""
-                                        }
-                                    </li>
-                                `
+                                        ` : "";
+                                        })()}
+                                    </li>`;
+                                    }
                                   )
                                   .join("")}
                             </ul>
@@ -745,6 +794,41 @@
 
       function closeEditModal() {
         document.getElementById("editModal").classList.remove("active");
+      }
+
+      function openFeatureModal(feature) {
+        const modalTitle = document.getElementById("featureModalTitle");
+        const modalBody = document.getElementById("featureModalBody");
+
+        modalTitle.innerHTML = `<i class="fas fa-star"></i> ${feature.name} (${feature.type})`;
+
+        let propertiesHtml = '<div class="info-section" style="margin-bottom: 0;">';
+        const parameters = { ...feature.options, state: feature.state, brightness: feature.brightness };
+        delete parameters.undefined;
+
+        if (Object.keys(parameters).length > 0) {
+          propertiesHtml += Object.entries(parameters)
+            .map(([key, value]) => {
+              if (value === undefined) return '';
+              return `
+              <div class="info-row">
+                <span class="info-label">${key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                <span class="info-value">${value}</span>
+              </div>
+            `;
+            })
+            .join("");
+        } else {
+          propertiesHtml += "<p>This feature has no configurable parameters.</p>";
+        }
+        propertiesHtml += "</div>";
+        modalBody.innerHTML = propertiesHtml;
+
+        document.getElementById("featureModal").classList.add("active");
+      }
+
+      function closeFeatureModal() {
+        document.getElementById("featureModal").classList.remove("active");
       }
 
       async function saveChanges(event) {
@@ -939,6 +1023,14 @@
         .addEventListener("click", function (e) {
           if (e.target === this) {
             closeEditModal();
+          }
+        });
+
+      document
+        .getElementById("featureModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeFeatureModal();
           }
         });
     </script>

@@ -140,6 +140,24 @@
         color: #e74c3c;
       }
 
+      #featuresContainer {
+        border: 2px dashed #e8e8e8;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 10px;
+      }
+
+      .feature-item {
+        background-color: #f8f9fa;
+        border-radius: 6px;
+        padding: 15px;
+        margin-bottom: 10px;
+      }
+
+      .feature-item:last-child {
+        margin-bottom: 0;
+      }
+
       @media (max-width: 768px) {
         h1 {
           font-size: 2em;
@@ -198,6 +216,23 @@
           </select>
         </div>
 
+        <div id="featuresSection" style="display: none">
+          <div class="form-group">
+            <label>Features</label>
+            <div id="featuresContainer">
+              <div id="featuresList"></div>
+              <button
+                type="button"
+                class="btn-secondary"
+                onclick="addFeature()"
+                style="width: 100%; margin-top: 10px"
+              >
+                Add Feature
+              </button>
+            </div>
+          </div>
+        </div>
+        
         <div class="button-group">
           <button
             type="button"
@@ -235,6 +270,7 @@
           const subTypeGroup = document.getElementById("subTypeGroup");
           const subTypeLabel = document.getElementById("subTypeLabel");
           const subTypeSelect = document.getElementById("subType");
+          const featuresSection = document.getElementById("featuresSection");
           const selectedType = this.value;
 
           subTypeSelect.innerHTML = "";
@@ -248,6 +284,7 @@
             });
             subTypeGroup.style.display = "block";
             subTypeSelect.required = true;
+            featuresSection.style.display = "block";
           } else if (selectedType === "Hub") {
             subTypeLabel.textContent = "Hub Type";
             subTypeSelect.innerHTML =
@@ -257,8 +294,10 @@
             });
             subTypeGroup.style.display = "block";
             subTypeSelect.required = true;
+            featuresSection.style.display = "none";
           } else {
             subTypeGroup.style.display = "none";
+            featuresSection.style.display = "none";
             subTypeSelect.required = false;
           }
         });
@@ -282,6 +321,10 @@
           const deviceType = document.getElementById("deviceType").value;
           const subType = document.getElementById("subType").value;
 
+          const features = getFeaturesData();
+
+          console.log(features);
+
           const formData = {
             name: document.getElementById("deviceName").value,
             status: document.getElementById("deviceStatus").value,
@@ -291,6 +334,10 @@
             formData.protocol = subType;
           } else if (deviceType === "Hub") {
             formData.type = subType;
+          }
+
+          if (features.length > 0) {
+            formData.features = features;
           }
 
           try {
@@ -316,6 +363,106 @@
             showMessage(`Failed to add device: ${error.message}`, "error");
           }
         });
+
+      let featureIdCounter = 0;
+
+      const featureTemplates = {
+        LampFeature: `
+          <div class="form-group">
+            <label>State (On/Off)</label>
+            <input type="checkbox" data-parameter="state">
+          </div>
+          <div class="form-group">
+            <label>Brightness</label>
+            <input type="number" data-parameter="brightness" placeholder="0-100" min="0" max="100">
+          </div>
+        `,
+        BlindsFeature: `
+          <div class="form-group">
+            <label>Position</label>
+            <input type="number" data-parameter="position" placeholder="0-100" min="0" max="100">
+          </div>
+        `,
+        TemperatureFeature: `
+          <div class="form-group">
+            <label>Temperature</label>
+            <input type="number" data-parameter="temperature" placeholder="e.g., 21">
+          </div>
+        `,
+      };
+
+      function addFeature() {
+        const featureId = featureIdCounter++;
+        const featuresList = document.getElementById("featuresList");
+        const featureDiv = document.createElement("div");
+        featureDiv.className = "feature-item";
+        featureDiv.id = `feature-${featureId}`;
+        featureDiv.innerHTML = `
+          <div class="form-group">
+            <label>Feature Name</label>
+            <input type="text" class="feature-name" placeholder="e.g., Living Room Light" required>
+          </div>
+          <div class="form-group">
+            <label>Feature Type</label>
+            <select class="feature-type-select" onchange="updateFeatureParameters(${featureId})">
+              <option value="">Select feature type</option>
+              <option value="LampFeature">Lamp</option>
+              <option value="BlindsFeature">Blinds</option>
+              <option value="TemperatureFeature">Temperature</option>
+            </select>
+          </div>
+          <div class="feature-parameters"></div>
+          <button type="button" class="btn-secondary" style="background: #e74c3c; color: white; width: 100%;" onclick="removeFeature(${featureId})">Remove</button>
+        `;
+        featuresList.appendChild(featureDiv);
+      }
+
+      function removeFeature(featureId) {
+        const featureDiv = document.getElementById(`feature-${featureId}`);
+        if (featureDiv) {
+          featureDiv.remove();
+        }
+      }
+
+      function updateFeatureParameters(featureId) {
+        const featureDiv = document.getElementById(`feature-${featureId}`);
+        const select = featureDiv.querySelector(".feature-type-select");
+        const parametersDiv = featureDiv.querySelector(".feature-parameters");
+        const featureType = select.value;
+
+        parametersDiv.innerHTML = featureTemplates[featureType] || "";
+      }
+
+      function getFeaturesData() {
+        const features = [];
+        const featureElements = document.querySelectorAll(".feature-item");
+
+        featureElements.forEach((featureEl) => {
+          const type = featureEl.querySelector(".feature-type-select").value;
+          const name = featureEl.querySelector(".feature-name").value;
+          if (!type || !name) return;
+
+          const featureData = { type: type.replace('Feature', '').toLowerCase(), name: name, options: {} };
+          const parameterElements = featureEl.querySelectorAll(
+            ".feature-parameters [data-parameter]"
+          );
+
+          parameterElements.forEach((paramEl) => {
+            const key = paramEl.dataset.parameter;
+            let value;
+            if (paramEl.type === "checkbox") {
+              value = paramEl.checked;
+            } else if (paramEl.type === "number") {
+              value = paramEl.value ? parseFloat(paramEl.value) : undefined;
+            } else {
+              value = paramEl.value;
+            }
+            if (value !== undefined) featureData.options[key] = value;
+          });
+          features.push(featureData);
+        });
+        return features;
+      }
     </script>
   </body>
 </html>

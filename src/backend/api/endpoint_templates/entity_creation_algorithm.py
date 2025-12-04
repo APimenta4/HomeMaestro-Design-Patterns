@@ -58,7 +58,7 @@ class EntityCreationAlgorithm(ABC):
                     "Either omit it or provide a valid value type."
                 )
 
-            if payload.get(field) and len(payload[field]) == 0:
+            if payload.get(field) and expected_type != list and len(payload[field]) == 0:
                 payload.pop(field)
                 logger.warning("Optional field '%s' is empty. Ignoring field.", field)
 
