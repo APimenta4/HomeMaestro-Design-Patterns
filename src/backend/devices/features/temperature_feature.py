@@ -21,4 +21,5 @@ class TemperatureFeature(Feature):
 
     def to_dict(self):
         dict = super().to_dict()
+        dict["temperature"] = self.temperature
         return dict

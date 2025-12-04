@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -608,12 +608,12 @@
             }
             break;
           case "BlindsFeature":
-            if (feature.options && feature.position !== undefined) {
+            if (feature.position !== undefined) {
               properties.push(`position: ${feature.position}`);
             }
             break;
           case "TemperatureFeature":
-            if (feature.options && feature.temperature !== undefined) {
+            if (feature.temperature !== undefined) {
               properties.push(`temperature: ${feature.temperature}`);
             }
             break;
@@ -684,7 +684,9 @@
                         <div class="info-section">
                             <h3><i class="fas fa-star"></i> Features</h3>
                             <ul class="features-list">
-                                ${device.features
+                                ${device.features.sort((a, b) =>
+                                  a.name.localeCompare(b.name)
+                                )
                                   .map(
                                     (feature) => {
                                       const featureString = JSON.stringify(feature).replace(/"/g, '&quot;');

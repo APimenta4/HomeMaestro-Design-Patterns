@@ -20,4 +20,5 @@ class BlindsFeature(Feature):
 
     def to_dict(self):
         dict = super().to_dict()
+        dict["position"] = self.position
         return dict
