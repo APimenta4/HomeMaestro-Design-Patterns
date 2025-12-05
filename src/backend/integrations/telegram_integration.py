@@ -4,5 +4,11 @@ from . import Integration
 
 
 class TelegramIntegration(Integration):
+    def __init__(self):
+        self.sent_messages: list[Message] = []
+
     def send_message(self, message: Message):
-        pass
+        self.sent_messages.append(message)
+
+    def get_sent_messages(self) -> list[Message]:
+        return self.sent_messages
