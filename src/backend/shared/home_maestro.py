@@ -11,6 +11,8 @@ logger = getLogger(__name__)
 
 class HomeMaestro(metaclass=Singleton):
     def __init__(self, integrations: set[Integration] | None = None):
+        print("Initializing HomeMaestro")
+        print(f"Integrations provided: {integrations}")
         self.notification_service = NotificationService(integrations or set())
         # hubless devices and hubs
         self.connected_devices: set[Device] = set()
@@ -37,6 +39,20 @@ class HomeMaestro(metaclass=Singleton):
 
     def add_automation(self, automation: Automation):
         self.automations.add(automation)
+
+    def add_integration(self, integration: Integration):
+        for existing_integration in self.notification_service.integrations:
+            if isinstance(integration, type(existing_integration)):
+                raise ValueError(
+                    f"An integration of type '{type(integration).__name__}' already exists."
+                )
+        self.notification_service.add_integration(integration)
+
+    def get_integration_by_id(self, integration_id: int) -> Integration | None:
+        for integration in self.notification_service.get_integrations():
+            if integration.id == integration_id:
+                return integration
+        return None
 
     def get_automation_by_id(self, automation_id: int) -> Automation | None:
         for automation in self.automations:

@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HomeMaestro - Integrations</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #87cefa 0%, #e0f4ff 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      h1 a {
+        color: #2c3e50;
+        text-decoration: none;
+        transition: opacity 0.3s;
+      }
+
+      h1 a:hover {
+        opacity: 0.7;
+      }
+
+      h2 {
+        color: #34495e;
+        font-size: 1.3em;
+        font-weight: 400;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+      }
+
+      .integration-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+        list-style: none;
+      }
+
+      .integration-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s ease;
+        position: relative;
+      }
+      
+      .integration-card {
+        cursor: pointer;
+      }
+
+      .integration-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
+      }
+
+      .integration-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .integration-icon {
+        width: 45px;
+        height: 45px;
+        background: #87cefa;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 3px 8px rgba(135, 206, 250, 0.4);
+      }
+
+      .integration-icon i {
+        color: white;
+        font-size: 1.4em;
+      }
+
+      .integration-name {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: #2c3e50;
+        flex-grow: 1;
+      }
+
+      .message-count {
+        background-color: #e9ecef;
+        color: #495057;
+        font-size: 0.8em;
+        font-weight: 700;
+        padding: 4px 8px;
+        border-radius: 12px;
+        min-width: 24px;
+        text-align: center;
+      }
+
+      .integration-header-main {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 60px 20px;
+        color: #2c3e50;
+        grid-column: 1/-1;
+      }
+
+      .spinner {
+        border: 3px solid rgba(44, 62, 80, 0.1);
+        border-top: 3px solid #2c3e50;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error,
+      .empty-state {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        text-align: center;
+        grid-column: 1/-1;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      .error {
+        color: #e74c3c;
+      }
+
+      .empty-state {
+        color: #7f8c8d;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .modal.active {
+        display: flex;
+      }
+
+      .modal-content {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .modal-header h3 {
+        color: #2c3e50;
+        font-size: 1.5em;
+      }
+
+      .close-modal {
+        background: none;
+        border: none;
+        font-size: 1.5em;
+        color: #7f8c8d;
+        cursor: pointer;
+        padding: 0;
+        width: 30px;
+        height: 30px;
+      }
+
+      .close-modal:hover {
+        color: #2c3e50;
+      }
+
+      .message-list {
+        list-style: none;
+      }
+
+      .message-item {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-left: 4px solid #87cefa;
+      }
+
+      .message-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .message-content {
+        color: #34495e;
+        margin-bottom: 8px;
+      }
+
+      .message-meta {
+        font-size: 0.85em;
+        color: #7f8c8d;
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1><a href="index.html">HomeMaestro</a></h1>
+      <h2>Integrations</h2>
+    </div>
+
+    <div class="container">
+      <div id="integrationsContainer">
+        <div class="loading">
+          <div class="spinner"></div>
+          <div>Loading integrations...</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Modal for Messages -->
+    <div id="messageModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modalTitle">Sent Messages</h3>
+          <button class="close-modal" onclick="closeModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="modalBody">
+          <!-- Messages will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://127.0.0.1:5000/integrations/";
+
+      const integrationDisplayMap = {
+        WhatsAppIntegration: {
+          name: "WhatsApp",
+          icon: "fa-brands fa-whatsapp",
+        },
+        TelegramIntegration: {
+          name: "Telegram",
+          icon: "fa-brands fa-telegram",
+        },
+        DiscordIntegration: {
+          name: "Discord",
+          icon: "fa-brands fa-discord",
+        },
+        SlackIntegration: { name: "Slack", icon: "fa-brands fa-slack" },
+        WebhookIntegration: { name: "Webhook", icon: "fa-solid fa-globe" },
+      };
+
+      function getIntegrationDetails(type) {
+        return (
+          integrationDisplayMap[type] || {
+            name: type,
+            icon: "fa-solid fa-puzzle-piece",
+          }
+        );
+      }
+
+      function openModal(integration) {
+        const modal = document.getElementById("messageModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalBody = document.getElementById("modalBody");
+        const details = getIntegrationDetails(integration.type);
+        const messageCount = integration.sent_messages?.length || 0;
+        modalTitle.textContent = `Messages for ${details.name} (${messageCount})`;
+
+        if (integration.sent_messages && integration.sent_messages.length > 0) {
+          const messageList = document.createElement("ul");
+          messageList.className = "message-list";
+          integration.sent_messages.forEach((msg) => {
+            const item = document.createElement("li");
+            item.className = "message-item";
+            item.innerHTML = `
+              <div class="message-content">${msg.content}</div>
+              <div class="message-meta">
+                <span>Type: <strong>${msg.message_type}</strong></span>
+                <span>${new Date(msg.timestamp).toLocaleString()}</span>
+              </div>
+            `;
+            messageList.appendChild(item);
+          });
+          modalBody.innerHTML = "";
+          modalBody.appendChild(messageList);
+        } else {
+          modalBody.innerHTML = `<div class="empty-state" style="padding: 20px; box-shadow: none;">No messages sent through this integration yet.</div>`;
+        }
+
+        modal.classList.add("active");
+      }
+
+      function closeModal() {
+        document.getElementById("messageModal").classList.remove("active");
+      }
+
+      async function loadIntegrations() {
+        const container = document.getElementById("integrationsContainer");
+
+        try {
+          const response = await fetch(API_URL);
+          if (!response.ok)
+            throw new Error(`HTTP error! status: ${response.status}`);
+          const data = await response.json();
+
+          if (!data || data.length === 0) {
+            container.innerHTML = `
+              <div class="empty-state">
+                <h3>No integrations found</h3>
+              </div>
+            `;
+            return;
+          }
+
+          const grid = document.createElement("ul");
+          grid.className = "integration-grid";
+
+          data.sort((a, b) => {
+            const nameA = getIntegrationDetails(a.type).name;
+            const nameB = getIntegrationDetails(b.type).name;
+            return nameA.localeCompare(nameB);
+          });
+
+          data.forEach((integration) => {
+            const card = document.createElement("li");
+            card.className = "integration-card";
+            card.onclick = () => openModal(integration);
+            const details = getIntegrationDetails(integration.type);
+
+            card.innerHTML = `
+              <div class="integration-header">
+                <div class="integration-header-main">
+                    <div class="integration-icon">
+                        <i class="${details.icon}"></i>
+                    </div>
+                    <div class="integration-name">${details.name}</div>
+                </div>
+                <div class="message-count">
+                  ${integration.sent_messages?.length || 0}
+                </div>
+              </div>
+            `;
+            grid.appendChild(card);
+          });
+          container.innerHTML = "";
+          container.appendChild(grid);
+        } catch (error) {
+          console.error("Error loading integrations:", error);
+          container.innerHTML = `
+            <div class="error">
+              <h3>Failed to load integrations</h3>
+              <p>${error.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", loadIntegrations);
+      
+      document.getElementById("messageModal").addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeModal();
+          }
+        });
+    </script>
+  </body>
+</html>

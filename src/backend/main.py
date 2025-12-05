@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from api import app
 from automations import Automation
@@ -9,16 +10,34 @@ from automations.triggers.conditions import LampCondition
 from devices import Device, ErrorStatus, OfflineStatus, OnlineStatus, Protocol
 from devices.features import Feature, LampFeature
 from devices.hubs import ZigbeeHub, ZWaveHub
-from integrations import TelegramIntegration, WhatsAppIntegration
+from integrations import TelegramIntegration, WhatsAppIntegration, DiscordIntegration, SlackIntegration, WebhookIntegration
 from shared import HomeMaestro
+from integrations.messages import Message, MessageType
+
 
 logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == "__main__":
 
-    home_maestro = HomeMaestro(
-        integrations={WhatsAppIntegration(), TelegramIntegration()}
+    home_maestro = HomeMaestro()
+
+    home_maestro.add_integration(WhatsAppIntegration())
+    home_maestro.add_integration(TelegramIntegration())
+    home_maestro.add_integration(DiscordIntegration())
+    home_maestro.add_integration(SlackIntegration())
+    home_maestro.add_integration(WebhookIntegration())
+
+    # print(f"Sending message: {message}")
+    timestamp_now = datetime.now().isoformat()
+
+    alert_message = Message(
+        message_type=MessageType.ALERT,
+        content="The front door was left open.",
+        timestamp=timestamp_now
     )
+
+    home_maestro.notification_service.send_notification_broadcast(alert_message) 
+
 
     # Sample devices
     features: set[Feature] = set()
@@ -47,20 +66,20 @@ if __name__ == "__main__":
     hub = ZWaveHub("My first hub", OnlineStatus)
     hub2 = ZigbeeHub("ZigBee Hub", OnlineStatus)
 
-    # home_maestro.add_device(hub)
-    # home_maestro.add_device(hub2)
-    # home_maestro.add_device(device1)
-    # home_maestro.add_device(device2)
-    # home_maestro.add_device(device3)
-    # home_maestro.add_device(device4)
-    # home_maestro.add_device(device5)
-    # home_maestro.add_device(device6)
-    # home_maestro.add_device(device7)
-    # home_maestro.add_device(device8)
-    # home_maestro.add_device(device9)
-    # home_maestro.add_device(device10)
-    # home_maestro.add_device(device11)
-    # home_maestro.add_device(device12)
+    home_maestro.add_device(hub)
+    home_maestro.add_device(hub2)
+    home_maestro.add_device(device1)
+    home_maestro.add_device(device2)
+    home_maestro.add_device(device3)
+    home_maestro.add_device(device4)
+    home_maestro.add_device(device5)
+    home_maestro.add_device(device6)
+    home_maestro.add_device(device7)
+    home_maestro.add_device(device8)
+    home_maestro.add_device(device9)
+    home_maestro.add_device(device10)
+    home_maestro.add_device(device11)
+    home_maestro.add_device(device12)
 
     # Sample automations
     condition1 = LampCondition()

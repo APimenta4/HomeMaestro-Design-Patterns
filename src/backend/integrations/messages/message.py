@@ -15,3 +15,10 @@ class Message:
     message_type: MessageType
     content: str
     timestamp: str
+
+    def to_dict(self) -> dict[str, object]:
+        return {
+            "message_type": self.message_type.value,
+            "content": self.content,
+            "timestamp": self.timestamp,
+        }
