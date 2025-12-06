@@ -22,10 +22,10 @@ if __name__ == "__main__":
     home_maestro = HomeMaestro()
 
     home_maestro.add_integration(WhatsAppIntegration())
-    home_maestro.add_integration(TelegramIntegration())
-    home_maestro.add_integration(DiscordIntegration())
-    home_maestro.add_integration(SlackIntegration())
-    home_maestro.add_integration(WebhookIntegration())
+    # home_maestro.add_integration(TelegramIntegration())
+    # home_maestro.add_integration(DiscordIntegration())
+    # home_maestro.add_integration(SlackIntegration())
+    # home_maestro.add_integration(WebhookIntegration())
 
     # print(f"Sending message: {message}")
     timestamp_now = datetime.now().isoformat()

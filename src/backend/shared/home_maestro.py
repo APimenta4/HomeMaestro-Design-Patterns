@@ -48,12 +48,6 @@ class HomeMaestro(metaclass=Singleton):
                 )
         self.notification_service.add_integration(integration)
 
-    def get_integration_by_id(self, integration_id: int) -> Integration | None:
-        for integration in self.notification_service.get_integrations():
-            if integration.id == integration_id:
-                return integration
-        return None
-
     def get_automation_by_id(self, automation_id: int) -> Automation | None:
         for automation in self.automations:
             if automation.id == automation_id:

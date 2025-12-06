@@ -55,6 +55,28 @@
         margin: 0 auto;
       }
 
+      .container-header {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 20px;
+      }
+
+      .add-btn {
+        background-color: #2c3e50;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 700;
+        transition: background-color 0.3s;
+        border: none;
+        cursor: pointer;
+      }
+
+      .add-btn:hover {
+        background-color: #34495e;
+      }
+
       .integration-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -255,6 +277,22 @@
         display: flex;
         justify-content: space-between;
       }
+
+      /* Add Integration Modal */
+      .add-integration-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+      }
+
+      .add-integration-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -264,6 +302,9 @@
     </div>
 
     <div class="container">
+      <div class="container-header">
+        <button class="add-btn" onclick="openAddIntegrationModal()">Add Integration</button>
+      </div>
       <div id="integrationsContainer">
         <div class="loading">
           <div class="spinner"></div>
@@ -283,6 +324,21 @@
         </div>
         <div id="modalBody">
           <!-- Messages will be loaded here -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for Adding Integration -->
+    <div id="addIntegrationModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="addModalTitle">Add New Integration</h3>
+          <button class="close-modal" onclick="closeAddIntegrationModal()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div id="addModalBody">
+          <!-- Available integrations will be loaded here -->
         </div>
       </div>
     </div>
@@ -352,6 +408,71 @@
         document.getElementById("messageModal").classList.remove("active");
       }
 
+      function closeAddIntegrationModal() {
+        document.getElementById("addIntegrationModal").classList.remove("active");
+      }
+
+      async function openAddIntegrationModal() {
+        const modal = document.getElementById("addIntegrationModal");
+        const modalBody = document.getElementById("addModalBody");
+        modalBody.innerHTML = `<div class="loading"><div class="spinner"></div><div>Loading available integrations...</div></div>`;
+        modal.classList.add("active");
+
+        try {
+          const [existingIntegrationsRes, availableTypesRes] = await Promise.all([
+            fetch(API_URL),
+            fetch(API_URL + "types")
+          ]);
+
+          if (!existingIntegrationsRes.ok || !availableTypesRes.ok) {
+            throw new Error("Failed to fetch integration data.");
+          }
+
+          const existingIntegrations = await existingIntegrationsRes.json();
+          const availableTypes = await availableTypesRes.json();
+
+          const existingTypes = existingIntegrations.map(int => int.type);
+          const availableToAdd = availableTypes.filter(type => 
+            !existingTypes.some(existing => existing.toLowerCase().includes(type.toLowerCase()))
+          );
+
+          if (availableToAdd.length === 0) {
+            modalBody.innerHTML = `<div class="empty-state" style="padding: 20px; box-shadow: none;">All available integrations have been added.</div>`;
+            return;
+          }
+
+          const grid = document.createElement("div");
+          grid.className = "add-integration-grid";
+
+          availableToAdd.forEach(type => {
+            const details = getIntegrationDetails(Object.keys(integrationDisplayMap).find(k => k.toLowerCase().includes(type.toLowerCase())));
+            const item = document.createElement("div");
+            item.className = "integration-card add-integration-item";
+            item.onclick = () => addIntegration(type);
+            item.innerHTML = `
+              <div class="integration-icon">
+                  <i class="${details.icon}"></i>
+              </div>
+              <div class="integration-name">${details.name}</div>
+            `;
+            grid.appendChild(item);
+          });
+
+          modalBody.innerHTML = "";
+          modalBody.appendChild(grid);
+
+        } catch (error) {
+          console.error("Error opening add integration modal:", error);
+          modalBody.innerHTML = `<div class="error" style="padding: 20px; box-shadow: none;"><h3>Failed to load available integrations</h3><p>${error.message}</p></div>`;
+        }
+      }
+
+      async function addIntegration(type) {
+        await fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type }) });
+        closeAddIntegrationModal();
+        loadIntegrations();
+      }
+
       async function loadIntegrations() {
         const container = document.getElementById("integrationsContainer");
 
@@ -418,6 +539,12 @@
       document.getElementById("messageModal").addEventListener("click", function (e) {
           if (e.target === this) {
             closeModal();
+          }
+        });
+
+      document.getElementById("addIntegrationModal").addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeAddIntegrationModal();
           }
         });
     </script>

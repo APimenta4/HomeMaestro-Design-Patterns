@@ -2,6 +2,7 @@ from api.api_shared import validates_exceptions
 from api.endpoint_templates import IntegrationCreationAlgorithm
 from flask import Blueprint, Response, make_response, request
 from shared import HomeMaestro
+from integrations import IntegrationFactory
 
 integrations_api = Blueprint("integrations", __name__)
 
@@ -34,3 +35,9 @@ def get_integration(integration_id: int) -> Response:
 @validates_exceptions
 def add_integration() -> Response:
     return integration_creation_handler.create_entity(request)
+
+
+@integrations_api.route("/types", methods=["GET"])
+@validates_exceptions
+def get_integration_types() -> Response:
+    return make_response(IntegrationFactory.get_supported_integrations())
