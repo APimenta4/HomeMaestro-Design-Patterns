@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -561,6 +561,11 @@
         // Device types
         Device: "fa-microchip",
         Light: "fa-lightbulb",
+        LockFeature: "fa-lock",
+        LampFeature: "fa-lightbulb",
+        BlindsFeature: "fa-blinds-open",
+        TemperatureFeature: "fa-temperature-half",
+
         Sensor: "fa-sensor",
         Camera: "fa-video",
         Thermostat: "fa-temperature-half",
@@ -616,6 +621,11 @@
           case "BlindsFeature":
             if (feature.position !== undefined) {
               properties.push(`position: ${feature.position}`);
+            }
+            break;
+          case "LockFeature":
+            if (feature.state !== undefined) {
+              properties.push(`state: ${feature.state ? "Locked" : "Unlocked"}`);
             }
             break;
           case "TemperatureFeature":
@@ -697,7 +707,7 @@
                                     (feature) => {
                                       const featureString = JSON.stringify(feature).replace(/"/g, '&quot;');
                                       return `
-                                    <li class="feature-item clickable" onclick='openFeatureModal(${featureString})'>
+                                    <li class="feature-item clickable" onclick='openFeatureModal(${featureString})' data-feature-type="${feature.type}">
                                         <i class="fas fa-check-circle"></i>
                                         <span>${feature.name} <span style="color: #7f8c8d; font-size: 0.9em;">(${
                                           feature.type
@@ -823,7 +833,9 @@
               const label = key.charAt(0).toUpperCase() + key.slice(1);
               let inputHtml = `<span class="info-value">${value}</span>`;
 
-              if (key === 'state') {
+              if (key === 'state' && feature.type === 'LockFeature') {
+                inputHtml = `<select name="state" disabled><option value="true" ${value ? 'selected' : ''}>Locked</option><option value="false" ${!value ? 'selected' : ''}>Unlocked</option></select>`;
+              } else if (key === 'state') {
                 inputHtml = `<select name="state" disabled><option value="true" ${value ? 'selected' : ''}>On</option><option value="false" ${!value ? 'selected' : ''}>Off</option></select>`;
               } else if (key === 'brightness') {
                 inputHtml = `<input type="range" name="brightness" min="0" max="100" value="${value}" disabled /> <span class="range-value">${value}</span>`;
