@@ -534,6 +534,12 @@
           <!-- O conteúdo será preenchido via JS -->
         </div>
         <div class="modal-actions">
+          <button type="button" class="btn btn-edit" id="editFeatureBtn">
+            Edit
+          </button>
+          <button type="button" class="btn btn-save" id="saveFeatureBtn" style="display: none;">
+            Save
+          </button>
           <button
             type="button"
             class="btn btn-cancel"
@@ -800,6 +806,10 @@
         const modalTitle = document.getElementById("featureModalTitle");
         const modalBody = document.getElementById("featureModalBody");
 
+        const editBtn = document.getElementById("editFeatureBtn");
+        const saveBtn = document.getElementById("saveFeatureBtn");
+        const closeBtn = document.querySelector("#featureModal .btn-cancel");
+
         modalTitle.innerHTML = `<i class="fas fa-star"></i> ${feature.name} (${feature.type})`;
 
         let propertiesHtml = '<div class="info-section" style="margin-bottom: 0;">';
@@ -807,28 +817,124 @@
         delete parameters.undefined;
 
         if (Object.keys(parameters).length > 0) {
-          propertiesHtml += Object.entries(parameters)
-            .map(([key, value]) => {
-              if (value === undefined) return '';
+          propertiesHtml += `<form id="featureEditForm" data-feature-id="${feature.id}">`;
+          propertiesHtml += Object.entries(parameters).map(([key, value]) => {
+              if (value === undefined) return "";
+              const label = key.charAt(0).toUpperCase() + key.slice(1);
+              let inputHtml = `<span class="info-value">${value}</span>`;
+
+              if (key === 'state') {
+                inputHtml = `<select name="state" disabled><option value="true" ${value ? 'selected' : ''}>On</option><option value="false" ${!value ? 'selected' : ''}>Off</option></select>`;
+              } else if (key === 'brightness') {
+                inputHtml = `<input type="range" name="brightness" min="0" max="100" value="${value}" disabled /> <span class="range-value">${value}</span>`;
+              } else if (key === 'position') {
+                inputHtml = `<input type="range" name="position" min="0" max="100" value="${value}" disabled/> <span class="range-value">${value}</span>`;
+              } else if (key === 'temperature') {
+                inputHtml = `<input type="number" name="temperature" value="${value}" disabled />`;
+              }
+
               return `
-              <div class="info-row">
-                <span class="info-label">${key.charAt(0).toUpperCase() + key.slice(1)}</span>
-                <span class="info-value">${value}</span>
-              </div>
-            `;
-            })
-            .join("");
+                <div class="form-group">
+                    <label>${label}</label>
+                    <div class="feature-control">${inputHtml}</div>
+                </div>
+              `;
+          }).join("");
+          propertiesHtml += `</form>`;
         } else {
           propertiesHtml += "<p>This feature has no configurable parameters.</p>";
+          editBtn.style.display = "none";
         }
         propertiesHtml += "</div>";
         modalBody.innerHTML = propertiesHtml;
 
+        // Reset buttons
+        editBtn.style.display = Object.keys(parameters).length > 0 ? "flex" : "none";
+        saveBtn.style.display = "none";
+        closeBtn.textContent = "Close";
+        editBtn.onclick = () => toggleFeatureEdit(true);
+        saveBtn.onclick = () => saveFeatureChanges(feature.id);
+        closeBtn.onclick = () => {
+            if (saveBtn.style.display === 'none') {
+                closeFeatureModal();
+            } else {
+                toggleFeatureEdit(false); // Cancel edit
+            }
+        };
+
+        // Add event listeners for range inputs
+        modalBody.querySelectorAll('input[type="range"]').forEach(range => {
+            range.addEventListener('input', (e) => {
+                e.target.nextElementSibling.textContent = e.target.value;
+            });
+        });
+
         document.getElementById("featureModal").classList.add("active");
+      }
+
+      function toggleFeatureEdit(isEditing) {
+        const form = document.getElementById("featureEditForm");
+        const editBtn = document.getElementById("editFeatureBtn");
+        const saveBtn = document.getElementById("saveFeatureBtn");
+        const closeBtn = document.querySelector("#featureModal .btn-cancel");
+
+        form.querySelectorAll("input, select").forEach(el => el.disabled = !isEditing);
+
+        if (isEditing) {
+            editBtn.style.display = "none";
+            saveBtn.style.display = "flex";
+            closeBtn.textContent = "Cancel";
+        } else {
+            editBtn.style.display = "flex";
+            saveBtn.style.display = "none";
+            closeBtn.textContent = "Close";
+            // TODO: Reset form to original values if needed
+        }
+      }
+
+      async function saveFeatureChanges(featureId) {
+        const form = document.getElementById("featureEditForm");
+        const formData = new FormData(form);
+        const options = {};
+
+        for (let [key, value] of formData.entries()) {
+            if (key === 'state') {
+                options[key] = value === 'true';
+            } else {
+                options[key] = Number(value);
+            }
+        }
+
+        try {
+            const response = await fetch(`${API_URL}${deviceId}/execute/${featureId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(options)
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to execute feature');
+            }
+
+            const result = await response.json();
+            alert(result.message);
+            closeFeatureModal();
+            renderDeviceDetails(result.device);
+
+        } catch (error) {
+            console.error('Error executing feature:', error);
+            alert(`Error: ${error.message}`);
+        }
       }
 
       function closeFeatureModal() {
         document.getElementById("featureModal").classList.remove("active");
+        const editBtn = document.getElementById("editFeatureBtn");
+        const saveBtn = document.getElementById("saveFeatureBtn");
+        editBtn.style.display = "flex";
+        saveBtn.style.display = "none";
+        document.querySelector("#featureModal .btn-cancel").textContent = "Close";
       }
 
       async function saveChanges(event) {
