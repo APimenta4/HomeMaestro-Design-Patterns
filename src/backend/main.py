@@ -8,7 +8,7 @@ from automations.actions.commands import LampCommand
 from automations.triggers import TimeTrigger
 from automations.triggers.conditions import LampCondition
 from devices import Device, ErrorStatus, OfflineStatus, OnlineStatus, Protocol
-from devices.features import Feature, LampFeature
+from devices.features import Feature, LampFeature, BlindsFeature, TemperatureFeature
 from devices.hubs import ZigbeeHub, ZWaveHub
 from integrations import TelegramIntegration, WhatsAppIntegration, DiscordIntegration, SlackIntegration, WebhookIntegration
 from shared import HomeMaestro
@@ -38,14 +38,15 @@ if __name__ == "__main__":
 
     home_maestro.notification_service.send_notification_broadcast(alert_message) 
 
-
     # Sample devices
     features: set[Feature] = set()
-    features.add(LampFeature("My Dream Feature", {"max_brightness": 100}))
+    features.add(LampFeature("Luzes", {"state": True, "brightness": 5}))
     features.add(
-        LampFeature("Second Feature", {"second feature": "amazing capabilities"})
+        BlindsFeature("Cortinas", {"position": 0})
     )
-    device1 = Device("Smartwatch", OnlineStatus, Protocol.HUBLESS, features)
+    features.add(TemperatureFeature("Termometro", {"temperature": 25}))
+
+    device1 = Device("Test Device", OnlineStatus, Protocol.HUBLESS, features)
     device2 = Device("Digital Clock 2018", OfflineStatus, Protocol.TRADFRI, features)
     feature1 = LampFeature("Feature 1", {"something": "my test value"})
     feature2 = LampFeature("Feature 2", {"something else": "20"})
@@ -66,20 +67,20 @@ if __name__ == "__main__":
     hub = ZWaveHub("My first hub", OnlineStatus)
     hub2 = ZigbeeHub("ZigBee Hub", OnlineStatus)
 
-    home_maestro.add_device(hub)
-    home_maestro.add_device(hub2)
+    # home_maestro.add_device(hub)
+    # home_maestro.add_device(hub2)
     home_maestro.add_device(device1)
-    home_maestro.add_device(device2)
-    home_maestro.add_device(device3)
-    home_maestro.add_device(device4)
-    home_maestro.add_device(device5)
-    home_maestro.add_device(device6)
-    home_maestro.add_device(device7)
-    home_maestro.add_device(device8)
-    home_maestro.add_device(device9)
-    home_maestro.add_device(device10)
-    home_maestro.add_device(device11)
-    home_maestro.add_device(device12)
+    # home_maestro.add_device(device2)
+    # home_maestro.add_device(device3)
+    # home_maestro.add_device(device4)
+    # home_maestro.add_device(device5)
+    # home_maestro.add_device(device6)
+    # home_maestro.add_device(device7)
+    # home_maestro.add_device(device8)
+    # home_maestro.add_device(device9)
+    # home_maestro.add_device(device10)
+    # home_maestro.add_device(device11)
+    # home_maestro.add_device(device12)
 
     # Sample automations
     condition1 = LampCondition()

@@ -10,7 +10,7 @@ class Feature(Identifiable, ABC):
         self.options = options or {}
 
     @abstractmethod
-    def execute(self) -> str:
+    def execute(self, options: dict[str, object] | None = None) -> str:
         pass
 
     @abstractmethod

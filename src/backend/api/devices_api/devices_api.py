@@ -92,16 +92,25 @@ def delete_device(device_id: int) -> Response:
     )
 
 
-@devices_api.route("/<int:device_id>/execute", methods=["POST"])
+@devices_api.route("/<int:device_id>/execute/<int:feature_id>", methods=["POST"])
 @validates_exceptions
-def execute_device_feature(device_id: int) -> Response:
+def execute_device_feature(device_id: int, feature_id: int) -> Response:
     device = home_maestro.get_device_by_id(device_id)
 
     if device is None:
         return make_response({"error": f"Device with id '{device_id}' not found"}, 404)
 
-    # TODO: Implement
-    pass
+    options = request.get_json()
+
+    try:
+        # options are the keyword arguments to be passed to the feature's execute method
+        device.execute_feature(feature_id, options)
+    except ValueError as e:
+        return make_response({"error": str(e)}, 400)
+
+    return make_response(
+        {"message": "Feature executed successfully", "device": device.to_dict_deep()}, 200
+    )
 
 
 @devices_api.route("/<int:hub_id>/discover", methods=["POST"])

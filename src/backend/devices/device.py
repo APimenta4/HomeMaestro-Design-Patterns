@@ -39,6 +39,7 @@ class Device(Identifiable):
     def execute_feature(
         self,
         feature_id: int,
+        options: dict[str, object] | None = None,
     ):
         self.status.verify_can_execute()
 
@@ -46,10 +47,7 @@ class Device(Identifiable):
         if feature is None:
             raise ValueError(f"Feature with id '{feature_id}' does not exist on device")
 
-        payload = feature.execute()
-        # Overwrite payload while feature is not implemented yet
-        # TODO: Remove following line
-        payload = "that was a success!"
+        payload = feature.execute(options)
         MQTTClient().publish(f"{self.id}", payload)
 
     def get_feature_status(self, feature_id: int):
