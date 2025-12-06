@@ -1,4 +1,4 @@
-from . import Feature, LampFeature, BlindsFeature, TemperatureFeature
+from . import Feature, LampFeature, BlindsFeature, TemperatureFeature, LockFeature
 
 
 # DESIGN PATTERN: Simple Factory
@@ -12,5 +12,7 @@ class FeatureFactory:
                 return BlindsFeature(name=name, options=options)
             case "temperature":
                 return TemperatureFeature(name=name, options=options)
+            case "lock":
+                return LockFeature(name=name, options=options)
             case _:
                 raise ValueError(f"The provided feature type is not supported: {type}")

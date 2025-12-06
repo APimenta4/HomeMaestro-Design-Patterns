@@ -370,7 +370,10 @@
         LampFeature: `
           <div class="form-group">
             <label>State (On/Off)</label>
-            <input type="checkbox" data-parameter="state">
+            <select data-parameter="state">
+              <option value="true">On</option>
+              <option value="false" selected>Off</option>
+            </select>
           </div>
           <div class="form-group">
             <label>Brightness</label>
@@ -387,6 +390,15 @@
           <div class="form-group">
             <label>Temperature</label>
             <input type="number" data-parameter="temperature" placeholder="e.g., 21">
+          </div>
+        `,
+        LockFeature: `
+          <div class="form-group">
+            <label>State (Locked/Unlocked)</label>
+            <select data-parameter="state">
+              <option value="true">Locked</option>
+              <option value="false" selected>Unlocked</option>
+            </select>
           </div>
         `,
       };
@@ -409,6 +421,7 @@
               <option value="LampFeature">Lamp</option>
               <option value="BlindsFeature">Blinds</option>
               <option value="TemperatureFeature">Temperature</option>
+              <option value="LockFeature">Lock</option>
             </select>
           </div>
           <div class="feature-parameters"></div>
@@ -451,7 +464,7 @@
             const key = paramEl.dataset.parameter;
             let value;
             if (paramEl.type === "checkbox") {
-              value = paramEl.checked;
+              value = paramEl.checked; 
             } else if (paramEl.type === "number") {
               value = paramEl.value ? parseFloat(paramEl.value) : undefined;
             } else {
