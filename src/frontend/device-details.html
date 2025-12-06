@@ -1,4 +1,4 @@
-﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -709,8 +709,8 @@
                                       return `
                                     <li class="feature-item clickable" onclick='openFeatureModal(${featureString})' data-feature-type="${feature.type}">
                                         <i class="fas fa-check-circle"></i>
-                                        <span>${feature.name} <span style="color: #7f8c8d; font-size: 0.9em;">(${
-                                          feature.type
+                                        <span>${feature.name} <span style="color: #7f8c8d; font-size: 0.9em;">(${feature.type} - ${
+                                          feature.category || 'N/A'
                                         })</span></span>
                                         ${(() => {
                                           const props = getFeatureDisplayProperties(feature);
@@ -823,6 +823,14 @@
         modalTitle.innerHTML = `<i class="fas fa-star"></i> ${feature.name} (${feature.type})`;
 
         let propertiesHtml = '<div class="info-section" style="margin-bottom: 0;">';
+        propertiesHtml += `
+          <div class="form-group">
+              <label>Category</label>
+              <div class="feature-control">
+                  <span class="info-value">${feature.category || 'N/A'}</span>
+              </div>
+          </div>
+        `;
         const parameters = { ...feature.options, state: feature.state, brightness: feature.brightness };
         delete parameters.undefined;
 

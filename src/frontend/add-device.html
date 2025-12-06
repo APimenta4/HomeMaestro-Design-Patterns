@@ -424,6 +424,14 @@
               <option value="LockFeature">Lock</option>
             </select>
           </div>
+          <div class="form-group">
+            <label>Feature Category</label>
+            <select class="feature-category-select" required>
+              <option value="">Select feature category</option>
+              <option value="ACTUATOR">Actuator</option>
+              <option value="SENSOR">Sensor</option>
+            </select>
+          </div>
           <div class="feature-parameters"></div>
           <button type="button" class="btn-secondary" style="background: #e74c3c; color: white; width: 100%;" onclick="removeFeature(${featureId})">Remove</button>
         `;
@@ -453,9 +461,10 @@
         featureElements.forEach((featureEl) => {
           const type = featureEl.querySelector(".feature-type-select").value;
           const name = featureEl.querySelector(".feature-name").value;
-          if (!type || !name) return;
+          const category = featureEl.querySelector(".feature-category-select").value;
+          if (!type || !name || !category) return;
 
-          const featureData = { type: type.replace('Feature', '').toLowerCase(), name: name, options: {} };
+          const featureData = { type: type.replace('Feature', '').toLowerCase(), name: name, category: category, options: {} };
           const parameterElements = featureEl.querySelectorAll(
             ".feature-parameters [data-parameter]"
           );

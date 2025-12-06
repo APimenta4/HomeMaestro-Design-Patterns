@@ -1,4 +1,4 @@
-from .feature import Feature
+from .feature import Feature, FeatureCategory
 from .lamp_feature import LampFeature
 from .temperature_feature import TemperatureFeature
 from .blinds_feature import BlindsFeature

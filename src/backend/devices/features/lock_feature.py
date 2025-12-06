@@ -1,4 +1,4 @@
-from . import Feature
+from . import Feature, FeatureCategory
 from typing import TypedDict, Optional
 
 
@@ -7,8 +7,8 @@ class LockParameters(TypedDict, total=False):
 
 
 class LockFeature(Feature):
-    def __init__(self, name: str, options: Optional[LockParameters] = None):
-        super().__init__(name, options)
+    def __init__(self, name: str, category: FeatureCategory, options: Optional[LockParameters] = None):
+        super().__init__(name, category, options)
         self.state = options.get("state", False)  # A lock is locked (True) or unlocked (False)
 
     def execute(self, options: Optional[LockParameters] = None):
