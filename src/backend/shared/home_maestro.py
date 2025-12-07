@@ -89,7 +89,7 @@ class HomeMaestro(metaclass=Singleton):
         self.unconnected_devices = loaded_instance.unconnected_devices
         self.automations = loaded_instance.automations
 
-        for device in self.all_devices:
+        for device in self.get_all_devices():
             MQTTClient().subscribe(f"{device.id}")
 
         MQTTClient().set_event_handler(self._handle_mqtt_event)
