@@ -1,3 +1,4 @@
+import pickle
 from abc import ABC, abstractmethod
 
 
@@ -12,6 +13,16 @@ class Identifiable(ABC):
     def _assign_id(cls) -> int:
         Identifiable._id_counter += 1
         return Identifiable._id_counter
+
+    @classmethod
+    def save_id_counter(cls, file_path: str):
+        with open(file_path, "wb") as file:
+            pickle.dump(cls._id_counter, file)
+
+    @classmethod
+    def load_id_counter(cls, file_path: str):
+        with open(file_path, "rb") as file:
+            cls._id_counter = pickle.load(file)
 
     @abstractmethod
     def to_dict(self) -> dict[str, object]:

@@ -1,4 +1,6 @@
+import atexit
 import logging
+import os
 from datetime import datetime
 
 from api import app
@@ -8,17 +10,25 @@ from automations.actions.commands import LampCommand
 from automations.triggers import TimeTrigger
 from automations.triggers.conditions import LampCondition
 from devices import Device, ErrorStatus, OfflineStatus, OnlineStatus, Protocol
-from devices.features import Feature, LampFeature, BlindsFeature, TemperatureFeature
+from devices.features import BlindsFeature, Feature, LampFeature, TemperatureFeature
 from devices.hubs import ZigbeeHub, ZWaveHub
-from integrations import TelegramIntegration, WhatsAppIntegration, DiscordIntegration, SlackIntegration, WebhookIntegration
-from shared import HomeMaestro
+from integrations import (
+    DiscordIntegration,
+    SlackIntegration,
+    TelegramIntegration,
+    WebhookIntegration,
+    WhatsAppIntegration,
+)
 from integrations.messages import Message, MessageType
-
+from shared import HomeMaestro, Identifiable
 
 logging.basicConfig(level=logging.DEBUG)
 
-if __name__ == "__main__":
+STATE_FILE = "home_maestro_state.pkl"
+ID_COUNTER_FILE = "id_counter.pkl"
 
+
+def create_sample_data():
     home_maestro = HomeMaestro()
 
     home_maestro.add_integration(WhatsAppIntegration())
@@ -27,23 +37,18 @@ if __name__ == "__main__":
     home_maestro.add_integration(SlackIntegration())
     home_maestro.add_integration(WebhookIntegration())
 
-    # print(f"Sending message: {message}")
-    timestamp_now = datetime.now().isoformat()
-
+    # Sample notification
     alert_message = Message(
         message_type=MessageType.ALERT,
         content="The front door was left open.",
-        timestamp=timestamp_now
+        timestamp=datetime.now().isoformat(),
     )
 
-    home_maestro.notification_service.send_notification_broadcast(alert_message) 
-
+    home_maestro.notification_service.send_notification_broadcast(alert_message)
     # Sample devices
     features: set[Feature] = set()
     features.add(LampFeature("Luzes", {"state": True, "brightness": 5}))
-    features.add(
-        BlindsFeature("Cortinas", {"position": 0})
-    )
+    features.add(BlindsFeature("Cortinas", {"position": 0}))
     features.add(TemperatureFeature("Termometro", {"temperature": 25}))
 
     device1 = Device("Test Device", OnlineStatus, Protocol.HUBLESS, features)
@@ -67,20 +72,20 @@ if __name__ == "__main__":
     hub = ZWaveHub("My first hub", OnlineStatus)
     hub2 = ZigbeeHub("ZigBee Hub", OnlineStatus)
 
-    # home_maestro.add_device(hub)
-    # home_maestro.add_device(hub2)
+    home_maestro.add_device(hub)
+    home_maestro.add_device(hub2)
     home_maestro.add_device(device1)
-    # home_maestro.add_device(device2)
-    # home_maestro.add_device(device3)
-    # home_maestro.add_device(device4)
-    # home_maestro.add_device(device5)
-    # home_maestro.add_device(device6)
-    # home_maestro.add_device(device7)
-    # home_maestro.add_device(device8)
-    # home_maestro.add_device(device9)
-    # home_maestro.add_device(device10)
-    # home_maestro.add_device(device11)
-    # home_maestro.add_device(device12)
+    home_maestro.add_device(device2)
+    home_maestro.add_device(device3)
+    home_maestro.add_device(device4)
+    home_maestro.add_device(device5)
+    home_maestro.add_device(device6)
+    home_maestro.add_device(device7)
+    home_maestro.add_device(device8)
+    home_maestro.add_device(device9)
+    home_maestro.add_device(device10)
+    home_maestro.add_device(device11)
+    home_maestro.add_device(device12)
 
     # Sample automations
     condition1 = LampCondition()
@@ -104,6 +109,30 @@ if __name__ == "__main__":
 
     home_maestro.add_automation(automation1)
     home_maestro.add_automation(automation2)
+
+    # Sample automations
+    condition1 = LampCondition()
+    command1 = LampCommand()
+    trigger1 = TimeTrigger({condition1})
+
+
+def save_state():
+    logging.info("Saving application state")
+    HomeMaestro().save_state(STATE_FILE)
+    Identifiable.save_id_counter(ID_COUNTER_FILE)
+
+
+if __name__ == "__main__":
+    # Register shutdown handler
+    atexit.register(save_state)
+
+    if os.path.exists(STATE_FILE) and os.path.exists(ID_COUNTER_FILE):
+        logging.info("Loading saved state")
+        Identifiable.load_id_counter(ID_COUNTER_FILE)
+        HomeMaestro().load_state(STATE_FILE)
+    else:
+        logging.info("No saved state found. Creating new instance sample data")
+        create_sample_data()
 
     # Start the API
     app.run(debug=True, use_reloader=False)

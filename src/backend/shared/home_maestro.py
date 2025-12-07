@@ -1,3 +1,4 @@
+import pickle
 from logging import getLogger
 
 from automations import Automation
@@ -11,8 +12,6 @@ logger = getLogger(__name__)
 
 class HomeMaestro(metaclass=Singleton):
     def __init__(self, integrations: set[Integration] | None = None):
-        print("Initializing HomeMaestro")
-        print(f"Integrations provided: {integrations}")
         self.notification_service = NotificationService(integrations or set())
         # hubless devices and hubs
         self.connected_devices: set[Device] = set()
@@ -68,3 +67,20 @@ class HomeMaestro(metaclass=Singleton):
                     automation.attempt_automation(payload)
         except ValueError:
             logger.warning("Received an MQTT event with an invalid topic: %s", topic)
+
+    def save_state(self, file_path: str):
+        with open(file_path, "wb") as file:
+            pickle.dump(self, file)
+
+    def load_state(self, file_path: str):
+        with open(file_path, "rb") as file:
+            loaded_instance = pickle.load(file)
+
+        self.connected_devices = loaded_instance.connected_devices
+        self.unconnected_devices = loaded_instance.unconnected_devices
+        self.automations = loaded_instance.automations
+
+        for device in self.all_devices:
+            MQTTClient().subscribe(f"{device.id}")
+
+        MQTTClient().set_event_handler(self._handle_mqtt_event)
