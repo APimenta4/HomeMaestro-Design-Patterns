@@ -482,14 +482,14 @@
             </div>
           </div>
 
-          <div class="form-group">
+          <div id="commandCreationSection" style="display: none;">
             <label>Commands (All will be executed)</label>
             <div id="commandsList" class="dynamic-list"></div>
             <button type="button" class="btn-add" onclick="addCommand()">
               + Add Command
             </button>
             <div class="field-error" id="commandsError">
-              Please add at least one command
+                Please add at least one command
             </div>
           </div>
         </div>
@@ -498,7 +498,7 @@
           <button
             type="button"
             class="btn-secondary"
-            onclick="window.location.href='automations.html'"
+            onclick="goBack()"
           >
             Cancel
           </button>
@@ -513,6 +513,10 @@
 
       let conditionCounter = 0;
       let commandCounter = 0;
+
+      function goBack() {
+        window.location.href = "automations.html";
+      }
 
       function showMessage(text, type) {
         const messageDiv = document.getElementById("message");
@@ -645,26 +649,51 @@
         }
       }
 
-      function addCommand() {
+      async function addCommand() {
         const commandsList = document.getElementById("commandsList");
         const commandId = `command-${commandCounter++}`;
-
+ 
         const commandItem = document.createElement("div");
         commandItem.className = "dynamic-item";
         commandItem.id = commandId;
-
+ 
         commandItem.innerHTML = `
-          <select class="command-type" required>
-            <option value="">Select command type</option>
-            <option value="lamp">Lamp</option>
-            <option value="lock">Lock</option>
-            <option value="temperature">Temperature</option>
-            <option value="blinds">Blinds</option>
+          <select class="command-device" required data-command-id="${commandId}">
+            <option value="">Select a device</option>
           </select>
+          <select class="command-feature" required disabled>
+            <option value="">Select a feature</option>
+          </select>
+          <div class="command-options" style="flex: 2; display: flex; gap: 10px;">
+            <select class="command-parameter" style="flex: 1;" disabled>
+              <option value="">Select parameter</option>
+            </select>
+            <div class="command-value-container" style="flex: 1;"></div>
+          </div>
           <button type="button" class="btn-remove" onclick="removeCommand('${commandId}')">Remove</button>
         `;
-
+ 
         commandsList.appendChild(commandItem);
+ 
+        const deviceSelect = commandItem.querySelector(".command-device");
+ 
+        try {
+          const response = await fetch(`${DEVICES_API}`);
+          if (!response.ok) throw new Error("Failed to fetch devices");
+          const devices = (await response.json()).connected_devices;
+
+          const filteredDevices = devices.filter(
+            (device) => device.type === "Device"
+          );
+
+          filteredDevices.sort((a, b) => a.id - b.id).forEach((device) => {
+            const option = new Option(`${device.name} (ID: ${device.id})`, device.id);
+            deviceSelect.add(option);
+          });
+        } catch (error) {
+          console.error("Error loading devices:", error);
+          showMessage("Could not load devices for commands.", "error");
+        }
 
         clearSectionErrors("actionSection");
       }
@@ -686,18 +715,18 @@
 
           let hasErrors = false;
 
-          const conditionItems = document.querySelectorAll("#conditionsList .dynamic-item");
+          const conditionItems = document.querySelectorAll("#conditionsList .dynamic-item");          
+          if (conditionItems.length === 0) {
+            showSectionError("triggerSection", "conditionsError");
+            hasErrors = true;
+          }
+
           const conditions = Array.from(conditionItems).map(item => ({
               device_id: parseInt(item.querySelector('.condition-device').value, 10),
               feature_id: parseInt(item.querySelector('.condition-feature').value, 10),
               type: item.querySelector('.condition-feature').selectedOptions[0]?.dataset.type,
               options: getConditionOptions(item)
-          })).filter(c => c.device_id && c.feature_id);
-
-          if (conditionItems.length === 0) {
-            showSectionError("triggerSection", "conditionsError");
-            hasErrors = true;
-          }
+          }));
 
           const actionType = document.getElementById("actionType").value;
           if (!actionType) {
@@ -705,11 +734,11 @@
             hasErrors = true;
           }
 
-          const commandElements = document.querySelectorAll(".command-type");
-          const commands = Array.from(commandElements)
-            .map((el) => el.value)
-            .filter((val) => val)
-            .map((type) => ({ type }));
+          let commands = [];
+          if (actionType === 'command') {
+            const commandItems = document.querySelectorAll("#commandsList .dynamic-item");
+            commands = Array.from(commandItems).map(getCommandData);
+          }
 
           if (commands.length === 0) {
             showSectionError("actionSection", "commandsError");
@@ -766,8 +795,20 @@
           }
         });
 
-      document.getElementById("actionType").addEventListener("change", () => {
+      document.getElementById("actionType").addEventListener("change", (e) => {
         clearSectionErrors("actionSection");
+        const commandSection = document.getElementById("commandCreationSection");
+        const commandsList = document.getElementById("commandsList");
+
+        if (e.target.value === "command") {
+          commandSection.style.display = "block";
+          if (commandsList.children.length === 0) {
+            addCommand();
+          }
+        } else {
+          commandSection.style.display = "none";
+        }
+
       });
 
       const featureTypeMap = {
@@ -862,6 +903,65 @@
         }
       });
 
+      document.getElementById("commandsList").addEventListener("change", async (e) => {
+        if (e.target.classList.contains("command-device")) {
+            const deviceId = e.target.value;
+            const commandId = e.target.dataset.commandId;
+            const featureSelect = document.querySelector(`#${commandId} .command-feature`);
+
+            featureSelect.innerHTML = '<option value="">Select a feature</option>';
+            featureSelect.disabled = true;
+
+            if (!deviceId) return;
+
+            try {
+                const response = await fetch(`${DEVICES_API}${deviceId}`);
+                if (!response.ok) throw new Error("Failed to fetch device details");
+                const device = await response.json();
+                
+                device.features.sort((a, b) => a.id - b.id).forEach(feature => {
+                    const option = new Option(`${feature.name} (ID: ${feature.id})`, feature.id);                    
+                    option.dataset.type = featureTypeMap[feature.type] || feature.type;
+                    featureSelect.add(option);
+                });
+                featureSelect.disabled = false;
+            } catch (error) {
+                console.error("Error loading features:", error);
+                showMessage(`Could not load features for device ${deviceId}.`, "error");
+            }
+        } else if (e.target.classList.contains("command-feature")) {
+            const featureSelect = e.target;
+            const selectedOption = featureSelect.selectedOptions[0];
+            const featureType = selectedOption?.dataset.type;
+            const commandItem = featureSelect.closest(".dynamic-item");
+            const parameterSelect = commandItem.querySelector(".command-parameter");
+            const valueContainer = commandItem.querySelector(".command-value-container");
+
+            parameterSelect.innerHTML = '<option value="">Select parameter</option>';
+            valueContainer.innerHTML = "";
+            parameterSelect.disabled = true;
+
+            if (featureType && featureParameters[featureType]) {
+                Object.entries(featureParameters[featureType]).forEach(([value, label]) => {
+                    parameterSelect.add(new Option(label, value));
+                });
+                parameterSelect.disabled = false;
+            }
+        } else if (e.target.classList.contains("command-parameter")) {
+            const parameterSelect = e.target;
+            const parameter = parameterSelect.value;
+            const commandItem = parameterSelect.closest(".dynamic-item");
+            const featureSelect = commandItem.querySelector(".command-feature");
+            const featureType = featureSelect.selectedOptions[0]?.dataset.type;
+            const valueContainer = commandItem.querySelector(".command-value-container");
+
+            valueContainer.innerHTML = ""; // Clear previous value input
+
+            if (!parameter) return;
+            valueContainer.innerHTML = createValueInput(parameter, featureType, 'command-value');
+        }
+      });
+
       function getConditionOptions(conditionItem) {
           const options = {};
           const parameterSelect = conditionItem.querySelector(".condition-parameter");
@@ -885,6 +985,45 @@
           return options;
       }
 
+      function getCommandData(commandItem) {
+        const deviceId = parseInt(commandItem.querySelector('.command-device').value, 10);
+        const featureId = parseInt(commandItem.querySelector('.command-feature').value, 10);
+        const featureType = commandItem.querySelector('.command-feature').selectedOptions[0]?.dataset.type;
+        
+        const options = {};
+        const parameterSelect = commandItem.querySelector(".command-parameter");
+        const valueInput = commandItem.querySelector(".command-value");
+
+        if (parameterSelect && valueInput && parameterSelect.value && valueInput.value !== '') {
+            const key = parameterSelect.value;
+            let value = valueInput.value;
+
+            if (valueInput.type === 'number') {
+                value = parseFloat(value);
+            } else if (key === 'state') {
+                value = (value === 'true');
+            }
+            options[key] = value;
+        }
+
+        return {
+            type: featureType,
+            device_id: deviceId,
+            feature_id: featureId,
+            options: options
+        };
+      }
+
+      function createValueInput(parameter, featureType, className) {
+        if (parameter === 'state') {
+            const options = featureType === 'lamp' ? { 'true': 'On', 'false': 'Off' } : { 'true': 'Locked', 'false': 'Unlocked' };
+            return `<select name="state" class="${className}"><option value="true">${options['true']}</option><option value="false">${options['false']}</option></select>`;
+        } else if (['brightness', 'position'].includes(parameter)) {
+            return `<input type="number" name="${parameter}" class="${className}" placeholder="0-100" min="0" max="100" />`;
+        }
+        return `<input type="number" name="${parameter}" class="${className}" placeholder="Value" />`;
+      }
+
       document.body.addEventListener('input', function(e) {
           if (
               e.target.type === 'range' && 
@@ -903,7 +1042,6 @@
 
       window.addEventListener("DOMContentLoaded", () => {
         addCondition();
-        addCommand();
       });
     </script>
   </body>
