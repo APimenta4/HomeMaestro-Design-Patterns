@@ -20,5 +20,6 @@ class Action(ABC):
     
     def to_dict_deep(self) -> dict[str, object]:
         return {
+            "type": self.__class__.__name__,
             "commands": [command.to_dict() for command in self.commands]
         }

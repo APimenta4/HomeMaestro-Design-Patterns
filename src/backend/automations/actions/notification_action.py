@@ -17,5 +17,6 @@ class NotificationAction(Action):
     
     def to_dict_deep(self) -> dict[str, object]:
         return {
+            "type": self.__class__.__name__,
             "notifications": [notification.to_dict() for notification in self.notifications]
         }
