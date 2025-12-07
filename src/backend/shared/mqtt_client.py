@@ -25,6 +25,9 @@ class MQTTClient(metaclass=Singleton):
     def subscribe(self, topic: str):
         self.client.subscribe(topic, qos=2)
 
+    def unsubscribe(self, topic: str):
+        self.client.unsubscribe(topic)
+
     def _on_event(self, client, userdata, msg):
         # client and userData are unused but required by the MQTT callback signature
         if self.event_handler:

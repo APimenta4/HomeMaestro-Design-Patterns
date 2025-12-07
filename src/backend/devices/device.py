@@ -45,7 +45,7 @@ class Device(Identifiable):
 
         feature = self.get_feature_by_id(feature_id)
         if feature is None:
-            raise ValueError(f"Feature with id '{feature_id}' does not exist on device")
+            raise ValueError(f"Feature with id '{feature_id}' does not exist on this device")
 
         payload = feature.execute(options)
         MQTTClient().publish(f"{self.id}", payload)
@@ -55,7 +55,7 @@ class Device(Identifiable):
 
         feature = self.get_feature_by_id(feature_id)
         if feature is None:
-            raise ValueError(f"Feature with id '{feature_id}' does not exist on device")
+            raise ValueError(f"Feature with id '{feature_id}' does not exist on this device")
         return feature.get_status()
 
     def to_dict(self) -> dict[str, object]:
