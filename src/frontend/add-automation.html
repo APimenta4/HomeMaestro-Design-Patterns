@@ -47,7 +47,7 @@
       }
 
       .container {
-        max-width: 600px;
+        max-width: 900px;
         margin: 0 auto;
         background: white;
         border-radius: 12px;
@@ -70,6 +70,7 @@
 
       input[type="text"],
       input[type="time"],
+      input[type="number"],
       select,
       textarea {
         width: 100%;
@@ -88,6 +89,7 @@
 
       input[type="text"]:focus,
       input[type="time"]:focus,
+      input[type="number"]:focus,
       select:focus,
       textarea:focus {
         outline: none;
@@ -601,6 +603,12 @@
           <select class="condition-feature" required disabled>
             <option value="">Select a feature</option>
           </select>
+          <div class="condition-options" style="flex: 2; display: flex; gap: 10px;">
+            <select class="condition-parameter" style="flex: 1;" disabled>
+              <option value="">Select parameter</option>
+            </select>
+            <div class="condition-value-container" style="flex: 1;"></div>
+          </div>
           <button type="button" class="btn-remove" onclick="removeCondition('${conditionId}')">Remove</button>
         `;
 
@@ -683,6 +691,7 @@
               device_id: parseInt(item.querySelector('.condition-device').value, 10),
               feature_id: parseInt(item.querySelector('.condition-feature').value, 10),
               type: item.querySelector('.condition-feature').selectedOptions[0]?.dataset.type,
+              options: getConditionOptions(item)
           })).filter(c => c.device_id && c.feature_id);
 
           if (conditionItems.length === 0) {
@@ -796,6 +805,101 @@
             }
         }
       })
+      
+      const featureParameters = {
+        lamp: { state: "State", brightness: "Brightness" },
+        blinds: { position: "Position" },
+        lock: { state: "State" },
+        temperature: { temperature: "Temperature" },
+      };
+
+      document.getElementById("conditionsList").addEventListener("change", (e) => {
+        if (e.target.classList.contains("condition-feature")) {
+            const featureSelect = e.target;
+            const selectedOption = featureSelect.selectedOptions[0];
+            const featureType = selectedOption?.dataset.type;
+            const conditionItem = featureSelect.closest(".dynamic-item");
+            const parameterSelect = conditionItem.querySelector(".condition-parameter");
+            const valueContainer = conditionItem.querySelector(".condition-value-container");
+
+            parameterSelect.innerHTML = '<option value="">Select parameter</option>';
+            valueContainer.innerHTML = "";
+            parameterSelect.disabled = true;
+
+            if (featureType && featureParameters[featureType]) {
+                Object.entries(featureParameters[featureType]).forEach(([value, label]) => {
+                    parameterSelect.add(new Option(label, value));
+                });
+                parameterSelect.disabled = false;
+            }
+        } else if (e.target.classList.contains("condition-parameter")) {
+            const parameterSelect = e.target;
+            const parameter = parameterSelect.value;
+            const conditionItem = parameterSelect.closest(".dynamic-item");
+            const featureSelect = conditionItem.querySelector(".condition-feature");
+            const featureType = featureSelect.selectedOptions[0]?.dataset.type;
+            const valueContainer = conditionItem.querySelector(".condition-value-container");
+
+            valueContainer.innerHTML = ""; // Clear previous value input
+
+            if (!parameter) return;
+
+            let valueInputHtml = '';
+            if (parameter === 'state') {
+                if (featureType === 'lamp') {
+                    valueInputHtml = `<select name="state" class="condition-value"><option value="true">On</option><option value="false">Off</option></select>`;
+                } else if (featureType === 'lock') {
+                    valueInputHtml = `<select name="state" class="condition-value"><option value="true">Locked</option><option value="false">Unlocked</option></select>`;
+                }
+            } else if (parameter === 'brightness') {
+                valueInputHtml = `<input type="number" name="brightness" class="condition-value" placeholder="0-100" min="0" max="100" />`;
+            } else if (parameter === 'position') {
+                valueInputHtml = `<input type="number" name="position" class="condition-value" placeholder="0-100" min="0" max="100" />`;
+            } else if (parameter === 'temperature') {
+                valueInputHtml = `<input type="number" name="temperature" class="condition-value" placeholder="Temperature" />`;
+            }
+            valueContainer.innerHTML = valueInputHtml;
+        }
+      });
+
+      function getConditionOptions(conditionItem) {
+          const options = {};
+          const parameterSelect = conditionItem.querySelector(".condition-parameter");
+          const valueInput = conditionItem.querySelector(".condition-value");
+
+          if (!parameterSelect || !valueInput || !parameterSelect.value || valueInput.value === '') {
+              return options;
+          }
+
+          const key = parameterSelect.value;
+          let value = valueInput.value;
+
+          if (valueInput.type === 'number') {
+              value = parseFloat(value);
+          } else if (key === 'state') {
+              value = (value === 'true');
+          }
+
+          options[key] = value;
+
+          return options;
+      }
+
+      document.body.addEventListener('input', function(e) {
+          if (
+              e.target.type === 'range' && 
+              e.target.nextElementSibling && 
+              e.target.nextElementSibling.classList.contains('range-value')
+          ) {
+              e.target.nextElementSibling.textContent = e.target.value;
+          }
+      });
+
+      document.body.addEventListener('change', function(e) {
+          if (e.target.classList.contains('condition-parameter') || e.target.classList.contains('condition-value')) {
+              clearSectionErrors("triggerSection");
+          }
+      });
 
       window.addEventListener("DOMContentLoaded", () => {
         addCondition();
