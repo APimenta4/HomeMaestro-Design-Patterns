@@ -434,19 +434,6 @@
           </p>
 
           <div class="form-group">
-            <label for="triggerType">Trigger Type</label>
-            <select id="triggerType" name="trigger" required>
-              <option value="">Select trigger type</option>
-              <option value="time">Time-based</option>
-              <option value="state">Device State</option>
-              <option value="threshold">Sensor Threshold</option>
-            </select>
-            <div class="field-error" id="triggerTypeError">
-              Please select a trigger type
-            </div>
-          </div>
-
-          <div class="form-group">
             <label>Conditions (All must be true)</label>
             <div id="conditionsList" class="dynamic-list"></div>
             <button type="button" class="btn-add" onclick="addCondition()">
@@ -485,7 +472,7 @@
             <select id="actionType" name="action" required>
               <option value="">Select action type</option>
               <option value="command">Command</option>
-              <option value="external">External</option>
+              <!-- <option value="external">External</option> -->
               <option value="notification">Notification</option>
             </select>
             <div class="field-error" id="actionTypeError">
@@ -520,6 +507,7 @@
 
     <script>
       const AUTOMATIONS_API = "http://127.0.0.1:5000/automations/";
+      const DEVICES_API = "http://127.0.0.1:5000/devices/";
 
       let conditionCounter = 0;
       let commandCounter = 0;
@@ -530,9 +518,9 @@
         messageDiv.className = `message ${type}`;
         messageDiv.style.display = "block";
 
-        setTimeout(() => {
-          messageDiv.style.display = "none";
-        }, 5000);
+        // setTimeout(() => {
+        //   messageDiv.style.display = "none";
+        // }, 5000);
       }
 
       function toggleSection(sectionId) {
@@ -598,26 +586,46 @@
         }
       }
 
-      function addCondition() {
+      async function addCondition() {
         const conditionsList = document.getElementById("conditionsList");
         const conditionId = `condition-${conditionCounter++}`;
 
         const conditionItem = document.createElement("div");
         conditionItem.className = "dynamic-item";
         conditionItem.id = conditionId;
-
+        
         conditionItem.innerHTML = `
-          <select class="condition-type" required>
-            <option value="">Select condition type</option>
-            <option value="blinds">Blinds</option>
-            <option value="lock">Lock</option>
-            <option value="temperature">Temperature</option>
-            <option value="lights">Lights</option>
+          <select class="condition-device" required data-condition-id="${conditionId}">
+            <option value="">Select a device</option>
+          </select>
+          <select class="condition-feature" required disabled>
+            <option value="">Select a feature</option>
           </select>
           <button type="button" class="btn-remove" onclick="removeCondition('${conditionId}')">Remove</button>
         `;
 
         conditionsList.appendChild(conditionItem);
+
+        const deviceSelect = conditionItem.querySelector(".condition-device");
+
+        try {
+          const response = await fetch(`${DEVICES_API}`);
+
+          if (!response.ok) throw new Error("Failed to fetch devices");
+          const devices = (await response.json()).connected_devices;
+ 
+          const filteredDevices = devices.filter(
+            (device) => device.type === "Device"
+          );
+ 
+          filteredDevices.sort((a, b) => a.id - b.id).forEach((device) => {
+            const option = new Option(`${device.name} (ID: ${device.id})`, device.id);
+            deviceSelect.add(option);
+          });
+        } catch (error) {
+          console.error("Error loading devices:", error);
+          showMessage("Could not load devices for conditions.", "error");
+        }
 
         clearSectionErrors("triggerSection");
       }
@@ -640,7 +648,7 @@
         commandItem.innerHTML = `
           <select class="command-type" required>
             <option value="">Select command type</option>
-            <option value="lights">Lights</option>
+            <option value="lamp">Lamp</option>
             <option value="lock">Lock</option>
             <option value="temperature">Temperature</option>
             <option value="blinds">Blinds</option>
@@ -670,20 +678,14 @@
 
           let hasErrors = false;
 
-          const triggerType = document.getElementById("triggerType").value;
-          if (!triggerType) {
-            showSectionError("triggerSection", "triggerTypeError");
-            hasErrors = true;
-          }
+          const conditionItems = document.querySelectorAll("#conditionsList .dynamic-item");
+          const conditions = Array.from(conditionItems).map(item => ({
+              device_id: parseInt(item.querySelector('.condition-device').value, 10),
+              feature_id: parseInt(item.querySelector('.condition-feature').value, 10),
+              type: item.querySelector('.condition-feature').selectedOptions[0]?.dataset.type,
+          })).filter(c => c.device_id && c.feature_id);
 
-          const conditionElements =
-            document.querySelectorAll(".condition-type");
-          const conditions = Array.from(conditionElements)
-            .map((el) => el.value)
-            .filter((val) => val)
-            .map((type) => ({ type }));
-
-          if (conditions.length === 0) {
+          if (conditionItems.length === 0) {
             showSectionError("triggerSection", "conditionsError");
             hasErrors = true;
           }
@@ -714,7 +716,7 @@
             name: document.getElementById("automationName").value,
             enabled: document.getElementById("enabled").checked,
             trigger: {
-              type: triggerType,
+              type: "threshold", // Hardcoded as per request
               conditions: conditions,
             },
             action: {
@@ -743,9 +745,9 @@
 
             showMessage("Automation created successfully!", "success");
 
-            setTimeout(() => {
-              window.location.href = "automations.html";
-            }, 1500);
+            // setTimeout(() => {
+            //   window.location.href = "automations.html";
+            // }, 1500);
           } catch (error) {
             console.error("Error creating automation:", error);
             showMessage(
@@ -755,13 +757,45 @@
           }
         });
 
-      document.getElementById("triggerType").addEventListener("change", () => {
-        clearSectionErrors("triggerSection");
-      });
-
       document.getElementById("actionType").addEventListener("change", () => {
         clearSectionErrors("actionSection");
       });
+
+      const featureTypeMap = {
+        LampFeature: "lamp",
+        BlindsFeature: "blinds",
+        LockFeature: "lock",
+        TemperatureFeature: "temperature",
+      };
+
+      document.getElementById("conditionsList").addEventListener("change", async (e) => {
+        if (e.target.classList.contains("condition-device")) {
+            const deviceId = e.target.value;
+            const conditionId = e.target.dataset.conditionId;
+            const featureSelect = document.querySelector(`#${conditionId} .condition-feature`);
+
+            featureSelect.innerHTML = '<option value="">Select a feature</option>';
+            featureSelect.disabled = true;
+
+            if (!deviceId) return;
+
+            try {
+                const response = await fetch(`${DEVICES_API}${deviceId}`);
+                if (!response.ok) throw new Error("Failed to fetch device details");
+                const device = await response.json();
+                
+                device.features.sort((a, b) => a.id - b.id).forEach(feature => {
+                    const option = new Option(`${feature.name} (ID: ${feature.id})`, feature.id);                    
+                    option.dataset.type = featureTypeMap[feature.type] || feature.type;
+                    featureSelect.add(option);
+                });
+                featureSelect.disabled = false;
+            } catch (error) {
+                console.error("Error loading features:", error);
+                showMessage(`Could not load features for device ${deviceId}.`, "error");
+            }
+        }
+      })
 
       window.addEventListener("DOMContentLoaded", () => {
         addCondition();

@@ -72,8 +72,7 @@ class HomeMaestro(metaclass=Singleton):
         try:
             device_id = int(topic)
             for automation in self.automations:
-                if automation.device_id == device_id:
-                    automation.attempt_automation(payload)
+                automation.attempt_automation(device_id, payload)
         except ValueError:
             logger.warning("Received an MQTT event with an invalid topic: %s", topic)
 

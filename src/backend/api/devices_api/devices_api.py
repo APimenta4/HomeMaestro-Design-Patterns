@@ -15,8 +15,15 @@ hub_creation_handler = HubCreationAlgorithm()
 @devices_api.route("/", methods=["GET"])
 @validates_exceptions
 def get_devices() -> Response:
-    connected = [device.to_dict() for device in home_maestro.connected_devices]
-    unconnected = [device.to_dict() for device in home_maestro.unconnected_devices]
+    deep = request.args.get("deep", "false").lower() == "true"
+    to_dict_method = "to_dict_deep" if deep else "to_dict"
+
+    connected = [
+        getattr(device, to_dict_method)() for device in home_maestro.connected_devices
+    ]
+    unconnected = [
+        getattr(device, to_dict_method)() for device in home_maestro.unconnected_devices
+    ]
     return make_response(
         {"connected_devices": connected, "unconnected_devices": unconnected}
     )
