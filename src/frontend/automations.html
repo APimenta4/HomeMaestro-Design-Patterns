@@ -261,6 +261,10 @@
             const listItem = document.createElement("li");
             listItem.className = "automation-card";
 
+            listItem.onclick = () => {
+              window.location.href = `automation-details.html?id=${automation.id}`;
+            };
+
             const isActive = !!automation.enabled;
 
             listItem.innerHTML = `
@@ -271,14 +275,6 @@
                                 <div class="automation-toggle ${
                                   isActive ? "active" : ""
                                 }" data-id="${automation.id}"></div>
-                            </div>
-                            <div class="automation-info">
-                                <span>Trigger: ${
-                                  automation.trigger || "N/A"
-                                }</span>
-                                <span>Action: ${
-                                  automation.action || "N/A"
-                                }</span>
                             </div>
                             ${
                               automation.description

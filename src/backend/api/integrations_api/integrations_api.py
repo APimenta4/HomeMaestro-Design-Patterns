@@ -13,8 +13,6 @@ integration_creation_handler = IntegrationCreationAlgorithm()
 @integrations_api.route("/", methods=["GET"])
 @validates_exceptions
 def get_integrations() -> Response:
-    print("Fetching integrations")
-    print(home_maestro.notification_service.integrations)
     integrations = [
         integration.to_dict()
         for integration in home_maestro.notification_service.integrations

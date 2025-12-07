@@ -18,6 +18,17 @@ def get_automations() -> Response:
     return make_response(automations)
 
 
+@automations_api.route("/<int:automation_id>", methods=["GET"])
+@validates_exceptions
+def get_automation_details(automation_id: int) -> Response:
+    automation = home_maestro.get_automation_by_id(automation_id)
+
+    if automation is None:
+        return make_response({"error": f"Automation with id '{automation_id}' not found"}, 404)
+
+    return make_response(automation.to_dict_deep(), 200)
+
+
 @automations_api.route("/<int:automation_id>", methods=["PATCH"])
 @validates_exceptions
 def toggle_automation(automation_id: int) -> Response:

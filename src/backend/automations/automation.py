@@ -37,6 +37,15 @@ class Automation(Identifiable):
         dict["device_id"] = self.device_id
         dict["description"] = self.description
         return dict
+    
+    def to_dict_deep(self) -> dict[str, object]:
+        dict = self.to_dict()
+        # The trigger and action objects in an automation already hold all their necessary data,
+        # so we can convert them to dictionaries directly.
+        # If they had complex objects, we would need to implement `to_dict` in them as well.
+        # dict["trigger"] = self.trigger.__dict__
+        # dict["action"] = self.action.__dict__
+        return dict
 
     def attempt_automation(self, payload: str) -> bool:
         # TODO: remove

@@ -37,19 +37,6 @@ ID_COUNTER_FILE = "id_counter.pkl"
 def create_sample_data():
     home_maestro = HomeMaestro()
 
-    home_maestro.add_integration(WhatsAppIntegration())
-    home_maestro.add_integration(TelegramIntegration())
-    home_maestro.add_integration(DiscordIntegration())
-    home_maestro.add_integration(SlackIntegration())
-    home_maestro.add_integration(WebhookIntegration())
-
-    # Sample notification
-    alert_message = Message(
-        message_type=MessageType.ALERT,
-        content="The front door was left open.",
-        timestamp=datetime.now().isoformat(),
-    )
-
     home_maestro.notification_service.send_notification_broadcast(alert_message)
     # Sample devices
     features: set[Feature] = set()
@@ -108,6 +95,19 @@ def create_sample_data():
     home_maestro.add_device(device10)
     home_maestro.add_device(device11)
     home_maestro.add_device(device12)
+
+    home_maestro.add_integration(WhatsAppIntegration())
+    home_maestro.add_integration(TelegramIntegration())
+    home_maestro.add_integration(DiscordIntegration())
+    home_maestro.add_integration(SlackIntegration())
+    home_maestro.add_integration(WebhookIntegration())
+
+    # Sample notification
+    alert_message = Message(
+        message_type=MessageType.ALERT,
+        content="The front door was left open.",
+        timestamp=datetime.now().isoformat(),
+    )
 
     # Sample automations
     condition1 = LampCondition()

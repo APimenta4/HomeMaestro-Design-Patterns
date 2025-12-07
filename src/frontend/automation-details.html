@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HomeMaestro - Automation Details</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #87cefa 0%, #e0f4ff 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+      }
+
+      .header {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        color: #2c3e50;
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 700;
+      }
+
+      h1 a {
+        color: #2c3e50;
+        text-decoration: none;
+        transition: opacity 0.3s;
+      }
+
+      h1 a:hover {
+        opacity: 0.7;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: white;
+        color: #2c3e50;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .back-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+
+      .detail-card {
+        background: white;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+      }
+
+      .automation-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .automation-icon-large {
+        width: 80px;
+        height: 80px;
+        background: #9b59b6; /* Purple for automations */
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        box-shadow: 0 4px 12px rgba(155, 89, 182, 0.4);
+      }
+
+      .automation-icon-large i {
+        color: white;
+        font-size: 2.5em;
+      }
+
+      .automation-title h2 {
+        color: #2c3e50;
+        font-size: 2em;
+        margin-bottom: 5px;
+      }
+
+      .info-section {
+        margin-bottom: 25px;
+      }
+
+      .info-section h3 {
+        color: #34495e;
+        font-size: 1.2em;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .info-section h3 i {
+        color: #9b59b6;
+      }
+
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #f0f0f0;
+      }
+
+      .info-row:last-child {
+        border-bottom: none;
+      }
+
+      .info-label {
+        color: #7f8c8d;
+        font-weight: 600;
+      }
+
+      .info-value {
+        color: #2c3e50;
+        font-weight: 500;
+        text-align: right;
+      }
+
+      .loading,
+      .error {
+        text-align: center;
+        padding: 60px 20px;
+      }
+
+      .spinner {
+        border: 3px solid rgba(44, 62, 80, 0.1);
+        border-top: 3px solid #2c3e50;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 15px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .error {
+        color: #e74c3c;
+      }
+
+      .automation-toggle {
+        width: 50px;
+        height: 26px;
+        background: #bdc3c7;
+        border-radius: 13px;
+        position: relative;
+        cursor: pointer;
+        transition: background 0.3s;
+        flex-shrink: 0;
+      }
+
+      .automation-toggle.active {
+        background: #27ae60;
+      }
+
+      .automation-toggle::after {
+        content: "";
+        position: absolute;
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: white;
+        top: 2px;
+        left: 2px;
+        transition: transform 0.3s;
+      }
+
+      .automation-toggle.active::after {
+        transform: translateX(24px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1><a href="index.html">HomeMaestro</a></h1>
+    </div>
+
+    <div class="container">
+      <a href="automations.html" class="back-button">
+        <i class="fas fa-arrow-left"></i>
+        Back to Automations
+      </a>
+
+      <div id="content">
+        <div class="detail-card loading">
+          <div class="spinner"></div>
+          <div>Loading automation details...</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_URL = "http://127.0.0.1:5000/automations/";
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const automationId = urlParams.get("id");
+
+      function renderAutomationDetails(automation) {
+        const content = document.getElementById("content");
+        const isActive = !!automation.enabled;
+
+        content.innerHTML = `
+            <div class="detail-card">
+                <div class="automation-header">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div class="automation-icon-large">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="automation-title">
+                            <h2>${automation.name}</h2>
+                        </div>
+                    </div>
+                     <div class="automation-toggle ${
+                       isActive ? "active" : ""
+                     }" data-id="${automation.id}"></div>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-info-circle"></i> General Information</h3>
+                    <div class="info-row">
+                        <span class="info-label">Automation ID</span>
+                        <span class="info-value">${automation.id}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Name</span>
+                        <span class="info-value">${automation.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Description</span>
+                        <span class="info-value">${
+                          automation.description || "N/A"
+                        }</span>
+                    </div>
+                     <div class="info-row">
+                        <span class="info-label">Associated Device ID</span>
+                        <span class="info-value">${
+                          automation.device_id
+                        }</span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-play-circle"></i> Trigger</h3>
+                     <div class="info-row">
+                        <span class="info-label">Type</span>
+                        <span class="info-value">${automation.trigger}</span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-cogs"></i> Action</h3>
+                    <div class="info-row">
+                        <span class="info-label">Type</span>
+                        <span class="info-value">${automation.action}</span>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const toggle = content.querySelector(".automation-toggle");
+        toggle.dataset.enabled = isActive.toString();
+        toggle.setAttribute("role", "switch");
+        toggle.setAttribute("aria-checked", isActive.toString());
+        toggle.dataset.pending = "false";
+
+        toggle.addEventListener("click", async (e) => {
+          e.stopPropagation();
+
+          if (toggle.dataset.pending === "true") return;
+
+          const currentEnabled = toggle.dataset.enabled === "true";
+          const desiredEnabled = !currentEnabled;
+
+          toggle.dataset.enabled = desiredEnabled.toString();
+          toggle.setAttribute("aria-checked", desiredEnabled.toString());
+          toggle.classList.toggle("active", desiredEnabled);
+
+          toggle.dataset.pending = "true";
+
+          try {
+            await toggleAutomation(automation.id, desiredEnabled);
+            toggle.dataset.pending = "false";
+          } catch (err) {
+            console.error("Failed to toggle, reverting UI:", err);
+            toggle.dataset.enabled = currentEnabled.toString();
+            toggle.setAttribute("aria-checked", currentEnabled.toString());
+            toggle.classList.toggle("active", currentEnabled);
+            toggle.dataset.pending = "false";
+          }
+        });
+      }
+
+      async function toggleAutomation(id, enabled) {
+        try {
+          const response = await fetch(`${API_URL}${id}`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ enabled }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to update automation");
+          }
+        } catch (error) {
+          console.error("Error toggling automation:", error);
+          throw error;
+        }
+      }
+
+      async function loadAutomationDetails() {
+        if (!automationId) {
+          document.getElementById("content").innerHTML = `
+                <div class="detail-card error">
+                    <i class="fas fa-exclamation-triangle fa-3x"></i>
+                    <h3>No automation ID provided</h3>
+                    <p>Please select an automation from the automations list</p>
+                </div>
+            `;
+          return;
+        }
+
+        try {
+          const response = await fetch(`${API_URL}${automationId}`);
+
+          if (!response.ok) {
+            if (response.status === 404) {
+              throw new Error("Automation not found");
+            }
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+
+          const automation = await response.json();
+          renderAutomationDetails(automation);
+        } catch (error) {
+          console.error("Error loading automation:", error);
+          document.getElementById("content").innerHTML = `
+                <div class="detail-card error">
+                    <i class="fas fa-exclamation-triangle fa-3x"></i>
+                    <h3>Failed to load automation</h3>
+                    <p>${error.message}</p>
+                </div>
+            `;
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", loadAutomationDetails);
+    </script>
+  </body>
+</html>
