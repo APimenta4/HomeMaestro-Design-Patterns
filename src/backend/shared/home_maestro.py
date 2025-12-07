@@ -20,8 +20,7 @@ class HomeMaestro(metaclass=Singleton):
         self.automations: set[Automation] = set()
         MQTTClient().set_event_handler(self._handle_mqtt_event)
 
-    @property
-    def all_devices(self) -> set[Device]:
+    def get_all_devices(self) -> set[Device]:
         return self.connected_devices | self.unconnected_devices
 
     def add_device(self, device: Device):
@@ -35,6 +34,16 @@ class HomeMaestro(metaclass=Singleton):
             self.unconnected_devices.add(device)
 
         MQTTClient().subscribe(f"{device.id}")
+
+    def remove_device(self, id: int):
+        device = self.get_device_by_id(id)
+        if device is None:
+            raise ValueError(f"Device with id '{id}' does not exist in HomeMaestro")
+
+        self.connected_devices.discard(device)
+        self.unconnected_devices.discard(device)
+
+        MQTTClient().unsubscribe(f"{device.id}")
 
     def add_automation(self, automation: Automation):
         self.automations.add(automation)
@@ -54,7 +63,7 @@ class HomeMaestro(metaclass=Singleton):
         return None
 
     def get_device_by_id(self, device_id: int) -> Device | None:
-        for device in self.all_devices:
+        for device in self.get_all_devices():
             if device.id == device_id:
                 return device
         return None

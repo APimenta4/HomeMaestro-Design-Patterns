@@ -76,16 +76,11 @@ def update_device(device_id: int) -> Response:
 @devices_api.route("/<int:device_id>", methods=["DELETE"])
 @validates_exceptions
 def delete_device(device_id: int) -> Response:
-    device = home_maestro.get_device_by_id(device_id)
-
-    if device is None:
-        return make_response({"error": f"Device with id '{device_id}' not found"}, 404)
-
-    home_maestro.all_devices.remove(device)
+    home_maestro.remove_device(device_id)
 
     return make_response(
         {
-            "message": f"Device '{device.name}' deleted successfully",
+            "message": f"Device with ID '{device_id}' deleted successfully",
             "device_id": device_id,
         },
         200,
@@ -109,7 +104,8 @@ def execute_device_feature(device_id: int, feature_id: int) -> Response:
         return make_response({"error": str(e)}, 400)
 
     return make_response(
-        {"message": "Feature executed successfully", "device": device.to_dict_deep()}, 200
+        {"message": "Feature executed successfully", "device": device.to_dict_deep()},
+        200,
     )
 
 
@@ -128,7 +124,6 @@ def discover_devices(hub_id: int) -> Response:
     )
 
 
-# unpair device from hub
 @devices_api.route("/<int:hub_id>/unpair/<int:device_id>", methods=["POST"])
 @validates_exceptions
 def unpair_device(hub_id: int, device_id: int) -> Response:
