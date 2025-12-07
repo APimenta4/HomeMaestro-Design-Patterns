@@ -8,7 +8,7 @@ from automations.actions.commands import LampCommand
 from automations.triggers import TimeTrigger
 from automations.triggers.conditions import LampCondition
 from devices import Device, ErrorStatus, OfflineStatus, OnlineStatus, Protocol
-from devices.features import Feature, LampFeature, BlindsFeature, TemperatureFeature
+from devices.features import Feature, LampFeature, BlindsFeature, TemperatureFeature, FeatureFactory
 from devices.hubs import ZigbeeHub, ZWaveHub
 from integrations import TelegramIntegration, WhatsAppIntegration, DiscordIntegration, SlackIntegration, WebhookIntegration
 from shared import HomeMaestro
@@ -39,18 +39,18 @@ if __name__ == "__main__":
     home_maestro.notification_service.send_notification_broadcast(alert_message) 
 
     # Sample devices
-    features: set[Feature] = set()
-    features.add(LampFeature("Luzes", {"state": True, "brightness": 5}))
+    features: set[Feature] = set()    
+    features.add(FeatureFactory.create_feature("Luzes", "ACTUATOR", {"state": True, "brightness": 5}, "lamp"))
     features.add(
-        BlindsFeature("Cortinas", {"position": 0})
+        FeatureFactory.create_feature("Cortinas", "ACTUATOR", {"position": 0}, "blinds")
     )
-    features.add(TemperatureFeature("Termometro", {"temperature": 25}))
+    features.add(FeatureFactory.create_feature("Termometro", "SENSOR", {"temperature": 25}, "temperature"))
 
     device1 = Device("Test Device", OnlineStatus, Protocol.HUBLESS, features)
     device2 = Device("Digital Clock 2018", OfflineStatus, Protocol.TRADFRI, features)
-    feature1 = LampFeature("Feature 1", {"something": "my test value"})
-    feature2 = LampFeature("Feature 2", {"something else": "20"})
-    feature3 = LampFeature("Feature 3", {"ADS feature": "10"})
+    feature1 = FeatureFactory.create_feature("Feature 1", "ACTUATOR", {"something": "my test value"}, "lamp")
+    feature2 = FeatureFactory.create_feature("Feature 2", "ACTUATOR", {"something else": "20"}, "lamp")
+    feature3 = FeatureFactory.create_feature("Feature 3", "ACTUATOR", {"ADS feature": "10"}, "lamp")
     device3 = Device(
         "Test Device", OfflineStatus, Protocol.ZWAVE, {feature1, feature2, feature3}
     )

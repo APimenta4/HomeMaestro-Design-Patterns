@@ -1,4 +1,4 @@
-from . import Feature
+from . import Feature, FeatureCategory
 from typing import TypedDict
 
 class LampParameters(TypedDict):
@@ -6,8 +6,8 @@ class LampParameters(TypedDict):
     brightness: int
 
 class LampFeature(Feature):
-    def __init__(self, name: str, options: LampParameters | None = None):
-        super().__init__(name, options)
+    def __init__(self, name: str, category: FeatureCategory, options: LampParameters | None = None):
+        super().__init__(name, category, options)
         self.state = options.get("state", False)
         self.brightness = options.get("brightness", 1)
 
