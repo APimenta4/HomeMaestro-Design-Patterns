@@ -257,6 +257,9 @@
             return;
           }
 
+          // Sort automations by ID in descending order to show the newest first.
+          data.sort((a, b) => b.id - a.id);
+
           data.forEach((automation) => {
             const listItem = document.createElement("li");
             listItem.className = "automation-card";

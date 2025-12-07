@@ -37,7 +37,6 @@ ID_COUNTER_FILE = "id_counter.pkl"
 def create_sample_data():
     home_maestro = HomeMaestro()
 
-    home_maestro.notification_service.send_notification_broadcast(alert_message)
     # Sample devices
     features: set[Feature] = set()
     features.add(
@@ -108,6 +107,8 @@ def create_sample_data():
         content="The front door was left open.",
         timestamp=datetime.now().isoformat(),
     )
+
+    home_maestro.notification_service.send_notification_broadcast(alert_message)
 
     # Sample automations
     condition1 = LampCondition()

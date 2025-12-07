@@ -352,6 +352,15 @@
         border-color: #e74c3c;
       }
 
+      .notification-type {
+        flex: 0 0 200px; /* Do not grow, do not shrink, base width 200px */
+      }
+
+      .notification-content {
+        flex: 1; /* Allow the textarea to grow and fill available space */
+        width: auto; /* Override the default 100% width */
+      }
+
       @media (max-width: 768px) {
         h1 {
           font-size: 2em;
@@ -492,6 +501,20 @@
                 Please add at least one command
             </div>
           </div>
+
+          <div id="notificationCreationSection" style="display: none;">
+            <label>Notifications (All will be sent)</label>
+            <div id="notificationsList" class="dynamic-list"></div>
+            <button type="button" class="btn-add" onclick="addNotification()">
+              + Add Notification
+            </button>
+            <div class="field-error" id="notificationsError">
+                Please add at least one notification
+            </div>
+          </div>
+
+
+
         </div>
 
         <div class="button-group">
@@ -513,6 +536,7 @@
 
       let conditionCounter = 0;
       let commandCounter = 0;
+      let notificationCounter = 0;
 
       function goBack() {
         window.location.href = "automations.html";
@@ -524,9 +548,9 @@
         messageDiv.className = `message ${type}`;
         messageDiv.style.display = "block";
 
-        // setTimeout(() => {
-        //   messageDiv.style.display = "none";
-        // }, 5000);
+        setTimeout(() => {
+          messageDiv.style.display = "none";
+        }, 5000);
       }
 
       function toggleSection(sectionId) {
@@ -705,6 +729,43 @@
         }
       }
 
+      function addNotification() {
+        const notificationsList = document.getElementById("notificationsList");
+        const notificationId = `notification-${notificationCounter++}`;
+
+        const notificationItem = document.createElement("div");
+        notificationItem.className = "dynamic-item";
+        notificationItem.id = notificationId;
+
+        notificationItem.innerHTML = `
+          <select class="notification-type" required>
+            <option value="">Select type</option>
+            <option value="alert">Alert</option>
+            <option value="status_update">Status Update</option>
+            <option value="automation_result">Automation Result</option>
+            <option value="error">Error</option>
+          </select>
+          <textarea class="notification-content" required placeholder="Notification message..."></textarea>
+          <button type="button" class="btn-remove" onclick="removeNotification('${notificationId}')">Remove</button>
+        `;
+
+        notificationsList.appendChild(notificationItem);
+        clearSectionErrors("actionSection");
+      }
+
+      function removeNotification(notificationId) {
+        const element = document.getElementById(notificationId);
+        if (element) {
+          element.remove();
+        }
+      }
+
+      function getNotificationData(notificationItem) {
+        const type = notificationItem.querySelector('.notification-type').value;
+        const content = notificationItem.querySelector('.notification-content').value;
+        return { type, content };
+      }
+
       document
         .getElementById("automationForm")
         .addEventListener("submit", async (e) => {
@@ -737,12 +798,19 @@
           let commands = [];
           if (actionType === 'command') {
             const commandItems = document.querySelectorAll("#commandsList .dynamic-item");
+            if (commandItems.length === 0) {
+              showSectionError("actionSection", "commandsError");
+              hasErrors = true;
+            }
             commands = Array.from(commandItems).map(getCommandData);
-          }
-
-          if (commands.length === 0) {
-            showSectionError("actionSection", "commandsError");
-            hasErrors = true;
+          } else if (actionType === 'notification') {
+            const notificationItems = document.querySelectorAll("#notificationsList .dynamic-item");
+            if (notificationItems.length === 0) {
+              showSectionError("actionSection", "notificationsError");
+              hasErrors = true;
+            }
+            // The backend expects notifications in the 'commands' field of the action
+            commands = Array.from(notificationItems).map(getNotificationData);
           }
 
           if (hasErrors) {
@@ -783,9 +851,9 @@
 
             showMessage("Automation created successfully!", "success");
 
-            // setTimeout(() => {
-            //   window.location.href = "automations.html";
-            // }, 1500);
+            setTimeout(() => {
+              window.location.href = "automations.html";
+            }, 1500);
           } catch (error) {
             console.error("Error creating automation:", error);
             showMessage(
@@ -798,15 +866,25 @@
       document.getElementById("actionType").addEventListener("change", (e) => {
         clearSectionErrors("actionSection");
         const commandSection = document.getElementById("commandCreationSection");
+        const notificationSection = document.getElementById("notificationCreationSection");
         const commandsList = document.getElementById("commandsList");
+        const notificationsList = document.getElementById("notificationsList");
 
         if (e.target.value === "command") {
           commandSection.style.display = "block";
+          notificationSection.style.display = "none";
           if (commandsList.children.length === 0) {
             addCommand();
           }
+        } else if (e.target.value === "notification") {
+          commandSection.style.display = "none";
+          notificationSection.style.display = "block";
+          if (notificationsList.children.length === 0) {
+            addNotification();
+          }
         } else {
           commandSection.style.display = "none";
+          notificationSection.style.display = "none";
         }
 
       });

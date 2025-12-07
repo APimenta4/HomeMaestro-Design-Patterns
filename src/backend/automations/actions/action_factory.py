@@ -1,5 +1,6 @@
 from . import Action, CommandAction, ExternalAction, NotificationAction
 from .commands import CommandFactory
+from .notifications import Notification
 
 
 # DESIGN PATTERN: Simple Factory
@@ -14,8 +15,8 @@ class ActionFactory:
                 created_commands = ActionFactory.create_commands(commands)
                 return ExternalAction(created_commands)
             case "notification":
-                created_commands = ActionFactory.create_commands(commands)
-                return NotificationAction(created_commands)
+                created_notifications = ActionFactory.create_notifications(commands)
+                return NotificationAction(created_notifications)
             case _:
                 raise ValueError(f"The provided action type is not supported: {type}")
 
@@ -26,3 +27,11 @@ class ActionFactory:
             command = CommandFactory.create_command(**command_data)
             commands.add(command)
         return commands
+
+    @staticmethod
+    def create_notifications(notifications_data: list[dict]) -> set:
+        notifications = set()
+        for notification_data in notifications_data:
+            notification = Notification(**notification_data)
+            notifications.add(notification)
+        return notifications
