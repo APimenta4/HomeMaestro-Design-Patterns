@@ -1,14 +1,14 @@
 import random
 
-from . import Feature
+from . import Feature, FeatureCategory
 from typing import TypedDict
 
 class BlindsParameters(TypedDict):
     position: int
 
 class BlindsFeature(Feature):
-    def __init__(self, name: str, options: BlindsParameters | None = None):
-        super().__init__(name, options)
+    def __init__(self, name: str, category: FeatureCategory, options: BlindsParameters | None = None):
+        super().__init__(name, category, options)
         self.position = options.get("position", 0)  # fully open
 
     def execute(self, options: BlindsParameters | None = None):

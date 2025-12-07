@@ -1,6 +1,6 @@
 import random
 
-from . import Feature
+from . import Feature, FeatureCategory
 from typing import TypedDict
 
 class TemperatureParameters(TypedDict):
@@ -8,8 +8,8 @@ class TemperatureParameters(TypedDict):
 
 
 class TemperatureFeature(Feature):
-    def __init__(self, name: str, options: TemperatureParameters | None = None):
-        super().__init__(name, options)
+    def __init__(self, name: str, category: FeatureCategory, options: TemperatureParameters | None = None):
+        super().__init__(name, category, options)
         self.temperature = options.get("temperature", 0.0)
 
     def execute(self, options: TemperatureParameters | None = None):
