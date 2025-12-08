@@ -20,6 +20,16 @@ class AutomationCreationAlgorithm(EntityCreationAlgorithm):
 
     def prepare_input_data(self, payload: dict[str, Any]) -> dict[str, object]:
         payload["trigger"] = TriggerFactory.create_trigger(**payload["trigger"])
+        # Validate that devices and features in conditions exist
+        all_devices = home_maestro.get_all_devices()
+        devices_map = {device.id: device for device in all_devices}
+
+        for condition in payload["trigger"].conditions:
+            if condition.device_id not in devices_map:
+                raise ValueError(f"Device with id '{condition.device_id}' not found.")
+            device = devices_map[condition.device_id]
+            if not device.get_feature_by_id(condition.feature_id):
+                raise ValueError(f"Feature with id '{condition.feature_id}' not found on device '{device.name}'.")
         payload["action"] = ActionFactory.create_action(**payload["action"])
         return payload
 

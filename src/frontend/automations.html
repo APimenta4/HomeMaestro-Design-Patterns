@@ -257,9 +257,16 @@
             return;
           }
 
+          // Sort automations by ID in descending order to show the newest first.
+          data.sort((a, b) => b.id - a.id);
+
           data.forEach((automation) => {
             const listItem = document.createElement("li");
             listItem.className = "automation-card";
+
+            listItem.onclick = () => {
+              window.location.href = `automation-details.html?id=${automation.id}`;
+            };
 
             const isActive = !!automation.enabled;
 
@@ -271,14 +278,6 @@
                                 <div class="automation-toggle ${
                                   isActive ? "active" : ""
                                 }" data-id="${automation.id}"></div>
-                            </div>
-                            <div class="automation-info">
-                                <span>Trigger: ${
-                                  automation.trigger || "N/A"
-                                }</span>
-                                <span>Action: ${
-                                  automation.action || "N/A"
-                                }</span>
                             </div>
                             ${
                               automation.description

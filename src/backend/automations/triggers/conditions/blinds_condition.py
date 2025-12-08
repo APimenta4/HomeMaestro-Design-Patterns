@@ -2,9 +2,15 @@ from . import Condition
 
 
 class BlindsCondition(Condition):
-    def __init__(self):
-        # condition related attributes
-        pass
+    def __init__(self, device_id: int, feature_id: int, options: dict[str, object] | None = None):
+        super().__init__(device_id, feature_id, options)
+        self.position: int | None = self.options.get("position")
 
     def check(self):
         pass
+
+    def to_dict(self):
+        dict = super().to_dict()
+        dict["position"] = self.position
+
+        return dict
