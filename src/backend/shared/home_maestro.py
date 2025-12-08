@@ -3,16 +3,14 @@ from logging import getLogger
 
 from automations import Automation
 from devices import Device, Protocol
-from integrations import Integration
 
-from . import MQTTClient, NotificationService, Singleton
+from . import MQTTClient, Singleton
 
 logger = getLogger(__name__)
 
 
 class HomeMaestro(metaclass=Singleton):
-    def __init__(self, integrations: set[Integration] | None = None):
-        self.notification_service = NotificationService(integrations or set())
+    def __init__(self):
         # hubless devices and hubs
         self.connected_devices: set[Device] = set()
         # other devices that require connection to a hub
@@ -48,14 +46,6 @@ class HomeMaestro(metaclass=Singleton):
     def add_automation(self, automation: Automation):
         self.automations.add(automation)
 
-    def add_integration(self, integration: Integration):
-        for existing_integration in self.notification_service.integrations:
-            if isinstance(integration, type(existing_integration)):
-                raise ValueError(
-                    f"An integration of type '{type(integration).__name__}' already exists."
-                )
-        self.notification_service.add_integration(integration)
-
     def get_automation_by_id(self, automation_id: int) -> Automation | None:
         for automation in self.automations:
             if automation.id == automation_id:
@@ -87,7 +77,6 @@ class HomeMaestro(metaclass=Singleton):
         self.connected_devices = loaded_instance.connected_devices
         self.unconnected_devices = loaded_instance.unconnected_devices
         self.automations = loaded_instance.automations
-        self.notification_service = loaded_instance.notification_service
 
         for device in self.get_all_devices():
             MQTTClient().subscribe(f"{device.id}")

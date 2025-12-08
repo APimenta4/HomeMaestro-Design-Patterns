@@ -15,7 +15,7 @@ class Hub(Device, ABC):
         status: type[DeviceStatus],
     ):
         super().__init__(name=name, status=status, protocol=Protocol.HUBLESS)
-        self.devices = set()
+        self.devices: set[Device] = set()
 
     def to_dict(self) -> dict[str, object]:
         dict = super().to_dict()

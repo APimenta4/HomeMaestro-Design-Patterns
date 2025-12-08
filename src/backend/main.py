@@ -26,16 +26,18 @@ from integrations import (
     WhatsAppIntegration,
 )
 from integrations.messages import Message, MessageType
-from shared import HomeMaestro, Identifiable
+from shared import HomeMaestro, Identifiable, NotificationService
 
 logging.basicConfig(level=logging.DEBUG)
 
-STATE_FILE = "home_maestro_state.pkl"
+HOMEMAESTRO_STATE_FILE = "home_maestro_state.pkl"
+NOTIFICATIONS_STATE_FILE = "notifications_state.pkl"
 ID_COUNTER_FILE = "id_counter.pkl"
 
 
 def create_sample_data():
     home_maestro = HomeMaestro()
+    notification_service = NotificationService()
 
     # Sample devices
     features: set[Feature] = set()
@@ -95,9 +97,9 @@ def create_sample_data():
     home_maestro.add_device(device11)
     home_maestro.add_device(device12)
 
-    home_maestro.add_integration(TelegramIntegration())
-    home_maestro.add_integration(DiscordIntegration())
-    home_maestro.add_integration(SlackIntegration())
+    notification_service.add_integration(TelegramIntegration())
+    notification_service.add_integration(DiscordIntegration())
+    notification_service.add_integration(SlackIntegration())
 
     # Sample notification
     alert_message = Message(
@@ -106,7 +108,7 @@ def create_sample_data():
         timestamp=datetime.now().isoformat(),
     )
 
-    home_maestro.notification_service.send_notification_broadcast(alert_message)
+    notification_service.send_notification_broadcast(alert_message)
 
     # Sample automations
     # condition1 = LampCondition()
@@ -134,7 +136,8 @@ def create_sample_data():
 
 def save_state():
     logging.info("Saving application state")
-    HomeMaestro().save_state(STATE_FILE)
+    HomeMaestro().save_state(HOMEMAESTRO_STATE_FILE)
+    NotificationService().save_state(NOTIFICATIONS_STATE_FILE)
     Identifiable.save_id_counter(ID_COUNTER_FILE)
 
 
@@ -142,10 +145,15 @@ if __name__ == "__main__":
     # Register shutdown handler
     atexit.register(save_state)
 
-    if os.path.exists(STATE_FILE) and os.path.exists(ID_COUNTER_FILE):
+    if (
+        os.path.exists(HOMEMAESTRO_STATE_FILE)
+        and os.path.exists(ID_COUNTER_FILE)
+        and os.path.exists(NOTIFICATIONS_STATE_FILE)
+    ):
         logging.info("Loading saved state")
         Identifiable.load_id_counter(ID_COUNTER_FILE)
-        HomeMaestro().load_state(STATE_FILE)
+        HomeMaestro().load_state(HOMEMAESTRO_STATE_FILE)
+        NotificationService().load_state(NOTIFICATIONS_STATE_FILE)
     else:
         logging.info("No saved state found. Creating new instance sample data")
         create_sample_data()

@@ -536,33 +536,23 @@
         modal.classList.add("active");
 
         try {
-          const [existingIntegrationsRes, availableTypesRes] =
-            await Promise.all([fetch(API_URL), fetch(API_URL + "types")]);
+          const availableTypesRes = await fetch(API_URL + "types");
 
-          if (!existingIntegrationsRes.ok || !availableTypesRes.ok) {
-            throw new Error("Failed to fetch integration data.");
+          if (!availableTypesRes.ok) {
+            throw new Error("Failed to fetch available integration types.");
           }
 
-          const existingIntegrations = await existingIntegrationsRes.json();
           const availableTypes = await availableTypesRes.json();
 
-          const existingTypes = existingIntegrations.map((int) => int.type);
-          const availableToAdd = availableTypes.filter(
-            (type) =>
-              !existingTypes.some((existing) =>
-                existing.toLowerCase().includes(type.toLowerCase())
-              )
-          );
-
-          if (availableToAdd.length === 0) {
-            modalBody.innerHTML = `<div class="empty-state" style="padding: 20px; box-shadow: none;">All available integrations have been added.</div>`;
+          if (availableTypes.length === 0) {
+            modalBody.innerHTML = `<div class="empty-state" style="padding: 20px; box-shadow: none;">No integrations available to add.</div>`;
             return;
           }
 
           const grid = document.createElement("div");
           grid.className = "add-integration-grid";
 
-          availableToAdd.forEach((type) => {
+          availableTypes.forEach((type) => {
             const details = getIntegrationDetails(
               Object.keys(integrationDisplayMap).find((k) =>
                 k.toLowerCase().includes(type.toLowerCase())

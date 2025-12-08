@@ -2,11 +2,11 @@ from api.api_shared import validates_exceptions
 from api.endpoint_templates import IntegrationCreationAlgorithm
 from flask import Blueprint, Response, make_response, request
 from integrations import IntegrationFactory
-from shared import HomeMaestro
+from shared import NotificationService
 
 integrations_api = Blueprint("integrations", __name__)
 
-home_maestro = HomeMaestro()
+notification_service = NotificationService()
 integration_creation_handler = IntegrationCreationAlgorithm()
 
 
@@ -14,8 +14,7 @@ integration_creation_handler = IntegrationCreationAlgorithm()
 @validates_exceptions
 def get_integrations() -> Response:
     integrations = [
-        integration.to_dict()
-        for integration in home_maestro.notification_service.integrations
+        integration.to_dict() for integration in notification_service.integrations
     ]
     return make_response(integrations)
 

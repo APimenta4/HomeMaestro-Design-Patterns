@@ -1,10 +1,10 @@
 from typing import Any
 
 from api.endpoint_templates import EntityCreationAlgorithm
-from integrations import Integration, IntegrationFactory
-from shared import HomeMaestro
+from integrations import IntegrationFactory
+from shared import NotificationService
 
-home_maestro = HomeMaestro()
+notification_service = NotificationService()
 
 
 class IntegrationCreationAlgorithm(EntityCreationAlgorithm):
@@ -19,9 +19,7 @@ class IntegrationCreationAlgorithm(EntityCreationAlgorithm):
         # No preparation needed for now
         return payload
 
-    def instantiate_and_persist_entity(
-        self, prepared_data: dict[str, Any]
-    ) -> Integration:
+    def instantiate_and_persist_entity(self, prepared_data: dict[str, Any]):
         integration = IntegrationFactory.create_integration(**prepared_data)
-        home_maestro.add_integration(integration)
+        notification_service.add_integration(integration)
         return integration
