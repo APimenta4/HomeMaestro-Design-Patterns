@@ -66,6 +66,8 @@
         color: white;
         padding: 10px 20px;
         border-radius: 8px;
+        margin-left: 10px;
+        margin-right: 10px;
         text-decoration: none;
         font-weight: 700;
         transition: background-color 0.3s;
@@ -369,6 +371,9 @@
         <button class="add-btn" onclick="openAddIntegrationModal()">
           Add Integration
         </button>
+        <button class="add-btn test-btn" onclick="testIntegrations()">
+          Test Integrations
+        </button>
       </div>
       <div id="integrationsContainer">
         <div class="loading">
@@ -484,9 +489,13 @@
         modalTitle.textContent = `Messages for ${details.name} (${messageCount})`;
 
         if (integration.sent_messages && integration.sent_messages.length > 0) {
+          const sortedMessages = integration.sent_messages.sort(
+            (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+          );
+
           const messageList = document.createElement("ul");
           messageList.className = "message-list";
-          integration.sent_messages.forEach((msg) => {
+          sortedMessages.forEach((msg) => {
             const item = document.createElement("li");
             item.className = "message-item";
             item.innerHTML = `
@@ -677,6 +686,21 @@
               <p>${error.message}</p>
             </div>
           `;
+        }
+      }
+
+      async function testIntegrations() {
+        try {
+          const response = await fetch(API_URL + "test", { method: "GET" });
+          if (!response.ok) {
+            throw new Error("Failed to send test notification.");
+          }
+          const result = await response.json();
+          alert(result.message || "Test notification sent successfully.");
+          await loadIntegrations();
+        } catch (error) {
+          console.error("Error testing integrations:", error);
+          alert("Failed to send test notification. Please try again.");
         }
       }
 
