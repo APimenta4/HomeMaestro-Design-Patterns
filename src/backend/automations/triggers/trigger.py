@@ -9,14 +9,17 @@ class Trigger(ABC):
 
     @abstractmethod
     def check_conditions(self, device_id: int, payload: str) -> bool:
-        pass
+        for condition in self.conditions:
+            if not condition.check(device_id, payload):
+                return False
+        return True
 
     def to_dict(self) -> dict[str, object]:
         return {
-            "conditions": [condition.__class__.__name__ for condition in self.conditions]
+            "conditions": [
+                condition.__class__.__name__ for condition in self.conditions
+            ]
         }
-    
+
     def to_dict_deep(self) -> dict[str, object]:
-        return {
-            "conditions": [condition.to_dict() for condition in self.conditions]
-        }
+        return {"conditions": [condition.to_dict() for condition in self.conditions]}

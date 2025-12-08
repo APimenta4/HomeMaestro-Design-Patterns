@@ -198,3 +198,5 @@ Is it called in:
 # TODO: add publisher subscriber
 
 # TODO: add state
+
+# TODO: add adapter

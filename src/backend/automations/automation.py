@@ -30,7 +30,7 @@ class Automation(Identifiable):
         dict["action"] = self.action.__class__.__name__
         dict["description"] = self.description
         return dict
-    
+
     def to_dict_deep(self) -> dict[str, object]:
         dict = self.to_dict()
 
@@ -40,7 +40,6 @@ class Automation(Identifiable):
         return dict
 
     def attempt_automation(self, device_id: int, payload: str) -> bool:
-        # TODO: remove
         logger.info("Attempting automation '%s' with payload: %s", self.name, payload)
         if not self.enabled:
             return False

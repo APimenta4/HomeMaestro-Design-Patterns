@@ -59,7 +59,7 @@ class EntityCreationAlgorithm(ABC):
 
             if (
                 payload.get(field)
-                and expected_type is not list
+                and expected_type is list
                 and len(payload[field]) == 0
             ):
                 payload.pop(field)
