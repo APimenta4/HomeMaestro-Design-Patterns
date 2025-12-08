@@ -17,8 +17,11 @@ class EntityCreationAlgorithm(ABC):
 
     def create_entity(self, request: Request) -> Response:
         payload = self.parse_payload(request)
+        print("Payload received:", payload)
         self.validate_and_clean_payload(payload)  # Partially hooked method
+        print("Payload after validation:", payload)
         prepared_data = self.prepare_input_data(payload)  # Hooked method
+        print("Prepared data:", prepared_data)
         entity = self.instantiate_and_persist_entity(prepared_data)  # Hooked method
         return self.success_response(entity)
 
@@ -73,9 +76,9 @@ class EntityCreationAlgorithm(ABC):
                 )
 
         # Clean all other fields from payload
-        for field in list(payload.keys()):
-            if field not in required_fields | optional_fields:
-                payload.pop(field)
+        # for field in list(payload.keys()):
+        #     if field not in required_fields | optional_fields:
+        #         payload.pop(field)
 
         return True
 
