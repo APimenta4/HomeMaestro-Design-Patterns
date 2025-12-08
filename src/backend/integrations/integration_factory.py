@@ -1,4 +1,11 @@
-from . import Integration, DiscordIntegration, SlackIntegration, TelegramIntegration, WhatsAppIntegration, WebhookIntegration
+from . import (
+    DiscordIntegration,
+    Integration,
+    SlackIntegration,
+    TelegramIntegration,
+    WebhookIntegration,
+    WhatsAppIntegration,
+)
 
 
 # DESIGN PATTERN: Simple Factory
@@ -12,11 +19,11 @@ class _IntegrationFactory:
             "webhook": WebhookIntegration,
         }
 
-    def create_integration(self, type: str) -> Integration:
+    def create_integration(self, type: str, **kwargs) -> Integration:
         creator = self._creators.get(type.lower())
         if not creator:
             raise ValueError(f"The provided feature type is not supported: {type}")
-        return creator()
+        return creator(**kwargs)
 
     def get_supported_integrations(self) -> list[str]:
         return list(self._creators.keys())

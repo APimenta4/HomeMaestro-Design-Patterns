@@ -95,11 +95,9 @@ def create_sample_data():
     home_maestro.add_device(device11)
     home_maestro.add_device(device12)
 
-    home_maestro.add_integration(WhatsAppIntegration())
     home_maestro.add_integration(TelegramIntegration())
     home_maestro.add_integration(DiscordIntegration())
     home_maestro.add_integration(SlackIntegration())
-    home_maestro.add_integration(WebhookIntegration())
 
     # Sample notification
     alert_message = Message(

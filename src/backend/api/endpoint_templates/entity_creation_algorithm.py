@@ -50,7 +50,6 @@ class EntityCreationAlgorithm(ABC):
             if expected_type is str and not payload[field].strip():
                 raise ValueError(f"Field '{field}' cannot be empty or whitespace.")
 
-        optional_fields = {"type": str, "features": list}
         for field, expected_type in optional_fields.items():
             if field in payload and not isinstance(payload[field], expected_type):
                 raise ValueError(

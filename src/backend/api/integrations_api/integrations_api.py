@@ -1,8 +1,8 @@
 from api.api_shared import validates_exceptions
 from api.endpoint_templates import IntegrationCreationAlgorithm
 from flask import Blueprint, Response, make_response, request
-from shared import HomeMaestro
 from integrations import IntegrationFactory
+from shared import HomeMaestro
 
 integrations_api = Blueprint("integrations", __name__)
 
@@ -20,13 +20,13 @@ def get_integrations() -> Response:
     return make_response(integrations)
 
 
-@integrations_api.route("/<int:integration_id>", methods=["GET"])
-@validates_exceptions
-def get_integration(integration_id: int) -> Response:
-    integration = home_maestro.get_integration_by_id(integration_id)
-    if not integration:
-        return make_response({"error": "Integration not found"}, 404)
-    return make_response(integration.to_dict())
+# @integrations_api.route("/<int:integration_id>", methods=["GET"])
+# @validates_exceptions
+# def get_integration(integration_id: int) -> Response:
+#     integration = home_maestro.get_integration_by_id(integration_id)
+#     if not integration:
+#         return make_response({"error": "Integration not found"}, 404)
+#     return make_response(integration.to_dict())
 
 
 @integrations_api.route("/", methods=["POST"])

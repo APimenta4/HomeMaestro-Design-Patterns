@@ -13,7 +13,7 @@ class IntegrationCreationAlgorithm(EntityCreationAlgorithm):
         return {"type": str}
 
     def optional_fields(self) -> dict[str, type]:
-        return {}
+        return {"webhook_url": str}
 
     def prepare_input_data(self, payload: dict[str, Any]) -> dict[str, object]:
         # No preparation needed for now
