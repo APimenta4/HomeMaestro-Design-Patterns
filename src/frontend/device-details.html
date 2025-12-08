@@ -227,6 +227,17 @@
         box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
       }
 
+      .feature-item.unconnected {
+        cursor: not-allowed;
+        background-color: #f0f0f0;
+        border-left: 3px solid #95a5a6;
+        opacity: 0.7;
+      }
+
+      .feature-item.unconnected i {
+        color: #95a5a6;
+      }
+
       .device-actions {
         display: flex;
         align-items: center;
@@ -525,7 +536,9 @@
     <div id="featureModal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 id="featureModalTitle"><i class="fas fa-star"></i> Feature Details</h3>
+          <h3 id="featureModalTitle">
+            <i class="fas fa-star"></i> Feature Details
+          </h3>
           <button class="close-modal" onclick="closeFeatureModal()">
             <i class="fas fa-times"></i>
           </button>
@@ -537,7 +550,12 @@
           <button type="button" class="btn btn-edit" id="editFeatureBtn">
             Edit
           </button>
-          <button type="button" class="btn btn-save" id="saveFeatureBtn" style="display: none;">
+          <button
+            type="button"
+            class="btn btn-save"
+            id="saveFeatureBtn"
+            style="display: none"
+          >
             Save
           </button>
           <button
@@ -586,6 +604,7 @@
       };
 
       let currentDevice = null;
+      let isDeviceUnconnected = false;
 
       function getDeviceIcon(type) {
         return deviceIcons[type] || deviceIcons.default;
@@ -607,7 +626,10 @@
         return device.type && device.type.endsWith("Hub");
       }
 
-      function getFeatureDisplayProperties(feature) {
+      function getFeatureDisplayProperties(feature, isDeviceUnconnected) {
+        if (isDeviceUnconnected) {
+          return "Device Unconnected";
+        }
         const properties = [];
         switch (feature.type) {
           case "LampFeature":
@@ -625,7 +647,9 @@
             break;
           case "LockFeature":
             if (feature.state !== undefined) {
-              properties.push(`state: ${feature.state ? "Locked" : "Unlocked"}`);
+              properties.push(
+                `state: ${feature.state ? "Locked" : "Unlocked"}`
+              );
             }
             break;
           case "TemperatureFeature":
@@ -644,10 +668,13 @@
         const statusClass = getStatusClass(device.status);
         const protocolIcon = getProtocolIcon(device.protocol);
         const deviceIsHub = isHub(device);
+        const isUnconnected = isDeviceUnconnected;
 
         content.innerHTML = `
                 <div class="detail-card">
-                    <input type="hidden" id="currentDevice" value='${JSON.stringify(device).replace(/'/g, '&#39;')}'>
+                    <input type="hidden" id="currentDevice" value='${JSON.stringify(
+                      device
+                    ).replace(/'/g, "&#39;")}'>
                     <div class="device-header">
                         <div class="device-icon-large">
                             <i class="fas ${icon}"></i>
@@ -700,30 +727,48 @@
                         <div class="info-section">
                             <h3><i class="fas fa-star"></i> Features</h3>
                             <ul class="features-list">
-                                ${device.features.sort((a, b) =>
-                                  a.name.localeCompare(b.name)
-                                )
-                                  .map(
-                                    (feature) => {
-                                      const featureString = JSON.stringify(feature).replace(/"/g, '&quot;');
-                                      return `
-                                    <li class="feature-item clickable" onclick='openFeatureModal(${featureString})' data-feature-type="${feature.type}">
+                                ${device.features
+                                  .sort((a, b) => a.name.localeCompare(b.name))
+                                  .map((feature) => {
+                                    const featureString = JSON.stringify(
+                                      feature
+                                    ).replace(/"/g, "&quot;");
+                                    const featureClasses = `feature-item ${
+                                      isUnconnected
+                                        ? "unconnected"
+                                        : "clickable"
+                                    }`;
+                                    const onClickHandler = isUnconnected
+                                      ? ""
+                                      : `onclick='openFeatureModal(${featureString})'`;
+                                    return `
+                                    <li class="${featureClasses}" ${onClickHandler} data-feature-type="${
+                                      feature.type
+                                    }">
                                         <i class="fas fa-check-circle"></i>
-                                        <span>${feature.name} <span style="color: #7f8c8d; font-size: 0.9em;">(${feature.type} - ${
-                                          feature.category || 'N/A'
-                                        })</span></span>
+                                        <span>${
+                                          feature.name
+                                        } <span style="color: #7f8c8d; font-size: 0.9em;">(${
+                                      feature.type
+                                    } - ${
+                                      feature.category || "N/A"
+                                    })</span></span>
                                         ${(() => {
-                                          const props = getFeatureDisplayProperties(feature);
+                                          const props =
+                                            getFeatureDisplayProperties(
+                                              feature,
+                                              isUnconnected
+                                            );
                                           return props
                                             ? `
                                             <div style="margin-left: auto; color: #7F8C8D; font-size: 0.9em;">
                                                 ${props}
                                             </div>
-                                        ` : "";
+                                        `
+                                            : "";
                                         })()}
                                     </li>`;
-                                    }
-                                  )
+                                  })
                                   .join("")}
                             </ul>
                         </div>
@@ -822,34 +867,48 @@
 
         modalTitle.innerHTML = `<i class="fas fa-star"></i> ${feature.name} (${feature.type})`;
 
-        let propertiesHtml = '<div class="info-section" style="margin-bottom: 0;">';
+        let propertiesHtml =
+          '<div class="info-section" style="margin-bottom: 0;">';
         propertiesHtml += `
           <div class="form-group">
               <label>Category</label>
               <div class="feature-control">
-                  <span class="info-value">${feature.category || 'N/A'}</span>
+                  <span class="info-value">${feature.category || "N/A"}</span>
               </div>
           </div>
         `;
-        const parameters = { ...feature.options, state: feature.state, brightness: feature.brightness };
+        const parameters = {
+          ...feature.options,
+          state: feature.state,
+          brightness: feature.brightness,
+        };
         delete parameters.undefined;
 
         if (Object.keys(parameters).length > 0) {
           propertiesHtml += `<form id="featureEditForm" data-feature-id="${feature.id}">`;
-          propertiesHtml += Object.entries(parameters).map(([key, value]) => {
+          propertiesHtml += Object.entries(parameters)
+            .map(([key, value]) => {
               if (value === undefined) return "";
               const label = key.charAt(0).toUpperCase() + key.slice(1);
               let inputHtml = `<span class="info-value">${value}</span>`;
 
-              if (key === 'state' && feature.type === 'LockFeature') {
-                inputHtml = `<select name="state" disabled><option value="true" ${value ? 'selected' : ''}>Locked</option><option value="false" ${!value ? 'selected' : ''}>Unlocked</option></select>`;
-              } else if (key === 'state') {
-                inputHtml = `<select name="state" disabled><option value="true" ${value ? 'selected' : ''}>On</option><option value="false" ${!value ? 'selected' : ''}>Off</option></select>`;
-              } else if (key === 'brightness') {
+              if (key === "state" && feature.type === "LockFeature") {
+                inputHtml = `<select name="state" disabled><option value="true" ${
+                  value ? "selected" : ""
+                }>Locked</option><option value="false" ${
+                  !value ? "selected" : ""
+                }>Unlocked</option></select>`;
+              } else if (key === "state") {
+                inputHtml = `<select name="state" disabled><option value="true" ${
+                  value ? "selected" : ""
+                }>On</option><option value="false" ${
+                  !value ? "selected" : ""
+                }>Off</option></select>`;
+              } else if (key === "brightness") {
                 inputHtml = `<input type="range" name="brightness" min="0" max="100" value="${value}" disabled /> <span class="range-value">${value}</span>`;
-              } else if (key === 'position') {
+              } else if (key === "position") {
                 inputHtml = `<input type="range" name="position" min="0" max="100" value="${value}" disabled/> <span class="range-value">${value}</span>`;
-              } else if (key === 'temperature') {
+              } else if (key === "temperature") {
                 inputHtml = `<input type="number" name="temperature" value="${value}" disabled />`;
               }
 
@@ -859,34 +918,37 @@
                     <div class="feature-control">${inputHtml}</div>
                 </div>
               `;
-          }).join("");
+            })
+            .join("");
           propertiesHtml += `</form>`;
         } else {
-          propertiesHtml += "<p>This feature has no configurable parameters.</p>";
+          propertiesHtml +=
+            "<p>This feature has no configurable parameters.</p>";
           editBtn.style.display = "none";
         }
         propertiesHtml += "</div>";
         modalBody.innerHTML = propertiesHtml;
 
         // Reset buttons
-        editBtn.style.display = Object.keys(parameters).length > 0 ? "flex" : "none";
+        editBtn.style.display =
+          Object.keys(parameters).length > 0 ? "flex" : "none";
         saveBtn.style.display = "none";
         closeBtn.textContent = "Close";
         editBtn.onclick = () => toggleFeatureEdit(true);
         saveBtn.onclick = () => saveFeatureChanges(feature.id);
         closeBtn.onclick = () => {
-            if (saveBtn.style.display === 'none') {
-                closeFeatureModal();
-            } else {
-                toggleFeatureEdit(false); // Cancel edit
-            }
+          if (saveBtn.style.display === "none") {
+            closeFeatureModal();
+          } else {
+            toggleFeatureEdit(false); // Cancel edit
+          }
         };
 
         // Add event listeners for range inputs
-        modalBody.querySelectorAll('input[type="range"]').forEach(range => {
-            range.addEventListener('input', (e) => {
-                e.target.nextElementSibling.textContent = e.target.value;
-            });
+        modalBody.querySelectorAll('input[type="range"]').forEach((range) => {
+          range.addEventListener("input", (e) => {
+            e.target.nextElementSibling.textContent = e.target.value;
+          });
         });
 
         document.getElementById("featureModal").classList.add("active");
@@ -898,17 +960,19 @@
         const saveBtn = document.getElementById("saveFeatureBtn");
         const closeBtn = document.querySelector("#featureModal .btn-cancel");
 
-        form.querySelectorAll("input, select").forEach(el => el.disabled = !isEditing);
+        form
+          .querySelectorAll("input, select")
+          .forEach((el) => (el.disabled = !isEditing));
 
         if (isEditing) {
-            editBtn.style.display = "none";
-            saveBtn.style.display = "flex";
-            closeBtn.textContent = "Cancel";
+          editBtn.style.display = "none";
+          saveBtn.style.display = "flex";
+          closeBtn.textContent = "Cancel";
         } else {
-            editBtn.style.display = "flex";
-            saveBtn.style.display = "none";
-            closeBtn.textContent = "Close";
-            // TODO: Reset form to original values if needed
+          editBtn.style.display = "flex";
+          saveBtn.style.display = "none";
+          closeBtn.textContent = "Close";
+          // TODO: Reset form to original values if needed
         }
       }
 
@@ -918,33 +982,35 @@
         const options = {};
 
         for (let [key, value] of formData.entries()) {
-            if (key === 'state') {
-                options[key] = value === 'true';
-            } else {
-                options[key] = Number(value);
-            }
+          if (key === "state") {
+            options[key] = value === "true";
+          } else {
+            options[key] = Number(value);
+          }
         }
 
         try {
-            const response = await fetch(`${API_URL}${deviceId}/execute/${featureId}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(options)
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || 'Failed to execute feature');
+          const response = await fetch(
+            `${API_URL}${deviceId}/execute/${featureId}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(options),
             }
+          );
 
-            const result = await response.json();
-            alert(result.message);
-            closeFeatureModal();
-            renderDeviceDetails(result.device);
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || "Failed to execute feature");
+          }
 
+          const result = await response.json();
+          alert(result.message);
+          closeFeatureModal();
+          renderDeviceDetails(result.device);
         } catch (error) {
-            console.error('Error executing feature:', error);
-            alert(`Error: ${error.message}`);
+          console.error("Error executing feature:", error);
+          alert(`Error: ${error.message}`);
         }
       }
 
@@ -954,7 +1020,8 @@
         const saveBtn = document.getElementById("saveFeatureBtn");
         editBtn.style.display = "flex";
         saveBtn.style.display = "none";
-        document.querySelector("#featureModal .btn-cancel").textContent = "Close";
+        document.querySelector("#featureModal .btn-cancel").textContent =
+          "Close";
       }
 
       async function saveChanges(event) {
@@ -1112,6 +1179,15 @@
         }
 
         try {
+          const devicesResponse = await fetch(API_URL);
+          if (devicesResponse.ok) {
+            const devicesData = await devicesResponse.json();
+            const unconnectedDevices = devicesData.unconnected_devices || [];
+            isDeviceUnconnected = unconnectedDevices.some(
+              (d) => d.id === parseInt(deviceId)
+            );
+          }
+
           const response = await fetch(`${API_URL}${deviceId}`);
 
           if (!response.ok) {

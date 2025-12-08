@@ -102,6 +102,15 @@ def execute_device_feature(device_id: int, feature_id: int) -> Response:
     if device is None:
         return make_response({"error": f"Device with id '{device_id}' not found"}, 404)
 
+    if device in home_maestro.unconnected_devices:
+        return make_response(
+            {
+                "error": "Cannot execute feature on unconnected device, "
+                "please connect it to a suitable hub first"
+            },
+            400,
+        )
+
     options = request.get_json()
 
     try:

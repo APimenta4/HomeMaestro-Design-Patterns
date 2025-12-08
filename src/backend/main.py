@@ -111,32 +111,27 @@ def create_sample_data():
     home_maestro.notification_service.send_notification_broadcast(alert_message)
 
     # Sample automations
-    condition1 = LampCondition()
-    command1 = LampCommand()
-    trigger1 = TimeTrigger({condition1})
-    action1 = ExternalAction({command1})
-    automation1 = Automation(
-        name="my beautiful automation",
-        trigger=trigger1,
-        action=action1,
-        description="just testing",
-        device_id=1,
-    )
-    automation2 = Automation(
-        name="another automation",
-        trigger=trigger1,
-        action=action1,
-        device_id=2,
-        enabled=False,
-    )
+    # condition1 = LampCondition()
+    # command1 = LampCommand()
+    # trigger1 = TimeTrigger({condition1})
+    # action1 = ExternalAction({command1})
+    # automation1 = Automation(
+    #     name="my beautiful automation",
+    #     trigger=trigger1,
+    #     action=action1,
+    #     description="just testing",
+    #     device_id=1,
+    # )
+    # automation2 = Automation(
+    #     name="another automation",
+    #     trigger=trigger1,
+    #     action=action1,
+    #     device_id=2,
+    #     enabled=False,
+    # )
 
-    home_maestro.add_automation(automation1)
-    home_maestro.add_automation(automation2)
-
-    # Sample automations
-    condition1 = LampCondition()
-    command1 = LampCommand()
-    trigger1 = TimeTrigger({condition1})
+    # home_maestro.add_automation(automation1)
+    # home_maestro.add_automation(automation2)
 
 
 def save_state():

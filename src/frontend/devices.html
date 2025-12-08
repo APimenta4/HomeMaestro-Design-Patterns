@@ -135,7 +135,6 @@
 
       .device-card.disabled {
         opacity: 0.5;
-        pointer-events: none;
         background: #f0f0f0;
       }
 
@@ -563,11 +562,11 @@
 
         const listItem = document.createElement("li");
         listItem.className = `device-card ${disabledClass}`;
-        if (!isDisabled) {
-          listItem.onclick = () => {
-            window.location.href = `device-details.html?id=${device.id}`;
-          };
-        }
+
+        listItem.onclick = () => {
+          window.location.href = `device-details.html?id=${device.id}`;
+        };
+
         listItem.innerHTML = `
                 <div class="device-header">
                     <div class="device-icon">

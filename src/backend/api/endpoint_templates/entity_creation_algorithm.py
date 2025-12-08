@@ -17,11 +17,8 @@ class EntityCreationAlgorithm(ABC):
 
     def create_entity(self, request: Request) -> Response:
         payload = self.parse_payload(request)
-        print("Payload received:", payload)
         self.validate_and_clean_payload(payload)  # Partially hooked method
-        print("Payload after validation:", payload)
         prepared_data = self.prepare_input_data(payload)  # Hooked method
-        print("Prepared data:", prepared_data)
         entity = self.instantiate_and_persist_entity(prepared_data)  # Hooked method
         return self.success_response(entity)
 
@@ -50,7 +47,7 @@ class EntityCreationAlgorithm(ABC):
             if payload[field] is None or len(payload[field]) == 0:
                 raise ValueError(f"Field '{field}' cannot be empty.")
 
-            if expected_type == str and not payload[field].strip():
+            if expected_type is str and not payload[field].strip():
                 raise ValueError(f"Field '{field}' cannot be empty or whitespace.")
 
         optional_fields = {"type": str, "features": list}
@@ -61,13 +58,17 @@ class EntityCreationAlgorithm(ABC):
                     "Either omit it or provide a valid value type."
                 )
 
-            if payload.get(field) and expected_type != list and len(payload[field]) == 0:
+            if (
+                payload.get(field)
+                and expected_type is not list
+                and len(payload[field]) == 0
+            ):
                 payload.pop(field)
                 logger.warning("Optional field '%s' is empty. Ignoring field.", field)
 
             if (
                 field in payload
-                and expected_type == str
+                and expected_type is str
                 and not (payload[field] or "").strip()
             ):
                 payload.pop(field)
@@ -76,9 +77,9 @@ class EntityCreationAlgorithm(ABC):
                 )
 
         # Clean all other fields from payload
-        # for field in list(payload.keys()):
-        #     if field not in required_fields | optional_fields:
-        #         payload.pop(field)
+        for field in list(payload.keys()):
+            if field not in required_fields | optional_fields:
+                payload.pop(field)
 
         return True
 

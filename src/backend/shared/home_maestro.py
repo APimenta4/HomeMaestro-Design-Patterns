@@ -87,6 +87,7 @@ class HomeMaestro(metaclass=Singleton):
         self.connected_devices = loaded_instance.connected_devices
         self.unconnected_devices = loaded_instance.unconnected_devices
         self.automations = loaded_instance.automations
+        self.notification_service = loaded_instance.notification_service
 
         for device in self.get_all_devices():
             MQTTClient().subscribe(f"{device.id}")
