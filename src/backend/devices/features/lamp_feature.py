@@ -15,11 +15,11 @@ class LampFeature(Feature):
 
     def execute(self, options: LampParameters | None = None):
         if options:
-            if "state" in options:
+            if "state" in options and options["state"] is not None:
                 self.state = bool(options.get("state", self.state))
                 if self.options:
                     self.options["state"] = self.state
-            if "brightness" in options:
+            if "brightness" in options and options["brightness"] is not None:
                 self.brightness = int(options.get("brightness", self.brightness))
                 if self.options:
                     self.options["brightness"] = self.brightness

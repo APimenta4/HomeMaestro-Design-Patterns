@@ -14,7 +14,7 @@ class LockFeature(Feature):
 
     def execute(self, options: Optional[LockParameters] = None):
         if options:
-            if "state" in options:
+            if "state" in options and options["state"] is not None:
                 self.state = bool(options.get("state", self.state))
                 if self.options:
                     self.options["state"] = self.state

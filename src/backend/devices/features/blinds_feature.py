@@ -12,7 +12,7 @@ class BlindsFeature(Feature):
         self.position = options.get("position", 0)  # fully open
 
     def execute(self, options: BlindsParameters | None = None):
-        if options and "position" in options:
+        if options and "position" in options and options["position"] is not None:
             self.position = int(options.get("position", self.position))
             if self.options:
                 self.options["position"] = self.position

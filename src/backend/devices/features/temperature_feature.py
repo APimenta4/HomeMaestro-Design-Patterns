@@ -13,7 +13,7 @@ class TemperatureFeature(Feature):
         self.temperature = options.get("temperature", 0.0)
 
     def execute(self, options: TemperatureParameters | None = None):
-        if options and "temperature" in options:
+        if options and "temperature" in options and options["temperature"] is not None:
             self.temperature = float(options.get("temperature", self.temperature))
             if self.options:
                 self.options["temperature"] = self.temperature

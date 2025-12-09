@@ -1,4 +1,5 @@
 import pickle
+import json
 from logging import getLogger
 
 from automations import Automation
@@ -31,7 +32,8 @@ class HomeMaestro(metaclass=Singleton):
         else:
             self.unconnected_devices.add(device)
 
-        MQTTClient().subscribe(f"{device.id}")
+        MQTTClient().subscribe(f"update.{device.id}")
+        MQTTClient().subscribe(f"execution.{device.id}")
 
     def remove_device(self, id: int):
         device = self.get_device_by_id(id)
@@ -41,7 +43,9 @@ class HomeMaestro(metaclass=Singleton):
         self.connected_devices.discard(device)
         self.unconnected_devices.discard(device)
 
-        MQTTClient().unsubscribe(f"{device.id}")
+        MQTTClient().unsubscribe(f"update.{device.id}")
+        MQTTClient().unsubscribe(f"execution.{device.id}")
+
 
     def add_automation(self, automation: Automation):
         self.automations.add(automation)
@@ -61,11 +65,30 @@ class HomeMaestro(metaclass=Singleton):
     def _handle_mqtt_event(self, topic: str, payload: str):
         logger.info(f"HomeMaestro received MQTT event on topic '{topic}' with payload '{payload}'")
         try:
-            device_id = int(topic)
-            for automation in self.automations:
-                automation.attempt_automation(device_id, payload)
-        except ValueError:
-            logger.warning("Received an MQTT event with an invalid topic: %s", topic)
+            parts = topic.split(".")
+            if len(parts) != 2:
+                logger.warning("Received an MQTT event with an invalid topic format: %s", topic)
+                return
+            
+            operation, device_id_str = parts
+            device_id = int(device_id_str)
+
+            if operation == "update":
+                for automation in self.automations:
+                    automation.attempt_automation(device_id, payload)
+            elif operation == "execution":
+                device = self.get_device_by_id(device_id)
+                if device is None:
+                    logger.warning("Received execution for unknown device id: %d", device_id)
+                    return
+                
+                if device.status.value() != "online":
+                    return
+                
+                data: dict[str, object] = json.loads(payload)
+                device.execute_feature(data.get("feature_id"), data)
+        except (ValueError, IndexError):
+            logger.warning("Could not parse MQTT topic: %s", topic)
 
     def save_state(self, file_path: str):
         with open(file_path, "wb") as file:
@@ -80,6 +103,7 @@ class HomeMaestro(metaclass=Singleton):
         self.automations = loaded_instance.automations
 
         for device in self.get_all_devices():
-            MQTTClient().subscribe(f"{device.id}")
+            MQTTClient().subscribe(f"update.{device.id}")
+            MQTTClient().subscribe(f"execution.{device.id}")
 
         MQTTClient().set_event_handler(self._handle_mqtt_event)

@@ -1,4 +1,7 @@
+import json
+
 from . import Command
+from shared import MQTTClient
 
 
 class LampCommand(Command):
@@ -8,7 +11,9 @@ class LampCommand(Command):
         self.brightness: int | None = self.options.get("brightness")
 
     def execute(self):
-        pass
+        payload = json.dumps(self.to_dict())
+
+        MQTTClient().publish(f"execution.{self.device_id}", payload)
 
     def to_dict(self):
         dict = super().to_dict()
