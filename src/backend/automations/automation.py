@@ -45,6 +45,7 @@ class Automation(Identifiable):
             return False
 
         if self.trigger.check_conditions(device_id, payload):
+            logger.info("Executing automation '%s' with payload: %s", self.name, payload)
             self.action.invoke_executions()
             return True
 

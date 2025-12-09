@@ -59,7 +59,7 @@ class HomeMaestro(metaclass=Singleton):
         return None
 
     def _handle_mqtt_event(self, topic: str, payload: str):
-        print(f"HomeMaestro received MQTT event on topic '{topic}' with payload '{payload}'")
+        logger.info(f"HomeMaestro received MQTT event on topic '{topic}' with payload '{payload}'")
         try:
             device_id = int(topic)
             for automation in self.automations:
