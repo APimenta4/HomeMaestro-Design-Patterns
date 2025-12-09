@@ -1,4 +1,5 @@
 from . import Feature, FeatureCategory
+import json
 from typing import TypedDict, Optional
 
 
@@ -17,7 +18,7 @@ class LockFeature(Feature):
                 self.state = bool(options.get("state", self.state))
                 if self.options:
                     self.options["state"] = self.state
-        return f"Lock state set to {'Locked' if self.state else 'Unlocked'}"
+        return json.dumps(self.to_dict())
 
     def get_status(self):
         return {"state": self.state}

@@ -82,24 +82,24 @@ def create_sample_data():
     hub = ZWaveHub("My first hub", OnlineStatus)
     hub2 = ZigbeeHub("ZigBee Hub", OnlineStatus)
 
-    home_maestro.add_device(hub)
-    home_maestro.add_device(hub2)
-    home_maestro.add_device(device1)
-    home_maestro.add_device(device2)
-    home_maestro.add_device(device3)
-    home_maestro.add_device(device4)
-    home_maestro.add_device(device5)
-    home_maestro.add_device(device6)
-    home_maestro.add_device(device7)
-    home_maestro.add_device(device8)
-    home_maestro.add_device(device9)
-    home_maestro.add_device(device10)
-    home_maestro.add_device(device11)
-    home_maestro.add_device(device12)
+    # home_maestro.add_device(hub)
+    # home_maestro.add_device(hub2)
+    # home_maestro.add_device(device1)
+    # home_maestro.add_device(device2)
+    # home_maestro.add_device(device3)
+    # home_maestro.add_device(device4)
+    # home_maestro.add_device(device5)
+    # home_maestro.add_device(device6)
+    # home_maestro.add_device(device7)
+    # home_maestro.add_device(device8)
+    # home_maestro.add_device(device9)
+    # home_maestro.add_device(device10)
+    # home_maestro.add_device(device11)
+    # home_maestro.add_device(device12)
 
-    notification_service.add_integration(TelegramIntegration())
-    notification_service.add_integration(DiscordIntegration())
-    notification_service.add_integration(SlackIntegration())
+    # notification_service.add_integration(TelegramIntegration())
+    # notification_service.add_integration(DiscordIntegration())
+    # notification_service.add_integration(SlackIntegration())
 
     # Sample notification
     alert_message = Message(
@@ -108,7 +108,7 @@ def create_sample_data():
         timestamp=datetime.now().isoformat(),
     )
 
-    notification_service.send_notification_broadcast(alert_message)
+    # notification_service.send_notification_broadcast(alert_message)
 
     # Sample automations
     # condition1 = LampCondition()

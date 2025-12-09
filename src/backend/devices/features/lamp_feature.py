@@ -1,3 +1,5 @@
+import json
+
 from . import Feature, FeatureCategory
 from typing import TypedDict
 
@@ -21,7 +23,7 @@ class LampFeature(Feature):
                 self.brightness = int(options.get("brightness", self.brightness))
                 if self.options:
                     self.options["brightness"] = self.brightness
-        return f"Lamp state set to {'ON' if self.state else 'OFF'} with brightness {self.brightness}"
+        return json.dumps(self.to_dict())
     
     def get_status(self):
         return {"on": self.state, "brightness": self.brightness}
