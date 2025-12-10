@@ -50,6 +50,8 @@ class Device(Identifiable):
         payload = feature.execute(options)
         MQTTClient().publish(f"update.{self.id}", payload)
 
+        # TODO: Here would be the implementation to actually execute/update the feature on the real device
+
     def get_feature_status(self, feature_id: int):
         self.status.verify_can_obtain_status()
 
