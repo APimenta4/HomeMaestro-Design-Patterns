@@ -371,9 +371,6 @@
         <button class="add-btn" onclick="openAddIntegrationModal()">
           Add Integration
         </button>
-        <button class="add-btn test-btn" onclick="testIntegrations()">
-          Test Integrations
-        </button>
       </div>
       <div id="integrationsContainer">
         <div class="loading">
@@ -686,21 +683,6 @@
               <p>${error.message}</p>
             </div>
           `;
-        }
-      }
-
-      async function testIntegrations() {
-        try {
-          const response = await fetch(API_URL + "test", { method: "GET" });
-          if (!response.ok) {
-            throw new Error("Failed to send test notification.");
-          }
-          const result = await response.json();
-          alert(result.message || "Test notification sent successfully.");
-          await loadIntegrations();
-        } catch (error) {
-          console.error("Error testing integrations:", error);
-          alert("Failed to send test notification. Please try again.");
         }
       }
 
