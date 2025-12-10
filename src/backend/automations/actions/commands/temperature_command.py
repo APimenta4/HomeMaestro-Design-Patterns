@@ -1,4 +1,7 @@
+import json
+
 from . import Command
+from shared import MQTTClient
 
 
 class TemperatureCommand(Command):
@@ -7,7 +10,9 @@ class TemperatureCommand(Command):
         self.temperature: int | None = self.options.get("temperature")
 
     def execute(self):
-        pass
+        payload = json.dumps(self.to_dict())
+
+        MQTTClient().publish(f"execution.{self.device_id}", payload)
 
     def to_dict(self):
         dict = super().to_dict()

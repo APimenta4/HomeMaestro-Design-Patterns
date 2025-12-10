@@ -48,7 +48,7 @@ class Device(Identifiable):
             raise ValueError(f"Feature with id '{feature_id}' does not exist on this device")
 
         payload = feature.execute(options)
-        MQTTClient().publish(f"{self.id}", payload)
+        MQTTClient().publish(f"update.{self.id}", payload)
 
     def get_feature_status(self, feature_id: int):
         self.status.verify_can_obtain_status()

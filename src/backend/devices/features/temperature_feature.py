@@ -1,4 +1,4 @@
-import random
+import json
 
 from . import Feature, FeatureCategory
 from typing import TypedDict
@@ -13,11 +13,11 @@ class TemperatureFeature(Feature):
         self.temperature = options.get("temperature", 0.0)
 
     def execute(self, options: TemperatureParameters | None = None):
-        if options and "temperature" in options:
+        if options and "temperature" in options and options["temperature"] is not None:
             self.temperature = float(options.get("temperature", self.temperature))
             if self.options:
                 self.options["temperature"] = self.temperature
-        return f"Temperature set to {self.temperature}"
+        return json.dumps(self.to_dict())
 
     def get_status(self):
         return {"temperature": self.temperature}

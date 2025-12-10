@@ -638,6 +638,9 @@
           const connectedDevices = data.connected_devices || [];
           const unconnectedDevices = data.unconnected_devices || [];
 
+          connectedDevices.sort((a, b) => b.id - a.id);
+          unconnectedDevices.sort((a, b) => b.id - a.id);
+
           container.innerHTML = "";
 
           if (
@@ -669,6 +672,7 @@
             const connectedGrid = document.createElement("div");
             connectedGrid.className = "connected-grid";
 
+            hubs.sort((a, b) => b.id - a.id);
             hubs.forEach((hub) => {
               connectedGrid.appendChild(createHubGroup(hub));
             });

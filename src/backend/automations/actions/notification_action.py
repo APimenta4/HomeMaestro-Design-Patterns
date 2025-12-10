@@ -8,7 +8,8 @@ class NotificationAction(Action):
         self.notifications = notifications
     
     def invoke_executions(self):
-        pass
+        for notification in self.notifications:
+            notification.send()
 
     def to_dict(self) -> dict[str, object]:
         return {

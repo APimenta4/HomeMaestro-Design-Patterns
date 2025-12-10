@@ -1,4 +1,4 @@
-import random
+import json
 
 from . import Feature, FeatureCategory
 from typing import TypedDict
@@ -12,11 +12,11 @@ class BlindsFeature(Feature):
         self.position = options.get("position", 0)  # fully open
 
     def execute(self, options: BlindsParameters | None = None):
-        if options and "position" in options:
+        if options and "position" in options and options["position"] is not None:
             self.position = int(options.get("position", self.position))
             if self.options:
                 self.options["position"] = self.position
-        return f"Blinds position set to {self.position}"
+        return json.dumps(self.to_dict())
 
     def get_status(self):
         return {"position": self.position}
