@@ -1,4 +1,7 @@
+import json
+
 from integrations.messages import MessageType
+from shared import MQTTClient
 
 
 class Notification:
@@ -7,8 +10,9 @@ class Notification:
         self.content = content
 
     def send(self):
-        # TODO: Implement the actual sending logic (e.g., via WebSocket, email, etc.)
-        print(f"Sending {self.type.value} notification: {self.content}")
+        payload = json.dumps(self.to_dict())
+        
+        MQTTClient().publish(f"notification", payload)
 
     def to_dict(self) -> dict[str, object]:
         return {

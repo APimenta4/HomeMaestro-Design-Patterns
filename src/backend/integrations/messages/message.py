@@ -18,7 +18,7 @@ class Message:
 
     def to_dict(self) -> dict[str, object]:
         return {
-            "message_type": self.message_type.value,
+            "message_type": self.message_type,
             "content": self.content,
             "timestamp": self.timestamp,
         }
