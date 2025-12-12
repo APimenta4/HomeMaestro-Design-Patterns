@@ -36,7 +36,7 @@ Using global variables that you pass around in the code, namely lists or key-val
 
 To include this additional desired logic, we could create a class that wraps the lists or key-value pairs that we would use to store the state, including any additional logic we desire. However, we would still need to pass around the instance of this class to every part of the code that would need to access it. 
 
-**This requirement, to frequently access a class intance, was one of the main problems we had to solve.**
+**This requirement, to frequently access a class instance, was one of the main problems we had to solve.**
 
 **The other problem was the fact that the application should always only have a single state. Therefore, even if we could access the class instances mentioned before, there should only ever be one of them, as they are the ones holding application state**
 
@@ -89,15 +89,26 @@ home_maestro = HomeMaestro() # New object?
 
 ### Problem
 
-Sometimes it is required to extend the behavior of existing objects (or in our case, methods) without modifying their code directly. This also applies when we are free to change the desired implementation, but still want to add the same behavior to multiple objects/methods while extracting duplicate code.
+Inside our API route handlers, throughout business operations, we often need to raise exceptions when something goes wrong (e.g., invalid input, entity not found, etc..) to abort the current operation and provide feedback to the client.
 
-A possible solution is to use inheritance, although this can be limited by the programming language's constraints or can lead to a complex hierarchy.
+Something such as:
+
+```python
+try:
+    # ... any exception prone snippet of code ...
+except Exception as e:
+    return ("Internal Server Error", 500)
+```
+
+This requires us to repeat the same generic exception handling code in multiple places in the code (even if we wrap the entire API route handler, we would still need to repeat the process in every endpoint). 
+
+**This would led to a considerable amount of code duplication, which is the main problem we want to solve by applying this pattern.**
 
 ### Pattern
 
 A simplified version of the Decorator pattern was in our project, in the form of generic Python decorators. Instead of wrapping objects to extend their behavior, as described in the original Decorator pattern, we apply the same concept to functions instead.
 
-One of the generic decorator that we opted to implement is named `validates_exceptions`. It is used to wrap API endpoint handler methods, and it captures any exceptions raised during the execution of the endpoint method and converts them into appropriate HTTP error responses. It also integrates seamlessly with Flask's decorators, as described in the conventional Decorator pattern.
+In our case, the decorator that we implemented is named `validates_exceptions`. It is used to deal with top-level API endpoint handler exceptions, as it captures any exceptions raised during the execution of the operations inside the endpoint and converts them into appropriate HTTP 500 error responses.
 
 **Structural Explanation**
 
@@ -115,31 +126,21 @@ def get_devices() -> Response:
 
 **Source code:**
 
-\- [Validates Exceptions Decorator](src/backend/shared/validates_exceptions.py)
+\- [Validates Exceptions Decorator](src/backend/api/api_shared/validates_exceptions.py)
 
 \- [Usage Example in Devices API](src/backend/api/devices_api/devices_api.py)
 
-The motivation behind this choice was the need to extend the behavior of certain methods (e.g., API endpoint handlers) in a reusable, clean and stackable way.
-
-The `validates_exceptions` decorator, in particular, allows us to handle any unexpected errors that may arise during the execution of the endpoint methods, ensuring that the API responds with an appropriate response while logging information for debugging purposes.
-
 ### Consequences
 
-**Pros**
+Once the decorator's implemented, we can apply it right on top of any API endpoint handler method that requires this behavior.
 
-- 🟢 Using the method decorator allows us to extend methods behavior without explicitly modifying the original function code, reducing code duplication.
+By using this approach, the API route handlers can become cleaner and don't have to worry about returning appropriate error responses, as this is now handled by the decorator. They only need to worry about raising excepetions with a message that would be meaningful to the user.
 
-- 🟢 It is possible to stack multiple decorators to combine behaviors, including framework-specific ones (like Flask, in our case).
+Using a decorator also allows us to easily add behavior for instances where exceptions are caught, such as logging the errors to a file or monitoring system.
 
-- 🟢 Enables quickly adding the decorator to new methods as needed (in our case, new endpoints).
+This approach also integrates seamlessly with additional custom decorators or decorators from third party libraries (such as Flask's), just as described in the conventional Decorator pattern. The only constraint being that the order of the decorators matters, as they are applied from bottom to top. In our case, we always need to apply our decorator before defining the API route through Flask's decorator.
 
-- 🟢 Conforms to the Open/Closed and Single Responsibility principles, promoting cleaner code.
-
-- 🟢 Decorators are a well-known, easy to implement and commonly used design pattern in Python, enabling faster development.
-
-**Cons**
-
-- 🔴 Although stacking decorators is possible, they still need to be called in the correct order to function as intended. In our case, we always need to run the decorators before defining the API route with Flask. Example:
+**Usage Example:**
 
 ```python
 @devices_api.route("/", methods=["POST"])
@@ -147,65 +148,198 @@ The `validates_exceptions` decorator, in particular, allows us to handle any une
 def add_device() -> Response:
 ```
 
-## 🏭 Simple Factory
 
-Simple Factory method is used to simplify the creation of objects that can be of multiple concrete classes.
+In the cases where we could want a server only exception to occur, for example, in cases where we need more detailed logging on the server side to happen without exposing unnecessary or sensitive details to the user, we can still write our custom try-catch blocks inside the API handlers as we normally would, and chose to deal with any caught exception by ignoring them/treating them differently/re-raise them with a more user-friendly message.
 
-This allows us to centralize object creation logic in a single location, making the creation of those concrete objects easier. This code is located on the Factory classes, and simply requires the usage of a "type" argument to determine which concrete class to instantiate.
+The only downside of using this approach would be that someone might be tempted to apply the decorator to a method that doesn't actually require it, such as a small utility function. This function could then start returning HTTP responses instead of its intended return type, which could lead to confusion and bugs in the code.
 
-Although we still need to make chain of "ifs" (or in our case, switch-case statements) to determine which concrete class to instantiate, this logic is now encapsulated within the Factory class, meaning that it won't be scattered all over the code.
 
-Some examples of this pattern can be found in the following Factory classes:
+## 🏭 Simple Factory
+
+> It is debatable whether a Simple Factory is a design pattern or not. However, given its frequent usage in our project, we decided to include it in this report. For more context on what the Simple Factory consists of, refer to [this article](https://refactoring.guru/design-patterns/factory-method/simple-factory).
+> 
+> Technically, this pattern could easily be scaled up to a Factory Method. However, given the current state of the project, we don't have any place where we need polymorphic object creation through inheritance, which is the main problem that Factory Method solves. Therefore, we are only using the simpler Simple Factory approach.
+
+### Problem
+
+During multiple occasions in our code, we find ourselves needing to create objects that can be of multiple concrete classes, based on some input parameter. Usually, this input parameter is a "type" string sent in the HTTP request that indicates which kind of concrete class to instantiate.
+
+### Pattern
+
+Simple Factory methods were used to simplify the creation of objects that can be of multiple concrete classes, chosen based on a provided input parameter, usually `type`.
+
+**UML Diagram:**
+
+![Simple Factory UML Diagram](assets/simple-factory-diagram.jpeg)
+
+This pattern can be found in the following Factory classes:
 
 **Source code:**
 
 \- [Hub Factory](src/backend/devices/hubs/hub_factory.py)
 
-\- [Action Factory](src/backend/devices/actions/action_factory.py)
+\- [Action Factory](src/backend/automations/actions/action_factory.py)
 
 \- [Feature Factory](src/backend/devices/features/feature_factory.py)
 
-\- [Condition Factory](src/backend/devices/conditions/condition_factory.py)
+\- [Condition Factory](src/backend/automations/triggers/conditions/condition_factory.py)
 
-\- [Trigger Factory](src/backend/devices/triggers/trigger_factory.py)
+\- [Trigger Factory](src/backend/automations/triggers/trigger_factory.py)
 
-\- [Command Factory](src/backend/devices/commands/command_factory.py)
+\- [Command Factory](src/backend/automations/actions/commands/command_factory.py)
 
-TODO: add states factory
+\- [Device Status Factory](src/backend/devices/device_statuses_factory.py)
 
-## Template Method
 
-We make use of the Template Method design pattern to structure well-defined steps of certain interactions with our API.
+### Consequences
 
-While creating entities, we always follow a consistent series of steps that are common to all POST endpoints. These steps include verifying the payload, preparing the data, creating the entity, and finally returning the response.
+Making use of this pattern allows us to centralize object creation logic in a single location, making the creation of those concrete objects easier.
 
-Most of the code for these steps is the same, and for that reason we encapsulated this common logic in abstract base classes, which define the overall structure of the process while allowing subclasses to implement specific details.
+Structuring the code in this way makes it considerably easier to maintain and extend the list of supported concrete classes whenever changes are required.
 
-Afterwards, we can simply call the general method that calls these steps in order in each API endpoint.
+Although we still rely on a chain of "ifs" (or switch-case statements) to determine which concrete class to instantiate, this logic is now encapsulated within the Factory class, and not scattered all over the code.
 
-This behavior can be seen in the following classes:
+A notable constraint of this approach is that, for some kinds of Factory, we might need to instantiate dependencies of the concrete classes inside the Factory class itself, which could lead to a violation of the Single Responsibility Principle. 
+
+For example, to create a new Automation through the Automation Factory, we first need to create a Trigger and an Action. Therefore, the Automation Factory also needs to know how to create those dependencies, which could lead to a bloated Factory class that handles too many responsibilities.
+
+
+## 🧮 Template Method
+
+### Problem
+
+Given the nature of our application, is it common to have multiple API endpoints that follow a similar series of steps to complete an operation, with only minor variations in the specific details of each step.
+
+In our case we support adding multiple types of entities (Devices, Hubs, Automations and Integrations) through POST endpoints. However, the overall process of creating these entities follows a similar pattern: 
+1. parsing the payload, 
+2. validating the incoming data, 
+3. preparing the data to be used, 
+4. creating the actual entity, 
+5. adding it to our persisted state, 
+6. and finally returning an appropriate response.
+
+Besides that, if we were to add any new type of entity to our system in the future, we would most likely need to follow the same series of steps to create it.
+
+This behavior leads to two problems:
+1. **We need to enforce a consistent set of steps for creating entities across multiple difference scenarios.**
+2. **We want to avoid duplicating similar code across multiple endpoints.**
+
+### Pattern
+
+Since most of the code for these steps is the same, we can encapsulated the common logic in an abstract base class, which defines the overall structure of the process while allowing subclasses to implement specific details. This is the **Template Method** design pattern.
+
+We applied this pattern to the proccess of creating entities of different types, since it was the most common operation that followed a complex enough structure that would justify using the pattern.
+
+Behavior that should be implemented by subclasses would only be:
+
+- Setting the required and optional fields to be sent in the payload for the entity to be created;
+- Preparing the data to be used as the input for the target entity constructor method;
+- Creating the actual entity instance and persisting it in the application state.
+
+While everything else, such as parsing the payload, validating the data and returning the appropriate response, is handled by the abstract base class.
+
+**UML Diagram:**
+
+![Template Method UML Diagram](assets/template-method-diagram.png)
 
 **Source code:**
+
 \- [AutomationCreationAlgorithm](src/backend/api/endpoint_templates/automation_creation_algorithm.py)
 
 \- [DeviceCreationAlgorithm](src/backend/api/endpoint_templates/device_creation_algorithm.py)
 
 \- [EntityCreationAlgorithm](src/backend/api/endpoint_templates/entity_creation_algorithm.py)
 
-Is it called in:
+\- [HubCreationAlgorithm](src/backend/api/endpoint_templates/hub_creation_algorithm.py)
 
-\- [Automations API](src/backend/api/automations_api/automations_api.py)
+\- [IntegrationCreationAlgorithm](src/backend/api/endpoint_templates/integration_creation_algorithm.py)
 
-\- [Devices API](src/backend/api/devices_api/devices_api.py)
+### Consequences
 
-# TODO: add publisher subscriber
+Using this pattern results in a much cleaner code, since about 75% of the code required to create an entity is now encapsulated in the abstract base class, making every creation algorithm more concise while abstracting away things that are common to all entity creation processes.
 
-# TODO: add state
+Afterwards, we can simply invoke the algorithm method that orchestrates these steps in the correct order in each API entity creation endpoint.
 
-# TODO: add adapter
+An existing constraint is that we are enforcing a really specific structure for creating entities, which could lead to some inflexibility in case we wanted to change the process for a specific entity type. However, in these cases, we could always override the abstracted methods or simply opt to not use the Template Method for that specific case.
 
+## 🎧🎤 Publisher-Subscriber
 
-# dsds
+### Problem
+
+In our system, we needed a way to enable communication between different components. For example, when a device's feature is executed, other parts of the system might need to react to that events. Note that here, a real Device will be an external component that communicates over a network.
+
+While using an approach like the Observer pattern could work for virtual devices, since they could be represented by an in-memory object, it wouldn't be a suitable way to represent real devices that communicate over a network, as they can't directly observe the changes in our system.
+
+Therefore, we had to use another kind of communication: an **event-driven architecture**.
+
+### Pattern
+
+The Publisher-Subscriber pattern was used to solve this problem. In this pattern, publishers (devices, regardless if they are real or virtual) broadcast messages to a specific topic, and subscribers (automations) listen to those topics to receive messages. This decouples the producers and consumers, as they only need to agree on the topic structure and message format, and allows us to pass data from the devices to the system.
+
+In our project, we implemented this pattern using the MQTT protocol. The `MQTTClient` class acts as the central component for managing subscriptions and publishing messages. Devices, automations, and other components interact with the `MQTTClient` to send and receive messages.
+
+**UML Diagram:**
+
+![Publisher-Subscriber UML Diagram](assets/pub-sub-diagram.jpeg)
+
+**Source code:**
+
+- [MQTTClient Class](src/backend/shared/mqtt_client.py)
+- [HomeMaestro Class](src/backend/shared/home_maestro.py) (sets up subscriptions and event handlers, which are callbacks invoked when messages are received on subscribed topics)
+- [Device Class](src/backend/devices/device.py) (publishes messages when features are executed)
+- [Automation Class](src/backend/automations/automation.py) (automations are attempted when messages are received on subscribed topics)
+
+### Consequences
+
+Using the Publisher-Subscriber effectively enables the usage of real devices in our system, as they can communicate to the main system asynchronously through MQTT messaging.
+
+> Note: Despite implementing this pattern, we still don't have real devices integrated into our system yet. For more context, refer to the [State Pattern and Real Devices](#state-pattern-and-real-devices) section.
+
+For each device that we add to the system, we can now subscribe to an isolated broker topic to receive relevant messages. For breaking down events into separate topics, we follow a topic structure where each device has its own topic, corresponding to its unique ID.
+
+Then, we can listen for messages on these topics and trigger automations or other actions based on the received data.
+
+Another advantage of using this pattern and communication style is that we can easily add new decoupled software components to the current system, as long as they can communicate through MQTT to send and receive messages, following an event-driven architecture. 
+
+A possible example would be a real time monitoring dashboard, that subscribes to all device topics and displays information on the latest events.
+
+## ⏻ State
+
+### Problem
+
+In our system, devices can be in different states (online, offline, error), and their behavior can vary based on their current state.
+
+Besides that, given the nature of our project and IoT devices, there can be the need to add more states in the future, or even change the behavior of existing states to better reflect real-world scenarios.
+
+Given these requirements of diverse, extendable and changeable behavior based on state, **our state-dependent methods could become cluttered with conditional statements**, making the code harder to read and maintain, which is the **main problem we want to solve**.
+
+### Pattern
+
+To address this, we implemented the **State design pattern**, which allows our Device objects to alter their behavior when their internal state changes. 
+
+Instead of using conditional statements to check the device's state, we encapsulated the desired variation of the behavior for each state in a separate class. We also made use of an abstract base class to define the interface that all state classes must implement.
+
+We arrived at the following State classes:
+
+- `OnlineState`: Represents a device that is online and fully functional. In this state, all device features can be executed normally.
+- `OfflineState`: Represents a device that is offline. In this state, any attempt to execute a device feature will result in an exception being raised, indicating that the device is not reachable. Likewise, any attemping to obtain the device's current status will also raise an exception.
+- `ErrorState`: Represents a device that is in an error state. Similar to the offline state, any attempt to execute a device feature will raise an exception, indicating that the device is currently experiencing issues. However, obtaining the device's current status is still allowed in this state.
+
+**UML Diagram:**
+
+![State UML Diagram](assets/state-diagram.jpeg)
+
+**Source code:**
+
+\- [DeviceState Abstract and Concrete Class](src/backend/devices/device_statuses.py)
+
+### Consequences 
+
+We can now easily add more states, change existing state-based logic or extend states' behavior without modifying the core Device class, making the code more maintainable and extensible.
+
+The Device class is also cleaner, as we don't have to deal with multiple conditional statements to handle state-dependent behavior.
+
+Another advantage of this approach is that we can also define state-change logic within the state classes themselves, allowing for more complex state transitions if needed in the future, although it is not the case as of now.
 
 # Project Retrospective
 
@@ -244,6 +378,16 @@ Instead, we should create a new Service Layer for our project (which we are curr
 For example, we would have DeviceService that would be responsible for handling all interactions between the entity classes and the global services (HomeMaestro, MQTTClient, etc..). Ideally, we would also include here the persistence logic for the entities in this same service (even if we are not technically using a database yet, we could still use simple in-memory lists or key-value pairs as the persistance here), and later on if we decided to move towards a proper database solution, we would not need to refactor anything other than the persistance logic inside the service layer.
 
 **This proposed design would also mitigate the need to use the Singleton design pattern, as we could provide the HomeMaestro, MQTTClient or other necessary class instances through Dependency Injection.**
+
+## Lacking Operation Atomicity
+
+Another problem detected was that, currently, business operations are not atomic, meaning that if an error occurs during the operation, the system can be left in an inconsistent state.
+
+For example, when creating an automation, if an error occurs after the Trigger and Action have been created, but before the entire operation is complete, we could end up with partially created automations or orphaned entities.
+
+To solve this problem, we would need to implement transaction management in our application, ensuring that either the entire operation is completed successfully, or none of it is applied, maintaining system consistency.
+
+Although implementing transaction management with our in-memory state persistence could be challenging, doing so by applying a design pattern such as [Unit of Work](https://martinfowler.com/eaaCatalog/unitOfWork.html) would be ideal, especially when developing robust and reliable applications. This factor is something we will consider when architecting future projects.
 
 ## Conclusion
 

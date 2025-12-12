@@ -8,9 +8,6 @@ from .messages import Message
 logger = getLogger(__name__)
 
 
-# DESIGN PATTERN: Adapter
-# adapt between NotificationService and the target technology (in this case, webhook)
-# in pratical terms, this means using libraries/mechanisms to integrate with the specific technology
 class WebhookIntegration(Integration):
     def __init__(self, webhook_url: str):
         super().__init__()
