@@ -4,7 +4,7 @@ TODO: update diagram with new classes and export image
 
 [High Level Class Diagram (draw.io)](https://app.diagrams.net/#G1Dm2RSYODV8ipJ_am0yr1ROCWjzooqt7y)
 
-![12-11 Architecture Model](assets/architecture-12-11.png)
+![12-12 Architecture Model](assets/architecture-12-12.png)
 
 TODO: "For the final version of the report, it would be good to also include a component diagram in your description of the high-level architecture of the system."
 
