@@ -1,12 +1,25 @@
 # Project Architecture
 
-[Updated Domain Model (draw.io)](https://app.diagrams.net/#G1Dm2RSYODV8ipJ_am0yr1ROCWjzooqt7y)
+TODO: update diagram with new classes and export image
 
-# TODO: update diagram with new classes
+[High Level Class Diagram (draw.io)](https://app.diagrams.net/#G1Dm2RSYODV8ipJ_am0yr1ROCWjzooqt7y)
 
 ![12-11 Architecture Model](assets/architecture-12-11.png)
 
-# TODO: "For the final version of the report, it would be good to also include a component diagram in your description of the high-level architecture of the system."
+TODO: "For the final version of the report, it would be good to also include a component diagram in your description of the high-level architecture of the system."
+
+## High Level Software Architecture
+
+![High Level Software Architecture Diagram](assets/software-architecture.png)
+
+## Home Maestro Singleton
+
+![Home Maestro Singleton Diagram](assets/homemaestro-class.png)
+
+# Device, Hub and Automation Classes
+
+![Device and Hub Class Diagrams](assets/device-hub-classes.png)
+![Automation Class Diagram](assets/automation-class.png)
 
 # Design Pattern Documentation
 
@@ -16,71 +29,61 @@
 
 ### Problem
 
-Accessing a single instance of a class in multiple places, across a complex project structure such as the present one, can be messy and challenging. Typical programatic solutions include passing the instance of the desired class as a parameter to functions or classes that depend on it, or pointing to highly controlled global variables.
+As we (initially) decided to start with in-memory state persistance for our application, we needed actual space in memory to save the state, which in our case would be the devices and automations. Therefore, we needed a way to access this state from multiple places in the code.
+
+Using global variables that you pass around in the code, namely lists or key-value pairs, would be a possible solution. However, it wouldn't encapsulate extra logic or behavior that could be of interest to us when persisting state. 
+> *Change: in retrospective, this additional encapsulation doesn't really make sense. (for context, refer to the [What we should've done](#what-we-shouldve-done) section). TL;DR: Using raw lists or key-value pairs would've more accurately represented a database and led to a better design.*
+
+To include this additional desired logic, we could create a class that wraps the lists or key-value pairs that we would use to store the state, including any additional logic we desire. However, we would still need to pass around the instance of this class to every part of the code that would need to access it. 
+
+**This requirement, to frequently access a class intance, was one of the main problems we had to solve.**
+
+**The other problem was the fact that the application should always only have a single state. Therefore, even if we could access the class instances mentioned before, there should only ever be one of them, as they are the ones holding application state**
+
+Similarly, we also have the need to access the `MQTTClient` instance around the code, as it is used in multiple places to publish messages to our broker. And in the same manner, there should only ever be a single instance of this class, as it held the connection to the MQTT broker, which should only be established once.
 
 ### Pattern
 
-# TODO: add MQTTClient class
+> Change: although we moved forwards with the Singleton pattern, using a proper layered architecture along with Dependency Injection when necessary would lead to a better design. For context, refer to the [Lacking a Proper Service Layer](#lacking-a-proper-service-layer) ending section.
 
-The Singleton pattern was applied to our commonly shared classes, namely `HomeMaestro` and `NotificationService` (as of right now).
+To solve the problems previously mentioned, the Singleton pattern was applied to the classes we wanted to access globally, namely `HomeMaestro`, `NotificationService`, and `MQTTClient`.
 
-We make use of a Python Metaclass to handle the instance creation and control, allowing us to provide Singleton behavior to any class that uses this Metaclass in a clean and reusable way.
+We make use of a Python Metaclass (class of a class that defines how a class behaves) to handle the instance creation and control, allowing us to provide Singleton behavior to any class that uses this Metaclass in a clean and reusable way.
+
+Using a Metaclass allows us to model the resulting concrete Singleton classes (HomeMaestro, NotificationService and MQTTClient) exactly as if they were regular classes. The only difference would be that we know beforehand there will only be one instance of them (and therefore their constructor method will only be called once). 
+
+Using a Metaclass also complies with the Open/Closed Principle, as we can add Singleton behavior to any class without modifying its code, and to the Single Responsibility Principle, as the Singleton Metaclass is solely responsible for ensuring the uniqueness of the instance, [as opposed to what is described in many Singleton pattern descriptions](https://refactoring.guru/design-patterns/singleton#pros-cons) *"(Violates the Single Responsibility Principle. The pattern solves two problems at the time.)"*.
 
 **UML Diagram:**
 
-![Singleton UML Diagram](assets/singleton-diagram.jpeg)
+![Singleton UML Diagram](assets/singleton-diagram.png)
 
 **Source code:**
 
-\- [Singleton Metaclass](src/backend/notifications/notification_service.py)
+\- [Singleton Metaclass](src/backend/shared/singleton.py) (the important part)
 
-\- [HomeMaestro Class](src/backend/home_maestro/home_maestro.py)
+\- [HomeMaestro Class](src/backend/shared/home_maestro.py)
 
-\- [NotificationService Class](src/backend/notifications/notification_service.py)
+\- [NotificationService Class](src/backend/shared/notification_service.py)
 
-The motivations behind the choice were the need to have a simplified interface for working with these classes across diferent parts of the code (classes, API endpoints, etc..) as well as the guarantee that only one instance of these classes would ever exist simultaneously, allowing us to maintain a single state of current `Devices` or `Integrations` (notifications), for example.
+\- [MQTTClient Class](src/backend/shared/mqtt_client.py)
+
 
 ### Consequences
 
-**Pros**
+This usage of Singletons allows us to access the global instance of our Singletons from anywhere in the code without needing to pass around instances. For example, we can simplify access to the `HomeMaestro` instance by simply calling `HomeMaestro()` anywhere in the code.
 
-- 🟢 Target classes can only be instantiated once, ensuring all parts of the program share the singleton instance (HomeMaestro and NotificationService).
+Therefore, by using Singletons, we can easily update or access the single current state of the application or use a service like `MQTTClient` from anywhere in the code.
 
-- 🟢 Simplified access to the class instance, by acting like a global variable (accessible anywhere through `home_maestro = HomeMaestro()`, for example).
+From the developer perspective, the Singleton pattern is commonly used and well-known, allowing a faster implementation and lowering the project learning curve.
 
-- 🟢 Singleton pattern is commonly used and well-known, allowing a faster implementation and transition from other programming languages while also lowering the project learning curve, as opposed to more complex practices like dependency injection and state management.
+However, a developer who is not acquainted with the design pattern might interpret that we are creating multiple instances of the Singleton class, which can be confusing. For instance:
 
-**Cons**
+```python
+home_maestro = HomeMaestro() # New object?
+```
 
-- 🔴 Using the Singleton pattern would usually imply we are violating the Single Responsibility Principle, as a single class is responsible for both providing global access to an instance and ensuring that only this one instance exists.
-
-  🟡 **Note:** By using a Python Metaclass to implement the Singleton pattern, we can overcome this issue by splitting the responsabilities. For example, HomeMaestro is completely unaware that it is a Singleton and behaves exactly like a regular class would do, providing access to itself, while the Singleton Metaclass is responsible for ensuring that only one instance of HomeMaestro exists.
-
-  ```python
-    class Singleton(type):
-        # ensures unique instance
-        _instances = {}
-
-        def __call__(cls, *args, **kwargs):
-            if cls not in cls._instances:
-                cls._instances[cls] = super().__call__(*args, **kwargs)
-            return cls._instances[cls]
-
-    class HomeMaestro(metaclass=Singleton):
-        # regular class implementation
-        ...
-
-  ```
-
-- 🔴 A developer who is not acquainted with the design pattern might interpret that we are creating multiple instances of the Singleton class, which can be confusing. For instance:
-
-  ```python
-  home_maestro = HomeMaestro() # New object?
-  ```
-
-  🟡 **Note:** The Singleton design pattern is, however, a fairly common and popular design pattern.
-
-- 🔴 [Python documentation](https://docs.python.org/3/faq/programming.html#how-do-i-share-global-variables-across-modules) itself recommends using modules instead of Singletons for global state management, as it is a more straightforward approach.
+❓ Fun fact: [Python documentation](https://docs.python.org/3/faq/programming.html#how-do-i-share-global-variables-across-modules) itself recommends using dedicated modules for sharing global variables. Therefore, it is technically possible to implement a Singleton by having that a module that contains a private variable that holds the instance, and a public function that gets/creates the instance and returns it. However, in Python, visibility modifiers are a convention based on naming rules and are not enforced by the language itself, so it would be possible to create multiple instances of the class if the developer is not careful or if something unexpected happens.
 
 ## 🏵️ (Method) Decorator
 
@@ -200,3 +203,52 @@ Is it called in:
 # TODO: add state
 
 # TODO: add adapter
+
+
+# dsds
+
+# Project Retrospective
+
+## 🧩 Patterns used
+
+Out of the patterns that were used in the project, we consider that most of them were appropriate for the problems we were trying to solve. Although the Publisher-Subscriber pattern doesn't make a lot of sense in the current state of the project, it still made sense to eventually implement it, as we are planning to move towards real devices that would communicate asynchronously through MQTT messages.
+
+**The exception to the last paragraph would be, in our opinion, the State design pattern used in devices.**
+
+### State Pattern and Real Devices
+
+Given the requirements of the project, separation of different Device states' behavior was not necessary or much benefitial. We were limited to only three states, and the behavior of two of them (offline and error) happened to only be a simple restriction of actions that could be performed on the device, rather than a completely different behavior. 
+
+It was therefore easier to simply check for those states in the methods that required it (if that meant making creating and repeating two conditions for the methods where state was used, we could create a helper function), rather than creating separate classes for each state and delegating the behavior to them, which made the project structure more complex with no real benefit.
+
+A case where state pattern could actually be benefitial and make sense to use would be when we move towards real devices, as those could introduce more states or more complex behaviors. 
+
+**However, in this regard, we also made a fundamental mistake of assuming every Device is a virtual Device**, which would not necessarily be true as we also planned to include real devices in our system, which can't be represented by the current Device class.
+
+**While the current Device class implementation is fine for virtual devices, our "real" devices entity class should not have many of the attributes that are present in the "virtual" devices entity**. For virtual devices, behavior like executing features or sending commands should've been handled by a separate class, namely the one mentioned in the Service Layer section [below](#lacking-a-proper-service-layer).
+
+**Therefore, whether we even needed to store a Device state in the first place was debatable**.
+
+## Lacking a proper Service Layer
+
+Currently, entity classes (Device, Hub, Automation) rely on global Singleton instances (HomeMaetro and MQTTClient, in our case) on some of their methods. This indicates a bad design, as base entity class and the global instance are tightly coupled.
+
+Even if we were to use Dependency Injection to provide the global instance to the entity classes as discussed before in the Singleton section, making them more decoupled and testable, we are still making a fundamental mistake of making a base entity class dependant on the implementation of a global service, which it should not even be aware of. An entity class should not be aware of how to access or use global services, as this violates the Single Responsibility Principle and makes maintenance and testing more difficult.
+
+In our case, we could technically make those service transactions directly inside the API route handlers, although this would break the SRP and DRY principles, since we would be repeating code often and mixing business logic with API handling logic.
+
+### What we should've done
+
+Instead, we should create a new Service Layer for our project (which we are currently lacking). What we currently have is the HomeMaestro class which is working both as the persistance layer and also includes some parts of the service layer.
+
+For example, we would have DeviceService that would be responsible for handling all interactions between the entity classes and the global services (HomeMaestro, MQTTClient, etc..). Ideally, we would also include here the persistence logic for the entities in this same service (even if we are not technically using a database yet, we could still use simple in-memory lists or key-value pairs as the persistance here), and later on if we decided to move towards a proper database solution, we would not need to refactor anything other than the persistance logic inside the service layer.
+
+**This proposed design would also mitigate the need to use the Singleton design pattern, as we could provide the HomeMaestro, MQTTClient or other necessary class instances through Dependency Injection.**
+
+## Conclusion
+
+Designing, iterating and reflecting over the architecture that led to this problem was a valuable learning experience, as we were able to refresh concepts such as having a proper layered architecture and the importance of separation of concerns in software design. Although things *work* so far (due to the lack of complexity of the project), it doesn't mean they are well-designed, maintainable or testable.
+
+Besides that, we were also able to come upon the realization that some of the design patterns we used (namely Singleton and perhaps State design patterns) were not really necessary or were the fruit of lack of knowledge at the time of implementation. Regardless of the cause, these patterns made sense to implement given the match between the problems we had and the problem each pattern solves.
+
+That being said, documenting the patterns as they were being used in this report would also have helped us reflect more on the design choices, detect some of the present flaws sooner and arrive at a better design overall. This is something we will take into account for future projects.

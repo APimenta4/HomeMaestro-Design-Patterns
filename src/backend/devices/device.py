@@ -45,19 +45,21 @@ class Device(Identifiable):
 
         feature = self.get_feature_by_id(feature_id)
         if feature is None:
-            raise ValueError(f"Feature with id '{feature_id}' does not exist on this device")
+            raise ValueError(
+                f"Feature with id '{feature_id}' does not exist on this device"
+            )
 
         payload = feature.execute(options)
         MQTTClient().publish(f"update.{self.id}", payload)
-
-        # TODO: Here would be the implementation to actually execute/update the feature on the real device
 
     def get_feature_status(self, feature_id: int):
         self.status.verify_can_obtain_status()
 
         feature = self.get_feature_by_id(feature_id)
         if feature is None:
-            raise ValueError(f"Feature with id '{feature_id}' does not exist on this device")
+            raise ValueError(
+                f"Feature with id '{feature_id}' does not exist on this device"
+            )
         return feature.get_status()
 
     def to_dict(self) -> dict[str, object]:

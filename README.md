@@ -17,11 +17,9 @@ The team is composed by:
 
 ## Project Management
 
-This project's management is centralized on the [Home Maestro Trello Board](https://trello.com/b/SKnU0Hi3/home-maestro).
+This project's management was centralized on the [Home Maestro Trello Board](https://trello.com/b/SKnU0Hi3/home-maestro).
 
 ## Installation
-
-# TODO: add mosquitto and python mosquitto package
 
 To install this project, follow these steps:
 
@@ -35,18 +33,23 @@ To install this project, follow these steps:
    ```
    git clone https://github.com/FEUP-MESW-ADS-2025/HomeMaestro-2T6
    ```
-3. In case you don't have it yet, install `flask` and `flask-cors` via pip:
-   ```
-   pip install Flask
-   pip install flask-cors
+3. Install the required Python packages:
+   ```bash
+   pip install Flask flask-cors paho-mqtt
+
+   # Alternatively, you can install all dependencies using the requirements.txt file:
+   cd src/backend
+   pip install -r requirements.txt
    ```
    The previous command installs Flask in your current python environment. If you aren't using any virtual environment, it will be installed on the global python version of your system.
-4. Running the backend:
+   Learn more about virtual environments [here](https://www.w3schools.com/python/python_virtualenv.asp).
+4. Install and run an MQTT broker (e.g., Mosquitto) on the `1883` port on your local machine (`localhost`). Our suggestion is to follow the instructions on the [Mosquitto website](https://mosquitto.org/download/) to install and run it on your operating system.
+5. Run the backend:
    ```
    cd src/backend && python -m main
    ```
    A Flask server will start running at `http://localhost:5000`.
-5. To run the frontend, simply open the `index.html` file located in the `src/frontend` directory in your preferred web browser.
+6. Run the frontend, by simply opening the `index.html` file located in the `src/frontend` directory in your preferred web browser.
 
 ## How to Contribute
 
@@ -54,4 +57,4 @@ On how to contribute to the project, see to our [How to Contribute](CONTRIBUTING
 
 ## Final Report
 
-This project's final report for the curricular unit Software Architecture and Design can be in [Final Report](REPORT.md).
+This project's report for the curricular unit Software Architecture and Design can be in [Final Report](REPORT.md).
