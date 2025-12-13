@@ -23,10 +23,10 @@
 
 ### Problem
 
-As we (initially) decided to start with in-memory state persistance for our application, we needed actual space in memory to save the state, which in our case would be the devices and automations. Therefore, we needed a way to access this state from multiple places in the code.
+As we (initially) decided to start with in-memory state persistence for our application, we needed actual space in memory to save the state, which in our case would be the devices and automations. Therefore, we needed a way to access this state from multiple places in the code.
 
 Using global variables that you pass around in the code, namely lists or key-value pairs, would be a possible solution. However, it wouldn't encapsulate extra logic or behavior that could be of interest to us when persisting state. 
-> *Change: in retrospective, this additional encapsulation doesn't really make sense. (for context, refer to the [What we should've done](#what-we-shouldve-done) section). TL;DR: Using raw lists or key-value pairs would've more accurately represented a database and led to a better design.*
+> *Change: In retrospect, this additional encapsulation doesn't really make sense. (for context, refer to the [What we should've done](#what-we-shouldve-done) section). TL;DR: Using raw lists or key-value pairs would've more accurately represented a database and led to a better design.*
 
 To include this additional desired logic, we could create a class that wraps the lists or key-value pairs that we would use to store the state, including any additional logic we desire. However, we would still need to pass around the instance of this class to every part of the code that would need to access it. 
 
@@ -34,17 +34,17 @@ To include this additional desired logic, we could create a class that wraps the
 
 **The other problem was the fact that the application should always only have a single state. Therefore, even if we could access the class instances mentioned before, there should only ever be one of them, as they are the ones holding application state**
 
-Similarly, we also have the need to access the `MQTTClient` instance around the code, as it is used in multiple places to publish messages to our broker. And in the same manner, there should only ever be a single instance of this class, as it held the connection to the MQTT broker, which should only be established once.
+Similarly, we also have the need to access the `MQTTClient` instance around the code, as it is used in multiple places to publish messages to our broker. And in the same manner, there should only ever be a single instance of this class, as it holds the connection to the MQTT broker, which should only be established once.
 
 ### Pattern
 
-> Change: although we moved forwards with the Singleton pattern, using a proper layered architecture along with Dependency Injection when necessary would lead to a better design. For context, refer to the [Lacking a Proper Service Layer](#lacking-a-proper-service-layer) ending section.
+> Change: although we moved forward with the Singleton pattern, using a proper layered architecture along with Dependency Injection when necessary would lead to a better design. For context, refer to the [Lacking a Proper Service Layer](#lacking-a-proper-service-layer) ending section.
 
 To solve the problems previously mentioned, the Singleton pattern was applied to the classes we wanted to access globally, namely `HomeMaestro`, `NotificationService`, and `MQTTClient`.
 
 We make use of a Python Metaclass (class of a class that defines how a class behaves) to handle the instance creation and control, allowing us to provide Singleton behavior to any class that uses this Metaclass in a clean and reusable way.
 
-Using a Metaclass allows us to model the resulting concrete Singleton classes (HomeMaestro, NotificationService and MQTTClient) exactly as if they were regular classes. The only difference would be that we know beforehand there will only be one instance of them (and therefore their constructor method will only be called once). 
+Using a Metaclass allows us to model the resulting concrete Singleton classes (HomeMaestro, NotificationService, and MQTTClient) exactly as if they were regular classes. The only difference would be that we know beforehand there will only be one instance of them (and therefore their constructor method will only be called once). 
 
 Using a Metaclass also complies with the Open/Closed Principle, as we can add Singleton behavior to any class without modifying its code, and to the Single Responsibility Principle, as the Singleton Metaclass is solely responsible for ensuring the uniqueness of the instance, [as opposed to what is described in many Singleton pattern descriptions](https://refactoring.guru/design-patterns/singleton#pros-cons) *"(Violates the Single Responsibility Principle. The pattern solves two problems at the time.)"*.
 
@@ -77,26 +77,26 @@ However, a developer who is not acquainted with the design pattern might interpr
 home_maestro = HomeMaestro() # New object?
 ```
 
-❓ Fun fact: [Python documentation](https://docs.python.org/3/faq/programming.html#how-do-i-share-global-variables-across-modules) itself recommends using dedicated modules for sharing global variables. Therefore, it is technically possible to implement a Singleton by having that a module that contains a private variable that holds the instance, and a public function that gets/creates the instance and returns it. However, in Python, visibility modifiers are a convention based on naming rules and are not enforced by the language itself, so it would be possible to create multiple instances of the class if the developer is not careful or if something unexpected happens.
+❓ Fun fact: [Python documentation](https://docs.python.org/3/faq/programming.html#how-do-i-share-global-variables-across-modules) itself recommends using dedicated modules for sharing global variables. Therefore, it is technically possible to implement a Singleton by having a module that contains a private variable that holds the instance, and a public function that gets/creates the instance and returns it. However, in Python, visibility modifiers are a convention based on naming rules and are not enforced by the language itself, so it would be possible to create multiple instances of the class if the developer is not careful or if something unexpected happens.
 
 ## 🏵️ (Method) Decorator
 
 ### Problem
 
-Inside our API route handlers, throughout business operations, we often need to raise exceptions when something goes wrong (e.g., invalid input, entity not found, etc..) to abort the current operation and provide feedback to the client.
+Inside our API route handlers, throughout business operations, we often need to raise exceptions when something goes wrong (e.g., invalid input, entity not found, etc) to abort the current operation and provide feedback to the client.
 
 Something such as:
 
 ```python
 try:
-    # ... any exception prone snippet of code ...
+    # ... any exception-prone snippet of code ...
 except Exception as e:
     return ("Internal Server Error", 500)
 ```
 
 This requires us to repeat the same generic exception handling code in multiple places in the code (even if we wrap the entire API route handler, we would still need to repeat the process in every endpoint). 
 
-**This would led to a considerable amount of code duplication, which is the main problem we want to solve by applying this pattern.**
+**This would lead to a considerable amount of code duplication, which is the main problem we want to solve by applying this pattern.**
 
 ### Pattern
 
@@ -106,7 +106,7 @@ In our case, the decorator that we implemented is named `validates_exceptions`. 
 
 **Structural Explanation**
 
-Under the hood, what's happening inside the API endpoint is exactly the equivalent to:
+Under the hood, what's happening inside the API endpoint is exactly the equivalent of:
 
 ```python
 @devices_api.route("/", methods=["GET"])
@@ -126,13 +126,13 @@ def get_devices() -> Response:
 
 ### Consequences
 
-Once the decorator's implemented, we can apply it right on top of any API endpoint handler method that requires this behavior.
+Once the decorator is implemented, we can apply it right on top of any API endpoint handler method that requires this behavior.
 
-By using this approach, the API route handlers can become cleaner and don't have to worry about returning appropriate error responses, as this is now handled by the decorator. They only need to worry about raising excepetions with a message that would be meaningful to the user.
+By using this approach, the API route handlers can become cleaner and don't have to worry about returning appropriate error responses, as this is now handled by the decorator. They only need to worry about raising exceptions with a message that would be meaningful to the user.
 
-Using a decorator also allows us to easily add behavior for instances where exceptions are caught, such as logging the errors to a file or monitoring system.
+Using a decorator also allows us to easily add behavior for instances where exceptions are caught, such as logging the errors to a file or a monitoring system.
 
-This approach also integrates seamlessly with additional custom decorators or decorators from third party libraries (such as Flask's), just as described in the conventional Decorator pattern. The only constraint being that the order of the decorators matters, as they are applied from bottom to top. In our case, we always need to apply our decorator before defining the API route through Flask's decorator.
+This approach also integrates seamlessly with additional custom decorators or decorators from third-party libraries (such as Flask's), just as described in the conventional Decorator pattern. The only constraint is that the order of the decorators matters, as they are applied from bottom to top. In our case, we always need to apply our decorator before defining the API route through Flask's decorator.
 
 **Usage Example:**
 
@@ -204,7 +204,7 @@ For example, to create a new Automation through the Automation Factory, we first
 
 Given the nature of our application, is it common to have multiple API endpoints that follow a similar series of steps to complete an operation, with only minor variations in the specific details of each step.
 
-In our case we support adding multiple types of entities (Devices, Hubs, Automations and Integrations) through POST endpoints. However, the overall process of creating these entities follows a similar pattern: 
+In our case, we support adding multiple types of entities (Devices, Hubs, Automations, and Integrations) through POST endpoints. However, the overall process of creating these entities follows a similar pattern: 
 1. parsing the payload, 
 2. validating the incoming data, 
 3. preparing the data to be used, 
@@ -215,14 +215,14 @@ In our case we support adding multiple types of entities (Devices, Hubs, Automat
 Besides that, if we were to add any new type of entity to our system in the future, we would most likely need to follow the same series of steps to create it.
 
 This behavior leads to two problems:
-1. **We need to enforce a consistent set of steps for creating entities across multiple difference scenarios.**
+1. **We need to enforce a consistent set of steps for creating entities across multiple different scenarios.**
 2. **We want to avoid duplicating similar code across multiple endpoints.**
 
 ### Pattern
 
-Since most of the code for these steps is the same, we can encapsulated the common logic in an abstract base class, which defines the overall structure of the process while allowing subclasses to implement specific details. This is the **Template Method** design pattern.
+Since most of the code for these steps is the same, we can encapsulate the common logic in an abstract base class, which defines the overall structure of the process while allowing subclasses to implement specific details. This is the **Template Method** design pattern.
 
-We applied this pattern to the proccess of creating entities of different types, since it was the most common operation that followed a complex enough structure that would justify using the pattern.
+We applied this pattern to the process of creating entities of different types, since it was the most common operation that followed a complex enough structure that would justify using the pattern.
 
 Behavior that should be implemented by subclasses would only be:
 
@@ -254,13 +254,13 @@ Using this pattern results in a much cleaner code, since about 75% of the code r
 
 Afterwards, we can simply invoke the algorithm method that orchestrates these steps in the correct order in each API entity creation endpoint.
 
-An existing constraint is that we are enforcing a really specific structure for creating entities, which could lead to some inflexibility in case we wanted to change the process for a specific entity type. However, in these cases, we could always override the abstracted methods or simply opt to not use the Template Method for that specific case.
+An existing constraint is that we are enforcing a really specific structure for creating entities, which could lead to some inflexibility in case we wanted to change the process for a specific entity type. However, in these cases, we could always override the abstracted methods or simply opt not to use the Template Method for that specific case.
 
 ## 🎧🎤 Publisher-Subscriber
 
 ### Problem
 
-In our system, we needed a way to enable communication between different components. For example, when a device's feature is executed, other parts of the system might need to react to that events. Note that here, a real Device will be an external component that communicates over a network.
+In our system, we needed a way to enable communication between different components. For example, when a device's feature is executed, other parts of the system might need to react to that event. Note that here, a real Device will be an external component that communicates over a network.
 
 While using an approach like the Observer pattern could work for virtual devices, since they could be represented by an in-memory object, it wouldn't be a suitable way to represent real devices that communicate over a network, as they can't directly observe the changes in our system.
 
@@ -268,7 +268,7 @@ Therefore, we had to use another kind of communication: an **event-driven archit
 
 ### Pattern
 
-The Publisher-Subscriber pattern was used to solve this problem. In this pattern, publishers (devices, regardless if they are real or virtual) broadcast messages to a specific topic, and subscribers (automations) listen to those topics to receive messages. This decouples the producers and consumers, as they only need to agree on the topic structure and message format, and allows us to pass data from the devices to the system.
+The Publisher-Subscriber pattern was used to solve this problem. In this pattern, publishers (devices, regardless of whether they are real or virtual) broadcast messages to a specific topic, and subscribers (automations) listen to those topics to receive messages. This decouples the producers and consumers, as they only need to agree on the topic structure and message format, and allows us to pass data from the devices to the system.
 
 In our project, we implemented this pattern using the MQTT protocol. The `MQTTClient` class acts as the central component for managing subscriptions and publishing messages. Devices, automations, and other components interact with the `MQTTClient` to send and receive messages.
 
@@ -285,7 +285,7 @@ In our project, we implemented this pattern using the MQTT protocol. The `MQTTCl
 
 ### Consequences
 
-Using the Publisher-Subscriber effectively enables the usage of real devices in our system, as they can communicate to the main system asynchronously through MQTT messaging.
+Using the Publisher-Subscriber effectively enables the usage of real devices in our system, as they can communicate with the main system asynchronously through MQTT messaging.
 
 > Note: Despite implementing this pattern, we still don't have real devices integrated into our system yet. For more context, refer to the [State Pattern and Real Devices](#state-pattern-and-real-devices) section.
 
@@ -295,17 +295,17 @@ Then, we can listen for messages on these topics and trigger automations or othe
 
 Another advantage of using this pattern and communication style is that we can easily add new decoupled software components to the current system, as long as they can communicate through MQTT to send and receive messages, following an event-driven architecture. 
 
-A possible example would be a real time monitoring dashboard, that subscribes to all device topics and displays information on the latest events.
+A possible example would be a real-time monitoring dashboard that subscribes to all device topics and displays information on the latest events.
 
 ## ⏻ State
 
 ### Problem
 
-In our system, devices can be in different states (online, offline, error), and their behavior can vary based on their current state.
+In our system, devices can be in different states (online, offline, or error), and their behavior can vary based on their current state.
 
-Besides that, given the nature of our project and IoT devices, there can be the need to add more states in the future, or even change the behavior of existing states to better reflect real-world scenarios.
+Besides that, given the nature of our project and IoT devices, there may be a need to add more states in the future, or even change the behavior of existing states to better reflect real-world scenarios.
 
-Given these requirements of diverse, extendable and changeable behavior based on state, **our state-dependent methods could become cluttered with conditional statements**, making the code harder to read and maintain, which is the **main problem we want to solve**.
+Given these requirements of diverse, extendable, and changeable behavior based on state, **our state-dependent methods could become cluttered with conditional statements**, making the code harder to read and maintain, which is the **main problem we want to solve**.
 
 ### Pattern
 
@@ -316,7 +316,7 @@ Instead of using conditional statements to check the device's state, we encapsul
 We arrived at the following State classes:
 
 - `OnlineState`: Represents a device that is online and fully functional. In this state, all device features can be executed normally.
-- `OfflineState`: Represents a device that is offline. In this state, any attempt to execute a device feature will result in an exception being raised, indicating that the device is not reachable. Likewise, any attemping to obtain the device's current status will also raise an exception.
+- `OfflineState`: Represents a device that is offline. In this state, any attempt to execute a device feature will result in an exception being raised, indicating that the device is not reachable. Likewise, any attempt to obtain the device's current status will also raise an exception.
 - `ErrorState`: Represents a device that is in an error state. Similar to the offline state, any attempt to execute a device feature will raise an exception, indicating that the device is currently experiencing issues. However, obtaining the device's current status is still allowed in this state.
 
 **UML Diagram:**
@@ -329,7 +329,7 @@ We arrived at the following State classes:
 
 ### Consequences 
 
-We can now easily add more states, change existing state-based logic or extend states' behavior without modifying the core Device class, making the code more maintainable and extensible.
+We can now easily add more states, change existing state-based logic, or extend states' behavior without modifying the core Device class, making the code more maintainable and extensible.
 
 The Device class is also cleaner, as we don't have to deal with multiple conditional statements to handle state-dependent behavior.
 
@@ -339,19 +339,19 @@ Another advantage of this approach is that we can also define state-change logic
 
 ## 🧩 Patterns used
 
-Out of the patterns that were used in the project, we consider that most of them were appropriate for the problems we were trying to solve. Although the Publisher-Subscriber pattern doesn't make a lot of sense in the current state of the project, it still made sense to eventually implement it, as we are planning to move towards real devices that would communicate asynchronously through MQTT messages.
+Out of the patterns that were used in the project, we consider that most of them were appropriate for the problems we were trying to solve. Although the Publisher-Subscriber pattern doesn't make a lot of sense in the current state of the project, it still makes sense to eventually implement it, as we are planning to move towards real devices that would communicate asynchronously through MQTT messages.
 
 **The exception to the last paragraph would be, in our opinion, the State design pattern used in devices.**
 
 ### State Pattern and Real Devices
 
-Given the requirements of the project, separation of different Device states' behavior was not necessary or much benefitial. We were limited to only three states, and the behavior of two of them (offline and error) happened to only be a simple restriction of actions that could be performed on the device, rather than a completely different behavior. 
+Given the requirements of the project, the separation of different Device states' behavior was neither necessary nor very beneficial. We were limited to only three states, and the behavior of two of them (offline and error) happened to only be a simple restriction of actions that could be performed on the device, rather than a completely different behavior. 
 
-It was therefore easier to simply check for those states in the methods that required it (if that meant making creating and repeating two conditions for the methods where state was used, we could create a helper function), rather than creating separate classes for each state and delegating the behavior to them, which made the project structure more complex with no real benefit.
+It was therefore easier to simply check for those states in the methods that required it (if that meant creating and repeating two conditions for the methods where state was used, we could create a helper function), rather than creating separate classes for each state and delegating the behavior to them, which made the project structure more complex with no real benefit.
 
-A case where state pattern could actually be benefitial and make sense to use would be when we move towards real devices, as those could introduce more states or more complex behaviors. 
+A case where the state pattern could actually be beneficial and make sense to use would be when we move towards real devices, as those could introduce more states or more complex behaviors. 
 
-**However, in this regard, we also made a fundamental mistake of assuming every Device is a virtual Device**, which would not necessarily be true as we also planned to include real devices in our system, which can't be represented by the current Device class.
+**However, in this regard, we also made a fundamental mistake of assuming every Device is a virtual Device**, which would not necessarily be true, as we also planned to include real devices in our system, which can't be represented by the current Device class.
 
 **While the current Device class implementation is fine for virtual devices, our "real" devices entity class should not have many of the attributes that are present in the "virtual" devices entity**. For virtual devices, behavior like executing features or sending commands should've been handled by a separate class, namely the one mentioned in the Service Layer section [below](#lacking-a-proper-service-layer).
 
@@ -359,34 +359,34 @@ A case where state pattern could actually be benefitial and make sense to use wo
 
 ## Lacking a proper Service Layer
 
-Currently, entity classes (Device, Hub, Automation) rely on global Singleton instances (HomeMaetro and MQTTClient, in our case) on some of their methods. This indicates a bad design, as base entity class and the global instance are tightly coupled.
+Currently, entity classes (Device, Hub, Automation) rely on global Singleton instances (HomeMaetro and MQTTClient, in our case) on some of their methods. This indicates a bad design, as the base entity class and the global instance are tightly coupled.
 
-Even if we were to use Dependency Injection to provide the global instance to the entity classes as discussed before in the Singleton section, making them more decoupled and testable, we are still making a fundamental mistake of making a base entity class dependant on the implementation of a global service, which it should not even be aware of. An entity class should not be aware of how to access or use global services, as this violates the Single Responsibility Principle and makes maintenance and testing more difficult.
+Even if we were to use Dependency Injection to provide the global instance to the entity classes as discussed before in the Singleton section, making them more decoupled and testable, we are still making a fundamental mistake of making a base entity class dependent on the implementation of a global service, which it should not even be aware of. An entity class should not be aware of how to access or use global services, as this violates the Single Responsibility Principle and makes maintenance and testing more difficult.
 
 In our case, we could technically make those service transactions directly inside the API route handlers, although this would break the SRP and DRY principles, since we would be repeating code often and mixing business logic with API handling logic.
 
 ### What we should've done
 
-Instead, we should create a new Service Layer for our project (which we are currently lacking). What we currently have is the HomeMaestro class which is working both as the persistance layer and also includes some parts of the service layer.
+Instead, we should create a new Service Layer for our project (which we are currently lacking). What we currently have is the HomeMaestro class, which is working both as the persistence layer and also includes some parts of the service layer.
 
 For example, we would have DeviceService that would be responsible for handling all interactions between the entity classes and the global services (HomeMaestro, MQTTClient, etc..). Ideally, we would also include here the persistence logic for the entities in this same service (even if we are not technically using a database yet, we could still use simple in-memory lists or key-value pairs as the persistance here), and later on if we decided to move towards a proper database solution, we would not need to refactor anything other than the persistance logic inside the service layer.
 
-**This proposed design would also mitigate the need to use the Singleton design pattern, as we could provide the HomeMaestro, MQTTClient or other necessary class instances through Dependency Injection.**
+**This proposed design would also mitigate the need to use the Singleton design pattern, as we could provide the HomeMaestro, MQTTClient, or other necessary class instances through Dependency Injection.**
 
 ## Lacking Operation Atomicity
 
 Another problem detected was that, currently, business operations are not atomic, meaning that if an error occurs during the operation, the system can be left in an inconsistent state.
 
-For example, when creating an automation, if an error occurs after the Trigger and Action have been created, but before the entire operation is complete, we could end up with partially created automations or orphaned entities.
+For example, when creating an automation, if an error occurs after the Trigger and Action have been created but before the entire operation is complete, we could end up with partially created automations or orphaned entities.
 
-To solve this problem, we would need to implement transaction management in our application, ensuring that either the entire operation is completed successfully, or none of it is applied, maintaining system consistency.
+To solve this problem, we would need to implement transaction management in our application, ensuring that either the entire operation is completed successfully or none of it is applied, maintaining system consistency.
 
 Although implementing transaction management with our in-memory state persistence could be challenging, doing so by applying a design pattern such as [Unit of Work](https://martinfowler.com/eaaCatalog/unitOfWork.html) would be ideal, especially when developing robust and reliable applications. This factor is something we will consider when architecting future projects.
 
 ## Conclusion
 
-Designing, iterating and reflecting over the architecture that led to this problem was a valuable learning experience, as we were able to refresh concepts such as having a proper layered architecture and the importance of separation of concerns in software design. Although things *work* so far (due to the lack of complexity of the project), it doesn't mean they are well-designed, maintainable or testable.
+Designing, iterating, and reflecting on the architecture that led to this problem was a valuable learning experience, as we were able to refresh concepts such as having a proper layered architecture and the importance of separation of concerns in software design. Although things *work* so far (due to the lack of complexity of the project), it doesn't mean they are well-designed, maintainable, or testable.
 
-Besides that, we were also able to come upon the realization that some of the design patterns we used (namely Singleton and perhaps State design patterns) were not really necessary or were the fruit of lack of knowledge at the time of implementation. Regardless of the cause, these patterns made sense to implement given the match between the problems we had and the problem each pattern solves.
+Besides that, we were also able to come to the realization that some of the design patterns we used (namely Singleton and perhaps State design patterns) were not really necessary or were the fruit of a lack of knowledge at the time of implementation. Regardless of the cause, these patterns made sense to implement given the match between the problems we had and the problem each pattern solves.
 
-That being said, documenting the patterns as they were being used in this report would also have helped us reflect more on the design choices, detect some of the present flaws sooner and arrive at a better design overall. This is something we will take into account for future projects.
+That being said, documenting the patterns as they were being used in this report would also have helped us reflect more on the design choices, detect some of the present flaws sooner, and arrive at a better design overall. This is something we will take into account for future projects.
