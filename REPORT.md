@@ -1,29 +1,23 @@
 # Project Architecture
 
-TODO: update diagram with new classes and export image
-
 [High Level Class Diagram (draw.io)](https://app.diagrams.net/#G1Dm2RSYODV8ipJ_am0yr1ROCWjzooqt7y)
 
 ![12-12 Architecture Model](assets/architecture-12-12.png)
-
-TODO: "For the final version of the report, it would be good to also include a component diagram in your description of the high-level architecture of the system."
 
 ## High Level Software Architecture
 
 ![High Level Software Architecture Diagram](assets/software-architecture.png)
 
-## Home Maestro Singleton
+## Home Maestro Singleton Diagram
 
 ![Home Maestro Singleton Diagram](assets/homemaestro-class.png)
 
-# Device, Hub and Automation Classes
+# Device, Hub and Automation Classes Diagrams
 
 ![Device and Hub Class Diagrams](assets/device-hub-classes.png)
 ![Automation Class Diagram](assets/automation-class.png)
 
 # Design Pattern Documentation
-
-# TODO: update patterns, see professor's feedback
 
 ## 1️⃣ Singleton
 
