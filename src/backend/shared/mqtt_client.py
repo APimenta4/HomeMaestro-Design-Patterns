@@ -1,3 +1,4 @@
+import os
 from logging import getLogger
 
 import paho.mqtt.client as mqtt
@@ -6,10 +7,12 @@ from . import Singleton
 
 logger = getLogger(__name__)
 
+BROKER_ENV = os.getenv("MQTT_BROKER", "localhost")
+
 
 # DESIGN PATTERN: Publisher-Subscriber
 class MQTTClient(metaclass=Singleton):
-    def __init__(self, broker="localhost", port=1883):
+    def __init__(self, broker=BROKER_ENV, port=1883):
         self.client = mqtt.Client(clean_session=True)
         self.client.connect(broker, port, clean_start=mqtt.MQTT_CLEAN_START_FIRST_ONLY)
         self.client.loop_start()

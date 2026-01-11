@@ -4,6 +4,8 @@
 
 This project implements a software system to monitor, control, and manage home automation devices and activities. It operates in contexts with multiple devices, including sensors, actuators and hubs.
 
+The purpose of this project was to use design patterns, justifying our motivations and analyzing the results. For that reason, a minimal set of libraries were used.
+
 ## Team Composition
 
 This project belongs to Team 6 from Class 2 of the curricular unit Software Architecture and Design of the Master in Software Engineering 2025-26 course.
@@ -21,7 +23,9 @@ This project's management was centralized on the [Home Maestro Trello Board](htt
 
 ## Installation
 
-To install this project, follow these steps:
+To install and run this project locally, please follow the following steps. Optionally, you can use Docker to run the project through the `docker-compose up -d` command.
+
+> Install Docker/Docker Desktop if you don't have it yet by following the instructions on the [official docs](https://docs.docker.com/desktop/).
 
 1. Ensure you have Python>=3.9 installed on your system.
 
@@ -35,13 +39,9 @@ To install this project, follow these steps:
    ```
 3. Install the required Python packages:
    ```bash
-   pip install Flask flask-cors paho-mqtt
-
-   # Alternatively, you can install all dependencies using the requirements.txt file:
-   cd src/backend
-   pip install -r requirements.txt
+   cd src/backend && pip install -r requirements.txt
    ```
-   The previous command installs Flask in your current python environment. If you aren't using any virtual environment, it will be installed on the global python version of your system.
+   The previous command installs the dependencies in your current python environment. If you aren't using any virtual environment, it will be installed on the global python version of your system.
    Learn more about virtual environments [here](https://www.w3schools.com/python/python_virtualenv.asp).
 4. Install and run an MQTT broker (e.g., Mosquitto) on the `1883` port on your local machine (`localhost`). Our suggestion is to follow the instructions on the [Mosquitto website](https://mosquitto.org/download/) to install and run it on your operating system.
 5. Run the backend:

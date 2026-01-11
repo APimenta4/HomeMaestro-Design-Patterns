@@ -1,0 +1,24 @@
+services:
+  app:
+    build: .
+    container_name: backend
+    ports:
+      - "5001:5000" # For mac, you might need to choose another port since airplay uses 5000
+    environment:
+      - MQTT_BROKER=mosquitto
+    depends_on:
+      - mosquitto
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./.mosquitto.config:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+
+volumes:
+  mosquitto_data:
+  mosquitto_log:

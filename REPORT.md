@@ -75,6 +75,8 @@ However, a developer who is not acquainted with the design pattern might interpr
 
 ```python
 home_maestro = HomeMaestro() # New object?
+# or 
+home_maestro = HomeMaestro.get_instance() # what instance?!
 ```
 
 ❓ Fun fact: [Python documentation](https://docs.python.org/3/faq/programming.html#how-do-i-share-global-variables-across-modules) itself recommends using dedicated modules for sharing global variables. Therefore, it is technically possible to implement a Singleton by having a module that contains a private variable that holds the instance, and a public function that gets/creates the instance and returns it. However, in Python, visibility modifiers are a convention based on naming rules and are not enforced by the language itself, so it would be possible to create multiple instances of the class if the developer is not careful or if something unexpected happens.
@@ -371,7 +373,7 @@ Instead, we should create a new Service Layer for our project (which we are curr
 
 For example, we would have DeviceService that would be responsible for handling all interactions between the entity classes and the global services (HomeMaestro, MQTTClient, etc..). Ideally, we would also include here the persistence logic for the entities in this same service (even if we are not technically using a database yet, we could still use simple in-memory lists or key-value pairs as the persistance here), and later on if we decided to move towards a proper database solution, we would not need to refactor anything other than the persistance logic inside the service layer.
 
-**This proposed design would also mitigate the need to use the Singleton design pattern, as we could provide the HomeMaestro, MQTTClient, or other necessary class instances through Dependency Injection.**
+**This proposed design would also complement the Singleton design pattern, as we could provide the HomeMaestro, MQTTClient, or other necessary class instances through Dependency Injection.**
 
 ## Lacking Operation Atomicity
 
@@ -387,6 +389,6 @@ Although implementing transaction management with our in-memory state persistenc
 
 Designing, iterating, and reflecting on the architecture that led to this problem was a valuable learning experience, as we were able to refresh concepts such as having a proper layered architecture and the importance of separation of concerns in software design. Although things *work* so far (due to the lack of complexity of the project), it doesn't mean they are well-designed, maintainable, or testable.
 
-Besides that, we were also able to come to the realization that some of the design patterns we used (namely Singleton and perhaps State design patterns) were not really necessary or were the fruit of a lack of knowledge at the time of implementation. Regardless of the cause, these patterns made sense to implement given the match between the problems we had and the problem each pattern solves.
+Besides that, we were also able to come to the realization that some of the design patterns we used (namely a standalone Singleton and perhaps State design patterns) were not really necessary or were the fruit of a lack of knowledge at the time of implementation. Regardless of the cause, these patterns made sense to implement given the match between the problems we had and the problem each pattern solves.
 
 That being said, documenting the patterns as they were being used in this report would also have helped us reflect more on the design choices, detect some of the present flaws sooner, and arrive at a better design overall. This is something we will take into account for future projects.
