@@ -6,24 +6,24 @@ This project implements a software system to monitor, control, and manage home a
 
 The purpose of this project was to use design patterns, justifying our motivations and analyzing the results. For that reason, a minimal set of libraries were used.
 
+## Final Report
+
+This project's report for the curricular unit Software Architecture and Design can be in [Final Report](REPORT.md).
+
 ## Team Composition
 
-This project belongs to Team 6 from Class 2 of the curricular unit Software Architecture and Design of the Master in Software Engineering 2025-26 course.
+This project belongs to the curricular unit Software Architecture and Design of the Master in Software Engineering 2025-26 course.
 
-The team is composed by:
+The team was composed by:
 
-- Afonso da Cruz Pimenta (202502507 / APimenta4)
-- Guimarães Manuel Pascoal (202500544 / smithpapi2017)
-- Gustavo Oliveira Martins (202502510 / gust0717)
-- Leonor Teixeira Pinto (202511257 / leonor-p)
-
-## Project Management
-
-This project's management was centralized on the [Home Maestro Trello Board](https://trello.com/b/SKnU0Hi3/home-maestro).
+- [Afonso Pimenta](https://github.com/APimenta4)
+- [Guimarães Manuel Pascoal](https://github.com/smithpapi2017)
+- [Gustavo Oliveira Martins](https://github.com/gust0717)
+- [Leonor Teixeira Pinto](https://github.com/leonor-p)
 
 ## Installation
 
-To install and run this project locally, please follow the following steps. Optionally, you can use Docker to run the project through the `docker-compose up -d` command.
+To install and run this project locally, please follow the following steps. Optionally, you can use Docker to run the backend through the `docker-compose up -d` command.
 
 > Install Docker/Docker Desktop if you don't have it yet by following the instructions on the [official docs](https://docs.docker.com/desktop/).
 
@@ -51,10 +51,3 @@ To install and run this project locally, please follow the following steps. Opti
    A Flask server will start running at `http://localhost:5000`.
 6. Run the frontend, by simply opening the `index.html` file located in the `src/frontend` directory in your preferred web browser.
 
-## How to Contribute
-
-On how to contribute to the project, see to our [How to Contribute](CONTRIBUTING.md).
-
-## Final Report
-
-This project's report for the curricular unit Software Architecture and Design can be in [Final Report](REPORT.md).
